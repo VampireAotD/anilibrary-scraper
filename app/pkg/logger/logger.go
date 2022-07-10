@@ -1,0 +1,42 @@
+package logger
+
+import (
+	"log"
+	"os"
+	"path/filepath"
+
+	zapcore "anilibrary-request-parser/app/pkg/logger/zap"
+	"go.uber.org/zap"
+)
+
+type Logger interface {
+	Debug(msg string, fields ...zap.Field)
+	Info(msg string, fields ...zap.Field)
+	Warn(msg string, fields ...zap.Field)
+	Error(msg string, fields ...zap.Field)
+	Named(s string) *zap.Logger
+}
+
+type Zap struct {
+	Logger *zap.Logger
+	File   *os.File
+}
+
+func New(path string) (*Zap, error) {
+	var zapLogger Zap
+
+	path = filepath.Clean(path)
+
+	file, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0666)
+
+	if err != nil {
+		log.Fatalf("error while creating file %s", err)
+	}
+
+	logger := zapcore.NewLogger(os.Stdout, file)
+
+	zapLogger.Logger = logger
+	zapLogger.File = file
+
+	return &zapLogger, nil
+}
