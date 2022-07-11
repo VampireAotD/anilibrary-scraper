@@ -4,12 +4,13 @@ RUN apk --no-cache add build-base git curl
 ADD . /build
 WORKDIR /build/app/cmd/app
 
-RUN GOOS=linux go build -ldflags="-w -s" -o=scrapper
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o=scrapper
 
 ## final stage
 FROM alpine:latest
-COPY --from=build-env /build/app/cmd/app/ /app/
+COPY --from=build-env /build/app/cmd/app /app/cmd/app
+COPY --from=build-env /build/.env .env
 
-WORKDIR /app
+WORKDIR /app/cmd/app
 
 ENTRYPOINT ["./scrapper"]

@@ -34,7 +34,7 @@ func (a *App) Listen() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		a.logger.Info("Starting server at", zap.String("addr", a.config.Http.Addr))
+		a.logger.Info("Starting server at", zap.String("addr", server.Addr))
 
 		err = server.ListenAndServe()
 
