@@ -1,8 +1,11 @@
 package anime
 
+import "anilibrary-request-parser/app/pkg/logger"
+
 type Controller struct {
+	logger logger.Logger
 }
 
-func NewController() *Controller {
-	return &Controller{}
+func NewController(logger logger.Logger) *Controller {
+	return &Controller{logger: logger}
 }

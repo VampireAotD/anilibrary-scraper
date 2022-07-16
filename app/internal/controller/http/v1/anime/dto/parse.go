@@ -1,5 +1,5 @@
 package dto
 
 type ParseDTO struct {
-	Url string
+	Url string `json:"url"`
 }
