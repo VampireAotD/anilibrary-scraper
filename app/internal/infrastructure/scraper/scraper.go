@@ -6,6 +6,7 @@ import (
 
 	"anilibrary-request-parser/app/internal/domain/contract"
 	"anilibrary-request-parser/app/internal/domain/entity"
+	"anilibrary-request-parser/app/internal/infrastructure/client"
 	"anilibrary-request-parser/app/pkg/logger"
 	"github.com/PuerkitoBio/goquery"
 )
@@ -22,8 +23,9 @@ func New(url string, instance contract.Scraper, logger logger.Logger) *Scrapper 
 
 func (s Scrapper) Process() (entity.Anime, error) {
 	var anime entity.Anime
+	requestParser := client.DefaultClient()
 
-	response, err := http.Get(s.url)
+	response, err := requestParser.Request(s.url)
 
 	if err != nil {
 		return anime, err
@@ -31,7 +33,7 @@ func (s Scrapper) Process() (entity.Anime, error) {
 
 	defer response.Body.Close()
 
-	if response.StatusCode != 200 {
+	if response.StatusCode != http.StatusOK {
 		return anime, fmt.Errorf("bad status code %d", response.StatusCode)
 	}
 

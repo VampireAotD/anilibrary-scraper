@@ -37,5 +37,9 @@ func Init() *App {
 
 	app.logger.Info("Reading config")
 
+	app.logger.Info("Setting timezone")
+
+	app.SetTimezone()
+
 	return &app
 }
