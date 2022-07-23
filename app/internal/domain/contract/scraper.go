@@ -7,11 +7,11 @@ import (
 )
 
 type Scraper interface {
-	GetTitle(document *goquery.Document) string
-	GetStatus(document *goquery.Document) animeEnum.Status
-	GetRating(document *goquery.Document) float32
-	GetEpisodes(document *goquery.Document) string
-	GetGenres(document *goquery.Document) []string
-	GetVoiceActing(document *goquery.Document) []string
-	GetAnime(document *goquery.Document) entity.Anime
+	Title(document *goquery.Document) string
+	Status(document *goquery.Document) animeEnum.Status
+	Rating(document *goquery.Document) float32
+	Episodes(document *goquery.Document) string
+	Genres(document *goquery.Document) []string
+	VoiceActing(document *goquery.Document) []string
+	Process() (*entity.Anime, error)
 }

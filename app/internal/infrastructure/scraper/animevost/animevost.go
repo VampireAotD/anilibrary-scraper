@@ -3,47 +3,49 @@ package animevost
 import (
 	"anilibrary-request-parser/app/internal/domain/entity"
 	animeEnum "anilibrary-request-parser/app/internal/domain/enum/anime"
+	"anilibrary-request-parser/app/internal/infrastructure/scraper"
 	"github.com/PuerkitoBio/goquery"
 )
 
 type AnimeVost struct {
+	*scraper.Scrapper
 }
 
-func New() *AnimeVost {
-	return &AnimeVost{}
+func New(scrapper *scraper.Scrapper) *AnimeVost {
+	return &AnimeVost{Scrapper: scrapper}
 }
 
-func (a AnimeVost) GetTitle(document *goquery.Document) string {
+func (a AnimeVost) Title(document *goquery.Document) string {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (a AnimeVost) GetStatus(document *goquery.Document) animeEnum.Status {
+func (a AnimeVost) Status(document *goquery.Document) animeEnum.Status {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (a AnimeVost) GetRating(document *goquery.Document) float32 {
+func (a AnimeVost) Rating(document *goquery.Document) float32 {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (a AnimeVost) GetEpisodes(document *goquery.Document) string {
+func (a AnimeVost) Episodes(document *goquery.Document) string {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (a AnimeVost) GetGenres(document *goquery.Document) []string {
+func (a AnimeVost) Genres(document *goquery.Document) []string {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (a AnimeVost) GetVoiceActing(document *goquery.Document) []string {
+func (a AnimeVost) VoiceActing(document *goquery.Document) []string {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (a AnimeVost) GetAnime(document *goquery.Document) entity.Anime {
+func (a AnimeVost) Process() (*entity.Anime, error) {
 	//TODO implement me
 	panic("implement me")
 }

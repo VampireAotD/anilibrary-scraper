@@ -1,54 +1,16 @@
 package scraper
 
 import (
-	"fmt"
-	"net/http"
-
-	"anilibrary-request-parser/app/internal/domain/contract"
-	"anilibrary-request-parser/app/internal/domain/entity"
 	"anilibrary-request-parser/app/internal/infrastructure/client"
 	"anilibrary-request-parser/app/pkg/logger"
-	"github.com/PuerkitoBio/goquery"
 )
 
 type Scrapper struct {
-	url      string
-	instance contract.Scraper
-	logger   logger.Logger
+	Url    string
+	Client *client.Client
+	Logger logger.Logger
 }
 
-func New(url string, instance contract.Scraper, logger logger.Logger) *Scrapper {
-	return &Scrapper{url: url, instance: instance, logger: logger}
-}
-
-func (s Scrapper) Process() (entity.Anime, error) {
-	var anime entity.Anime
-	requestParser := client.DefaultClient()
-
-	response, err := requestParser.Request(s.url)
-
-	if err != nil {
-		return anime, err
-	}
-
-	defer response.Body.Close()
-
-	if response.StatusCode != http.StatusOK {
-		return anime, fmt.Errorf("bad status code %d", response.StatusCode)
-	}
-
-	document, err := goquery.NewDocumentFromReader(response.Body)
-
-	if err != nil {
-		return anime, err
-	}
-
-	anime.Title = s.instance.GetTitle(document)
-	anime.Status = s.instance.GetStatus(document)
-	anime.Rating = s.instance.GetRating(document)
-	anime.Episodes = s.instance.GetEpisodes(document)
-	anime.Genres = s.instance.GetGenres(document)
-	anime.VoiceActing = s.instance.GetVoiceActing(document)
-
-	return anime, err
+func New(url string, client *client.Client, logger logger.Logger) *Scrapper {
+	return &Scrapper{Url: url, Client: client, Logger: logger}
 }
