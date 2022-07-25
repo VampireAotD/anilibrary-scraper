@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"anilibrary-request-parser/app/internal/config"
-	"go.uber.org/zap"
+	"anilibrary-request-parser/app/pkg/logger"
 )
 
 func (a *App) ReadConfig() {
@@ -13,7 +13,7 @@ func (a *App) ReadConfig() {
 	if err != nil {
 		defer a.closer.Close()
 
-		a.logger.Error("error while reading config", zap.Error(err))
+		a.logger.Error("error while reading config", logger.Error(err))
 
 		os.Exit(1)
 	}

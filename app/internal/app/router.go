@@ -4,10 +4,10 @@ import (
 	"net/http"
 
 	"anilibrary-request-parser/app/internal/controller/http/v1/anime"
+	"anilibrary-request-parser/app/pkg/logger"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"go.uber.org/zap"
 )
 
 func (a *App) Router() (http.Handler, error) {
@@ -30,11 +30,11 @@ func composeRoutes(router chi.Router, app *App) {
 	if app.flags.prom {
 		router.Handle("/metrics", promhttp.Handler())
 
-		app.logger.Info("Prometheus metrics enabled", zap.String("endpoint", "/metrics"))
+		app.logger.Info("Prometheus metrics enabled", logger.String("endpoint", "/metrics"))
 	}
 
 	if app.flags.pprof {
 		router.Mount("/debug", middleware.Profiler())
-		app.logger.Info("Pprof enabled", zap.String("endpoint", "/debug/pprof"))
+		app.logger.Info("Pprof enabled", logger.String("endpoint", "/debug/pprof"))
 	}
 }

@@ -10,14 +10,14 @@ import (
 	"syscall"
 	"time"
 
-	"go.uber.org/zap"
+	"anilibrary-request-parser/app/pkg/logger"
 )
 
 func (a *App) Listen() {
 	router, err := a.Router()
 
 	if err != nil {
-		a.logger.Error("error while creating router", zap.Error(err))
+		a.logger.Error("error while creating router", logger.Error(err))
 		a.closer.Close()
 
 		os.Exit(1)
@@ -34,12 +34,12 @@ func (a *App) Listen() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		a.logger.Info("Starting server at", zap.String("addr", server.Addr))
+		a.logger.Info("Starting server at", logger.String("addr", server.Addr))
 
 		err = server.ListenAndServe()
 
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			a.logger.Error("error from server", zap.Error(err))
+			a.logger.Error("error from server", logger.Error(err))
 		}
 
 		stop()
@@ -53,6 +53,6 @@ func (a *App) Listen() {
 	defer cancel()
 
 	if err = server.Shutdown(ctx); err != nil {
-		a.logger.Error("error while shutting down server", zap.Error(err))
+		a.logger.Error("error while shutting down server", logger.Error(err))
 	}
 }

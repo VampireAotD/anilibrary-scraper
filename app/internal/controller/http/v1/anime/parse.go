@@ -7,6 +7,7 @@ import (
 	"anilibrary-request-parser/app/internal/controller/http/utils"
 	"anilibrary-request-parser/app/internal/controller/http/v1/anime/dto"
 	"anilibrary-request-parser/app/internal/domain/service/anime"
+	"anilibrary-request-parser/app/pkg/logger"
 )
 
 func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
@@ -15,7 +16,7 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&parse)
 
 	if err != nil {
-		c.logger.Error("while decoding incoming url")
+		c.logger.Error("while decoding incoming url", logger.Error(err))
 		_ = utils.NewError(w, http.StatusUnprocessableEntity, err)
 		return
 	}
@@ -25,7 +26,7 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 	service, err := anime.NewScrapperService(parse.Url, c.logger)
 
 	if err != nil {
-		c.logger.Error("while creating scraper service")
+		c.logger.Error("while creating scraper service", logger.Error(err))
 		_ = utils.NewError(w, http.StatusUnprocessableEntity, err)
 		return
 	}
@@ -33,7 +34,7 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 	entity, err := service.Process()
 
 	if err != nil {
-		c.logger.Error("while scraping")
+		c.logger.Error("while scraping", logger.Error(err))
 		_ = utils.NewError(w, http.StatusUnprocessableEntity, err)
 		return
 	}

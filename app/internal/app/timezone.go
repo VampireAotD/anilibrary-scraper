@@ -4,7 +4,7 @@ import (
 	"os"
 	"time"
 
-	"go.uber.org/zap"
+	"anilibrary-request-parser/app/pkg/logger"
 )
 
 func (a *App) SetTimezone() {
@@ -13,7 +13,7 @@ func (a *App) SetTimezone() {
 	if err != nil {
 		defer a.closer.Close()
 
-		a.logger.Error("error while setting timezone", zap.Error(err))
+		a.logger.Error("error while setting timezone", logger.Error(err))
 
 		os.Exit(1)
 	}
