@@ -6,7 +6,6 @@ func (s *ScraperService) Process() (*entity.Anime, error) {
 	anime, err := s.scraper.Process()
 
 	if err != nil {
-		s.logger.Error(err.Error())
 		return anime, err
 	}
 

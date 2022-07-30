@@ -23,7 +23,7 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
-	service, err := anime.NewScrapperService(parse.Url, c.logger)
+	service, err := anime.NewScrapperService(parse.Url)
 
 	if err != nil {
 		c.logger.Error("while creating scraper service", logger.Error(err))
@@ -31,6 +31,7 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	c.logger.Info("Scraping", logger.String("url", parse.Url))
 	entity, err := service.Process()
 
 	if err != nil {

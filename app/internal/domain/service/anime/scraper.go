@@ -1,6 +1,7 @@
 package anime
 
 import (
+	"errors"
 	"strings"
 
 	"anilibrary-request-parser/app/internal/domain/contract"
@@ -8,17 +9,15 @@ import (
 	"anilibrary-request-parser/app/internal/infrastructure/scraper"
 	"anilibrary-request-parser/app/internal/infrastructure/scraper/animego"
 	"anilibrary-request-parser/app/internal/infrastructure/scraper/animevost"
-	"anilibrary-request-parser/app/pkg/logger"
 )
 
 type ScraperService struct {
 	scraper contract.Scraper
-	logger  logger.Logger
 }
 
-func NewScrapperService(url string, logger logger.Logger) (*ScraperService, error) {
+func NewScrapperService(url string) (*ScraperService, error) {
 	var instance contract.Scraper
-	base := scraper.New(url, client.DefaultClient(), logger)
+	base := scraper.New(url, client.DefaultClient())
 
 	switch true {
 	case strings.Contains(url, "animego.org"):
@@ -28,12 +27,10 @@ func NewScrapperService(url string, logger logger.Logger) (*ScraperService, erro
 		instance = animevost.New(base)
 		break
 	default:
-		logger.Error("Undefined scraper")
-		return nil, nil
+		return nil, errors.New("undefined scraper")
 	}
 
 	return &ScraperService{
 		scraper: instance,
-		logger:  logger,
 	}, nil
 }
