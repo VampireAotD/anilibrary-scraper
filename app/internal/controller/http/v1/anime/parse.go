@@ -23,7 +23,7 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
-	service, err := anime.NewScrapperService(parse.Url)
+	service, err := anime.NewScraperService(parse.Url)
 
 	if err != nil {
 		c.logger.Error("while creating scraper service", logger.Error(err))

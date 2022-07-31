@@ -12,12 +12,12 @@ import (
 )
 
 type ScraperService struct {
-	scraper contract.Scraper
+	scraper *scraper.Scraper
 }
 
-func NewScrapperService(url string) (*ScraperService, error) {
-	var instance contract.Scraper
+func NewScraperService(url string) (*ScraperService, error) {
 	base := scraper.New(url, client.DefaultClient())
+	var instance contract.Scraper
 
 	switch true {
 	case strings.Contains(url, "animego.org"):
@@ -30,7 +30,9 @@ func NewScrapperService(url string) (*ScraperService, error) {
 		return nil, errors.New("undefined scraper")
 	}
 
+	base.Scraper = instance
+
 	return &ScraperService{
-		scraper: instance,
+		scraper: base,
 	}, nil
 }

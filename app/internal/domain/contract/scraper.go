@@ -1,7 +1,6 @@
 package contract
 
 import (
-	"anilibrary-request-parser/app/internal/domain/entity"
 	animeEnum "anilibrary-request-parser/app/internal/domain/enum/anime"
 	"github.com/PuerkitoBio/goquery"
 )
@@ -13,5 +12,4 @@ type Scraper interface {
 	Episodes(document *goquery.Document) string
 	Genres(document *goquery.Document) []string
 	VoiceActing(document *goquery.Document) []string
-	Process() (*entity.Anime, error)
 }
