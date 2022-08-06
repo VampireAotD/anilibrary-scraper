@@ -5,7 +5,7 @@ services:
     container_name: anilibrary-request-parser
     build: .
     volumes:
-      - ./storage:/storage
+      - ./app/storage:/app/storage
     ports:
       - "8080:8080"
     networks:

@@ -1,6 +1,6 @@
 ## build stage
 FROM golang:1.18.3-alpine AS build-env
-RUN apk --no-cache add build-base git curl
+RUN apk --no-cache add build-base git curl tzdata
 ADD . /build
 WORKDIR /build/app/cmd/app
 

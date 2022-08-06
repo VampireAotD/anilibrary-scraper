@@ -3,6 +3,7 @@ package app
 import (
 	"os"
 	"time"
+	_ "time/tzdata"
 
 	"anilibrary-request-parser/app/pkg/logger"
 )
