@@ -2,6 +2,7 @@ package anime
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"anilibrary-request-parser/app/internal/controller/http/utils"
@@ -13,15 +14,16 @@ import (
 func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 	var parse dto.ParseDTO
 
-	err := json.NewDecoder(r.Body).Decode(&parse)
+	json.NewDecoder(r.Body).Decode(&parse)
+	defer r.Body.Close()
+
+	err := parse.Validate()
 
 	if err != nil {
 		c.logger.Error("while decoding incoming url", logger.Error(err))
-		_ = utils.NewError(w, http.StatusUnprocessableEntity, err)
+		_ = utils.NewError(w, http.StatusUnprocessableEntity, errors.New("invalid url"))
 		return
 	}
-
-	defer r.Body.Close()
 
 	service, err := anime.NewScraperService(parse.Url)
 
