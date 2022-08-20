@@ -1,17 +1,13 @@
 package config
 
 import (
-	"path/filepath"
-
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
-func New(path string) (*Config, error) {
+func New() (*Config, error) {
 	var cfg Config
 
-	path = filepath.Clean(path)
-
-	err := cleanenv.ReadConfig(path, &cfg)
+	err := cleanenv.ReadEnv(&cfg)
 
 	if err != nil {
 		return &cfg, err

@@ -11,7 +11,6 @@ RUN CGO_ENABLED=0 GOOS=linux go build -ldflags='-w -s -extldflags "-static"' -o=
 ## final stage
 FROM alpine:latest
 COPY --from=build-env /build/app/cmd/app /app/cmd/app
-COPY --from=build-env /build/.env .env
 
 WORKDIR /app/cmd/app
 

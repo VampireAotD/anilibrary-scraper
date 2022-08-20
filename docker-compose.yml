@@ -24,6 +24,8 @@ services:
     command:
       - "-pprof"
       - "-prom"
+    env_file:
+      - .env
     volumes:
       - ./app/storage:/app/storage
     ports:

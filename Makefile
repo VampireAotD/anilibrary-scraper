@@ -6,15 +6,15 @@ BIN_PATH=./app/cmd/bin
 
 .PHONY: build
 build:
-	go build -o $(BIN_PATH) $(APP_PATH)
+	go build -o $(BIN_PATH)/scraper $(APP_PATH)
 
 .PHONY: run
 run:
-	(cd $(BIN_PATH) && ./app)
+	(cd $(BIN_PATH) && ./scraper)
 
 .PHONY: clean
 clean:
-	if [ -f $(BIN_PATH)/app ]; then rm $(BIN_PATH)/app; fi
+	if [ -f $(BIN_PATH)/scraper ]; then rm $(BIN_PATH)/scraper; fi
 
 .PHONY: all
 all : clean build run

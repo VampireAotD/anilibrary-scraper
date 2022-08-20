@@ -8,7 +8,7 @@ import (
 )
 
 func (a *App) ReadConfig() {
-	cfg, err := config.New(a.flags.envPath)
+	cfg, err := config.New()
 
 	if err != nil {
 		defer a.closer.Close()
