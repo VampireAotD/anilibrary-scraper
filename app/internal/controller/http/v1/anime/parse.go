@@ -15,12 +15,11 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 	parseDTO.FromCache = true
 
 	json.NewDecoder(r.Body).Decode(&parseDTO)
-
 	err := parseDTO.Validate()
 
 	if err != nil {
 		c.logger.Error("while decoding incoming url", logger.Error(err))
-		_ = utils.NewError(w, http.StatusUnprocessableEntity, errors.New("invalid url"))
+		_ = utils.NewErrorResponse(w, http.StatusUnprocessableEntity, errors.New("invalid url"))
 		return
 	}
 
@@ -31,13 +30,9 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		c.logger.Error("while scraping", logger.Error(err))
-		_ = utils.NewError(w, http.StatusUnprocessableEntity, err)
+		_ = utils.NewErrorResponse(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
-	marshal, _ := json.Marshal(entity)
-	w.Write(marshal)
+	_ = utils.NewSuccessResponse(w, entity)
 }

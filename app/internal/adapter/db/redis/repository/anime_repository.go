@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"encoding/json"
 	"time"
 
 	"anilibrary-request-parser/app/internal/domain/entity"
@@ -28,9 +27,7 @@ func (a *AnimeRepository) FindByUrl(ctx context.Context, url string) (*entity.An
 
 	var anime entity.Anime
 
-	json.Unmarshal(res, &anime)
-
-	return &anime, nil
+	return anime.FromJson(res)
 }
 
 func (a *AnimeRepository) Create(ctx context.Context, key string, anime entity.Anime) error {

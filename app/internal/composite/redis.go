@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"anilibrary-request-parser/app/internal/config"
+	redisClient "anilibrary-request-parser/app/pkg/client/redis"
 	"github.com/go-redis/redis/v9"
 )
 
@@ -18,7 +19,7 @@ func NewComposite(ctx context.Context, cfg config.Redis) (RedisComposite, error)
 		cfg: cfg,
 	}
 
-	client, err := composite.newClient(ctx)
+	client, err := redisClient.New(ctx, fmt.Sprintf("%s:%d", cfg.Host, cfg.Port), cfg.Password)
 
 	if err != nil {
 		return composite, fmt.Errorf("while creating redis client : %w", err)
@@ -31,19 +32,4 @@ func NewComposite(ctx context.Context, cfg config.Redis) (RedisComposite, error)
 
 func (c RedisComposite) Close() error {
 	return c.client.Close()
-}
-
-func (c *RedisComposite) newClient(ctx context.Context) (*redis.Client, error) {
-	opts := &redis.Options{
-		Addr:     fmt.Sprintf("%s:%d", c.cfg.Host, c.cfg.Port),
-		Password: c.cfg.Password,
-	}
-
-	client := redis.NewClient(opts)
-
-	if err := client.Ping(ctx).Err(); err != nil {
-		return nil, fmt.Errorf("ping : %w", err)
-	}
-
-	return client, nil
 }

@@ -15,6 +15,12 @@ type Anime struct {
 	VoiceActing []string     `json:"voice_acting"`
 }
 
+func (a *Anime) FromJson(data []byte) (*Anime, error) {
+	err := json.Unmarshal(data, a)
+
+	return a, err
+}
+
 func (a Anime) ToJson() ([]byte, error) {
 	bytes, err := json.Marshal(a)
 

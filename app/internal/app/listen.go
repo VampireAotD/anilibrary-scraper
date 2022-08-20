@@ -23,6 +23,8 @@ func (a *App) Listen() {
 		os.Exit(1)
 	}
 
+	defer a.closer.Close()
+
 	server := &http.Server{
 		Addr:         fmt.Sprintf("%s:%d", a.config.Http.Addr, a.config.Http.Port),
 		Handler:      router,
