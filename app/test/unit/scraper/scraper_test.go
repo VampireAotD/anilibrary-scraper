@@ -5,14 +5,26 @@ package scraper
 import (
 	"testing"
 
+	"anilibrary-request-parser/app/internal/domain/dto"
 	"anilibrary-request-parser/app/internal/domain/service/anime"
 	"github.com/stretchr/testify/require"
 )
 
+var (
+	service = anime.NewScraperService(nil)
+)
+
+func composeDto(testCase string) dto.ParseDTO {
+	return dto.ParseDTO{
+		Url:       testCase,
+		FromCache: false,
+	}
+}
+
 func TestScraperService(t *testing.T) {
 	testCase := "https://google.com"
 
-	_, err := anime.NewScraperService(testCase)
+	_, err := service.Process(composeDto(testCase))
 
 	require.Error(t, err, "resolving scraper")
 }
@@ -20,8 +32,7 @@ func TestScraperService(t *testing.T) {
 func TestAnimeGoScraper(t *testing.T) {
 	testCase := "https://animego.org/anime/naruto-102"
 
-	service, _ := anime.NewScraperService(testCase)
-	_, err := service.Process()
+	_, err := service.Process(composeDto(testCase))
 
 	require.NoError(t, err, "scraping animego")
 }
@@ -29,8 +40,7 @@ func TestAnimeGoScraper(t *testing.T) {
 func TestAnimeVostScraper(t *testing.T) {
 	testCase := "https://animevost.org/tip/tv/5-naruto-shippuuden12.html"
 
-	service, _ := anime.NewScraperService(testCase)
-	_, err := service.Process()
+	_, err := service.Process(composeDto(testCase))
 
 	require.NoError(t, err, "scraping animevost")
 }

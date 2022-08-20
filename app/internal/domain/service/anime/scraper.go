@@ -1,38 +1,17 @@
 package anime
 
 import (
-	"errors"
-	"strings"
-
-	"anilibrary-request-parser/app/internal/domain/contract"
-	"anilibrary-request-parser/app/internal/infrastructure/client"
+	"anilibrary-request-parser/app/internal/domain/repository"
 	"anilibrary-request-parser/app/internal/infrastructure/scraper"
-	"anilibrary-request-parser/app/internal/infrastructure/scraper/animego"
-	"anilibrary-request-parser/app/internal/infrastructure/scraper/animevost"
 )
 
 type ScraperService struct {
-	scraper *scraper.Scraper
+	scraper    *scraper.Scraper
+	repository repository.AnimeRepositoryInterface
 }
 
-func NewScraperService(url string) (*ScraperService, error) {
-	base := scraper.New(url, client.DefaultClient())
-	var instance contract.Scraper
-
-	switch true {
-	case strings.Contains(url, "animego.org"):
-		instance = animego.New(base)
-		break
-	case strings.Contains(url, "animevost.org"):
-		instance = animevost.New(base)
-		break
-	default:
-		return nil, errors.New("undefined scraper")
-	}
-
-	base.Scraper = instance
-
+func NewScraperService(repository repository.AnimeRepositoryInterface) *ScraperService {
 	return &ScraperService{
-		scraper: base,
-	}, nil
+		repository: repository,
+	}
 }

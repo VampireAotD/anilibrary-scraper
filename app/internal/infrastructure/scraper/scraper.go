@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"anilibrary-request-parser/app/internal/domain/contract"
 	"anilibrary-request-parser/app/internal/domain/entity"
 	"anilibrary-request-parser/app/internal/infrastructure/client"
+	"anilibrary-request-parser/app/internal/infrastructure/scraper/contract"
 	"github.com/PuerkitoBio/goquery"
 )
 

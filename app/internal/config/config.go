@@ -1,8 +1,9 @@
 package config
 
 type Config struct {
-	App  App
-	Http Http
+	App   App
+	Http  Http
+	Redis Redis
 }
 
 type Http struct {
@@ -12,4 +13,10 @@ type Http struct {
 
 type App struct {
 	Timezone string `env:"TIMEZONE" env-default:"Europe/Kiev"`
+}
+
+type Redis struct {
+	Host     string `env:"REDIS_HOSTNAME" env-default:"0.0.0.0"`
+	Port     int    `env:"REDIS_PORT" env-default:"6379"`
+	Password string `env:"REDIS_PASSWORD" env-default:"default"`
 }

@@ -5,7 +5,8 @@ import (
 )
 
 type ParseDTO struct {
-	Url string `json:"url" validate:"url"`
+	Url       string `json:"url" validate:"url"`
+	FromCache bool
 }
 
 func (dto *ParseDTO) Validate() error {
