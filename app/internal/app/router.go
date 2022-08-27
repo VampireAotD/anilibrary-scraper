@@ -22,7 +22,7 @@ func (a *App) Router() (http.Handler, error) {
 		return nil, err
 	}
 
-	a.closer.Add(redisComposite)
+	a.closer.Add("redisComposite", redisComposite)
 
 	service := composite.NewScraperComposite(redisComposite)
 	controller := anime.NewController(a.logger, service)

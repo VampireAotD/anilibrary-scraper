@@ -14,5 +14,5 @@ func (a *App) SetLogger() {
 	}
 
 	a.logger = instance.Logger
-	a.closer.Add(instance)
+	a.closer.Add("logger", instance)
 }
