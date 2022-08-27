@@ -1,0 +1,12 @@
+linters-settings:
+  govet:
+    check-shadowing: true
+    enable:
+      - fieldalignment
+
+linters:
+  enable:
+    - exportloopref
+    - revive
+    - varnamelen
+    - gci
