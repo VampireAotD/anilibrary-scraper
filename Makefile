@@ -34,3 +34,7 @@ down:
 .PHONY: test
 test:
 	go test -v ./... -tags test -count=1
+
+.PHONY: lint
+lint:
+	golangci-lint run

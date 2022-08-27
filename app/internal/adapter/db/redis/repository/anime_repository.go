@@ -27,12 +27,12 @@ func (a *AnimeRepository) FindByUrl(ctx context.Context, url string) (*entity.An
 
 	var anime entity.Anime
 
-	return anime.FromJson(res)
+	return anime.FromJSON(res)
 }
 
 func (a *AnimeRepository) Create(ctx context.Context, key string, anime entity.Anime) error {
 	expire, _ := time.ParseDuration(sevenDaysInHours)
-	data, _ := anime.ToJson()
+	data, _ := anime.ToJSON()
 
 	return a.client.Set(ctx, key, data, expire).Err()
 }

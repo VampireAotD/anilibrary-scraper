@@ -26,7 +26,7 @@ func (a *App) Listen() {
 	defer a.closer.Close()
 
 	server := &http.Server{
-		Addr:         fmt.Sprintf("%s:%d", a.config.Http.Addr, a.config.Http.Port),
+		Addr:         fmt.Sprintf("%s:%d", a.config.HTTP.Addr, a.config.HTTP.Port),
 		Handler:      router,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 5 * time.Second,
