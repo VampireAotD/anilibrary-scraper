@@ -32,7 +32,7 @@ func NewLogger(console io.Writer, files ...io.Writer) *zap.Logger {
 	pe.ConsoleSeparator = " "
 	consoleEncoder := zapcore.NewConsoleEncoder(pe)
 
-	cores := make([]zapcore.Core, len(files)+1, len(files)+1) // TODO: make logger config
+	cores := make([]zapcore.Core, len(files), len(files)+1) // TODO: make logger config
 
 	// console
 	cores[0] = zapcore.NewCore(consoleEncoder,
