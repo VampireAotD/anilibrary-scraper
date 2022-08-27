@@ -23,4 +23,4 @@ jobs:
           go-version: ${{ matrix.go-version }}
 
       - name: Run tests
-        run: make test
+        run: go test -v ./... -tags test -count=1
