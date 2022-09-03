@@ -34,9 +34,13 @@ func NewLogger(console io.Writer, files ...io.Writer) Logger {
 		encoder.AppendString("|")
 	}
 	pe.ConsoleSeparator = " "
+	pe.EncodeName = func(s string, encoder zapcore.PrimitiveArrayEncoder) {
+		encoder.AppendString(s)
+		encoder.AppendString("|")
+	}
 	consoleEncoder := zapcore.NewConsoleEncoder(pe)
 
-	cores := make([]zapcore.Core, len(files)+1, len(files)+1) // TODO: make logger config
+	cores := make([]zapcore.Core, len(files)+1, len(files)+1)
 
 	// console
 	cores[0] = zapcore.NewCore(consoleEncoder,

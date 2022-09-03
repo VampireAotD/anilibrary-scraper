@@ -24,7 +24,7 @@ func (a *App) Router() (http.Handler, error) {
 	a.closer.Add("redis composite", redisComposite)
 
 	service := composite.NewScraperComposite(redisComposite)
-	controller := anime.NewController(a.logger, service)
+	controller := anime.NewController(a.logger.Named("api/http"), service)
 
 	composeRoutes(router, a, controller)
 
