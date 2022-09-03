@@ -1,8 +1,8 @@
 include .env
 export
 
-APP_PATH=./app/cmd/app
-BIN_PATH=./app/cmd/bin
+APP_PATH=./cmd/app
+BIN_PATH=./cmd/bin
 
 .PHONY: build
 build:
