@@ -4,7 +4,7 @@ import (
 	"io"
 	"sync"
 
-	logger2 "anilibrary-request-parser/pkg/logger"
+	"anilibrary-request-parser/pkg/logger"
 )
 
 type Closer struct {
@@ -13,12 +13,12 @@ type Closer struct {
 }
 
 type Closers struct {
-	logger  logger2.Logger
+	logger  logger.Logger
 	mutex   sync.Mutex
 	closers []Closer
 }
 
-func New(logger logger2.Logger) Closers {
+func New(logger logger.Logger) Closers {
 	return Closers{logger: logger}
 }
 
@@ -42,7 +42,7 @@ func (c *Closers) Close() {
 		closer := c.closers[len(c.closers)-1-i]
 
 		if err := closer.callback.Close(); err != nil {
-			c.logger.Error("close", logger2.String("scope", closer.scope), logger2.Error(err))
+			c.logger.Error("close", logger.String("scope", closer.scope), logger.Error(err))
 		}
 	}
 

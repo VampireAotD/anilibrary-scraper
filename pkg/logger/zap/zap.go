@@ -9,7 +9,11 @@ import (
 
 const timeEncoderLayout string = "02/01/2006 15:04:05"
 
-func NewLogger(console io.Writer, files ...io.Writer) *zap.Logger {
+type Logger struct {
+	*zap.Logger
+}
+
+func NewLogger(console io.Writer, files ...io.Writer) Logger {
 	pe := zap.NewProductionEncoderConfig()
 
 	// file
@@ -49,8 +53,8 @@ func NewLogger(console io.Writer, files ...io.Writer) *zap.Logger {
 		cores[i+1] = core
 	}
 
-	return zap.New(
+	return Logger{zap.New(
 		zapcore.NewTee(cores...),
 		zap.AddCaller(),
-	)
+	)}
 }

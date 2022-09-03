@@ -8,4 +8,6 @@ type Logger interface {
 	Warn(msg string, fields ...Field)
 	Error(msg string, fields ...Field)
 	Named(s string) *zap.Logger
+	With(fields ...Field) *zap.Logger
+	Sync() error
 }
