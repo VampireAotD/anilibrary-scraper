@@ -1,5 +1,7 @@
 package config
 
+import "time"
+
 type Config struct {
 	App   App
 	HTTP  HTTP
@@ -16,7 +18,9 @@ type App struct {
 }
 
 type Redis struct {
-	Host     string `env:"REDIS_HOSTNAME" env-default:"0.0.0.0"`
-	Password string `env:"REDIS_PASSWORD" env-default:"default"`
-	Port     int    `env:"REDIS_PORT" env-default:"6379"`
+	Address     string        `env:"REDIS_ADDRESS" env-required:""`
+	Password    string        `env:"REDIS_PASSWORD" env-default:"default"`
+	PoolTimeout time.Duration `env:"REDIS_POOL_TIMEOUT" env-default:"5s"`
+	PoolSize    int           `env:"REDIS_POOL_SIZE" env-default:"-1"`
+	IdleSize    int           `env:"REDIS_IDLE_SIZE" env-default:"-1"`
 }

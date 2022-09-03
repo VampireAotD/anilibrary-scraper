@@ -11,15 +11,22 @@ import (
 
 type RedisComposite struct {
 	client *redis.Client
-	cfg    config.Redis
 }
 
-func NewComposite(ctx context.Context, cfg config.Redis) (RedisComposite, error) {
-	composite := RedisComposite{
-		cfg: cfg,
-	}
+func NewRedisComposite(cfg config.Redis) (RedisComposite, error) {
+	var composite RedisComposite
 
-	client, err := redisClient.New(ctx, fmt.Sprintf("%s:%d", cfg.Host, cfg.Port), cfg.Password)
+	ctx, cancel := context.WithTimeout(context.Background(), cfg.PoolTimeout)
+
+	defer cancel()
+
+	client, err := redisClient.New(ctx, redisClient.Config{
+		Address:     cfg.Address,
+		Password:    cfg.Password,
+		PoolTimeout: cfg.PoolTimeout,
+		PoolSize:    cfg.PoolSize,
+		IdleSize:    cfg.IdleSize,
+	})
 
 	if err != nil {
 		return composite, fmt.Errorf("while creating redis client : %w", err)

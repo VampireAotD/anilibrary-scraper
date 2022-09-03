@@ -1,10 +1,9 @@
 package app
 
 import (
-	"context"
 	"net/http"
 
-	composite2 "anilibrary-request-parser/internal/composite"
+	"anilibrary-request-parser/internal/composite"
 	"anilibrary-request-parser/internal/controller/http/v1/anime"
 	"anilibrary-request-parser/pkg/logger"
 	"github.com/go-chi/chi/v5"
@@ -15,16 +14,16 @@ import (
 func (a *App) Router() (http.Handler, error) {
 	router := chi.NewRouter()
 
-	redisComposite, err := composite2.NewComposite(context.Background(), a.config.Redis)
+	redisComposite, err := composite.NewRedisComposite(a.config.Redis)
 
 	if err != nil {
-		a.logger.Error("composite", logger.Error(err))
+		a.logger.Error("redis composite", logger.Error(err))
 		return nil, err
 	}
 
-	a.closer.Add("redisComposite", redisComposite)
+	a.closer.Add("redis composite", redisComposite)
 
-	service := composite2.NewScraperComposite(redisComposite)
+	service := composite.NewScraperComposite(redisComposite)
 	controller := anime.NewController(a.logger, service)
 
 	composeRoutes(router, a, controller)
