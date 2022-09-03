@@ -10,7 +10,8 @@ build:
 
 .PHONY: run
 run:
-	(cd $(BIN_PATH) && ./scraper)
+	docker-compose up -d redis;
+	(cd $(BIN_PATH) && ./scraper);
 
 .PHONY: clean
 clean:

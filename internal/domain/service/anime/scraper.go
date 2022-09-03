@@ -7,10 +7,10 @@ import (
 
 type ScraperService struct {
 	scraper    *scraper.Scraper
-	repository repository.AnimeRepositoryInterface
+	repository repository.AnimeRepository
 }
 
-func NewScraperService(repository repository.AnimeRepositoryInterface) *ScraperService {
+func NewScraperService(repository repository.AnimeRepository) *ScraperService {
 	return &ScraperService{
 		repository: repository,
 	}
