@@ -34,7 +34,7 @@ down:
 
 .PHONY: test
 test:
-	go test -v ./... -tags test -count=1
+	go test -v ./... -tags test -count=1 -cover
 
 .PHONY: lint
 lint:

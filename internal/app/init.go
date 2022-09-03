@@ -3,20 +3,16 @@ package app
 import (
 	"flag"
 	"runtime"
-
-	"anilibrary-request-parser/internal/config"
 )
 
 type flags struct {
-	logPath, envPath string
-	prom, pprof      bool
+	prom, pprof bool
 }
 
 func Init() *App {
 	var (
-		logPath = flag.String("log", config.DefaultLoggerFileLocation, "Define log file path")
-		prom    = flag.Bool("prom", false, "Enable Prometheus")
-		pprof   = flag.Bool("pprof", false, "Enable pprof")
+		prom  = flag.Bool("prom", false, "Enable Prometheus")
+		pprof = flag.Bool("pprof", false, "Enable pprof")
 	)
 
 	flag.Parse()
@@ -26,9 +22,8 @@ func Init() *App {
 	var app App
 
 	app.flags = flags{
-		logPath: *logPath,
-		prom:    *prom,
-		pprof:   *pprof,
+		prom:  *prom,
+		pprof: *pprof,
 	}
 
 	app.SetCloser()
