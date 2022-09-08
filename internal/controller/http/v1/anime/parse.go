@@ -5,21 +5,24 @@ import (
 	"errors"
 	"net/http"
 
-	"anilibrary-request-parser/internal/controller/http/utils"
 	"anilibrary-request-parser/internal/domain/dto"
 	"anilibrary-request-parser/pkg/logger"
+	"anilibrary-request-parser/pkg/response"
 )
 
 func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
-	var parseDTO dto.ParseDTO
-	parseDTO.FromCache = true
+	resp := response.New(w)
+
+	parseDTO := dto.ParseDTO{
+		FromCache: true,
+	}
 
 	json.NewDecoder(r.Body).Decode(&parseDTO)
 	err := parseDTO.Validate()
 
 	if err != nil {
 		c.logger.Error("while decoding incoming url", logger.Error(err))
-		_ = utils.NewErrorResponse(w, http.StatusUnprocessableEntity, errors.New("invalid url"))
+		_ = resp.ErrorJSON(http.StatusUnprocessableEntity, errors.New("invalid url"))
 		return
 	}
 
@@ -30,9 +33,9 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		c.logger.Error("while scraping", logger.Error(err))
-		_ = utils.NewErrorResponse(w, http.StatusUnprocessableEntity, err)
+		_ = resp.ErrorJSON(http.StatusUnprocessableEntity, errors.New("invalid url"))
 		return
 	}
 
-	_ = utils.NewSuccessResponse(w, entity)
+	_ = resp.JSON(http.StatusOK, entity)
 }
