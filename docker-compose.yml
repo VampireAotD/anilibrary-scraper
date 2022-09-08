@@ -1,16 +1,19 @@
 version: '3.9'
 
-volumes:
-  redis-data:
-
 services:
   redis:
     image: redis:latest
-    command: redis-server --requirepass ${REDIS_PASSWORD:-default}
+    command: redis-server --requirepass ${REDIS_PASSWORD}
     ports:
       - ${REDIS_PORT:-6380}:6379
     environment:
       REDIS_REPLICATION_MODE: master
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a $$REDIS_PASSWORD ping | grep PONG"]
+      interval: 2s
+      timeout: 2s
+      retries: 5
     volumes:
       - redis-data:/data
     networks:
@@ -18,7 +21,8 @@ services:
 
   app:
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
     container_name: anilibrary-request-parser
     build: .
     command:
@@ -36,3 +40,6 @@ services:
 networks:
   local:
     driver: bridge
+
+volumes:
+  redis-data:

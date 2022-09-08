@@ -6,7 +6,7 @@ WORKDIR /build/cmd/app
 
 RUN go mod tidy
 RUN go mod download
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags='-w -s -extldflags "-static"' -o=scraper
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags '-w -s -extldflags "-static"' -o=scraper
 
 ## final stage
 FROM alpine:latest
