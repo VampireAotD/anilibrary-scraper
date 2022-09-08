@@ -4,14 +4,15 @@ import (
 	"context"
 	"errors"
 	"strings"
+	"time"
 
+	"anilibrary-request-parser/internal/adapter/client"
+	"anilibrary-request-parser/internal/adapter/scraper"
+	"anilibrary-request-parser/internal/adapter/scraper/animego"
+	"anilibrary-request-parser/internal/adapter/scraper/animevost"
+	"anilibrary-request-parser/internal/adapter/scraper/contract"
 	"anilibrary-request-parser/internal/domain/dto"
 	"anilibrary-request-parser/internal/domain/entity"
-	"anilibrary-request-parser/internal/infrastructure/client"
-	"anilibrary-request-parser/internal/infrastructure/scraper"
-	"anilibrary-request-parser/internal/infrastructure/scraper/animego"
-	"anilibrary-request-parser/internal/infrastructure/scraper/animevost"
-	"anilibrary-request-parser/internal/infrastructure/scraper/contract"
 )
 
 func (s *ScraperService) Process(dto dto.ParseDTO) (*entity.Anime, error) {
@@ -31,7 +32,10 @@ func (s *ScraperService) Process(dto dto.ParseDTO) (*entity.Anime, error) {
 	s.scraper = base
 
 	if dto.FromCache {
-		anime, _ := s.repository.FindByUrl(context.Background(), dto.Url)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		anime, _ := s.repository.FindByUrl(ctx, dto.Url)
 
 		if anime != nil {
 			return anime, nil
@@ -45,7 +49,10 @@ func (s *ScraperService) Process(dto dto.ParseDTO) (*entity.Anime, error) {
 	}
 
 	if dto.FromCache {
-		_ = s.repository.Create(context.Background(), dto.Url, *anime)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		_ = s.repository.Create(ctx, dto.Url, *anime)
 	}
 
 	return anime, nil

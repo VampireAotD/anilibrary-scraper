@@ -4,8 +4,8 @@ import (
 	"strconv"
 	"strings"
 
-	animeEnum "anilibrary-request-parser/internal/domain/enum/anime"
-	"anilibrary-request-parser/internal/infrastructure/scraper"
+	"anilibrary-request-parser/internal/adapter/scraper"
+	"anilibrary-request-parser/internal/domain/enum"
 	"github.com/PuerkitoBio/goquery"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
@@ -30,12 +30,12 @@ func (a AnimeVost) Title(document *goquery.Document) string {
 	return ""
 }
 
-func (a AnimeVost) Status(document *goquery.Document) animeEnum.Status {
+func (a AnimeVost) Status(document *goquery.Document) enum.Status {
 	if status := document.Find("#nexttime").First(); status != nil {
-		return animeEnum.Ongoing
+		return enum.Ongoing
 	}
 
-	return animeEnum.Ready
+	return enum.Ready
 }
 
 func (a AnimeVost) Rating(document *goquery.Document) float32 {

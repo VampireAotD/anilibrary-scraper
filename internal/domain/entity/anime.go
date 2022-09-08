@@ -3,16 +3,16 @@ package entity
 import (
 	"encoding/json"
 
-	"anilibrary-request-parser/internal/domain/enum/anime"
+	"anilibrary-request-parser/internal/domain/enum"
 )
 
 type Anime struct {
-	Title       string       `json:"title"`
-	Status      anime.Status `json:"status"`
-	Episodes    string       `json:"episodes"`
-	Genres      []string     `json:"genres"`
-	VoiceActing []string     `json:"voice_acting"`
-	Rating      float32      `json:"rating"`
+	Title       string      `json:"title"`
+	Status      enum.Status `json:"status"`
+	Episodes    string      `json:"episodes"`
+	Genres      []string    `json:"genres"`
+	VoiceActing []string    `json:"voice_acting"`
+	Rating      float32     `json:"rating"`
 }
 
 func (a *Anime) FromJSON(data []byte) (*Anime, error) {

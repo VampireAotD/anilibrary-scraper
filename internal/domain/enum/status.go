@@ -1,4 +1,4 @@
-package anime
+package enum
 
 type Status string
 

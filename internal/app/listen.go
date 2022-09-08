@@ -34,6 +34,7 @@ func (a *App) Listen() {
 	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill, syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
 
 	go func() {
 		a.logger.Info("Starting server at", logger.String("addr", server.Addr))

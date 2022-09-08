@@ -28,28 +28,43 @@ func composeService(t *testing.T) *anime.ScraperService {
 }
 
 func TestScraperService(t *testing.T) {
-	testCase := "https://google.com"
+	cases := []struct {
+		name         string
+		url          string
+		requireError bool
+	}{
+		{
+			name:         "Random url",
+			url:          "https://google.com",
+			requireError: true,
+		},
+		{
+			name:         "AnimeGo",
+			url:          "https://animego.org/anime/naruto-102",
+			requireError: false,
+		},
+		{
+			name:         "AnimeVostOrg",
+			url:          "https://animevost.org/tip/tv/5-naruto-shippuuden12.html",
+			requireError: false,
+		},
+	}
 
-	service := composeService(t)
-	_, err := service.Process(composeDto(testCase))
+	t.Run("Scraper tests", func(t *testing.T) {
+		service := composeService(t)
 
-	require.Error(t, err, "resolving scraper")
-}
+		for _, testCase := range cases {
+			t.Run(testCase.name, func(t *testing.T) {
+				result, err := service.Process(composeDto(testCase.url))
 
-func TestAnimeGoScraper(t *testing.T) {
-	testCase := "https://animego.org/anime/naruto-102"
-
-	service := composeService(t)
-	_, err := service.Process(composeDto(testCase))
-
-	require.NoError(t, err, "scraping animego")
-}
-
-func TestAnimeVostScraper(t *testing.T) {
-	testCase := "https://animevost.org/tip/tv/5-naruto-shippuuden12.html"
-
-	service := composeService(t)
-	_, err := service.Process(composeDto(testCase))
-
-	require.NoError(t, err, "scraping animevost")
+				if testCase.requireError {
+					require.Error(t, err, testCase.name)
+					require.Nil(t, result)
+				} else {
+					require.NoError(t, err, testCase.name)
+					require.NotNil(t, result)
+				}
+			})
+		}
+	})
 }

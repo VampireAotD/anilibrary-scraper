@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	animeEnum "anilibrary-request-parser/internal/domain/enum/anime"
-	"anilibrary-request-parser/internal/infrastructure/scraper"
+	"anilibrary-request-parser/internal/adapter/scraper"
+	"anilibrary-request-parser/internal/domain/enum"
 	"github.com/PuerkitoBio/goquery"
 )
 
@@ -26,12 +26,12 @@ func (a AnimeGo) Title(document *goquery.Document) string {
 	return ""
 }
 
-func (a AnimeGo) Status(document *goquery.Document) animeEnum.Status {
+func (a AnimeGo) Status(document *goquery.Document) enum.Status {
 	if status := document.Find(".anime-info .row dt:contains(Статус) + dd").First(); status != nil {
-		return animeEnum.Status(status.Text())
+		return enum.Status(status.Text())
 	}
 
-	return animeEnum.Ready
+	return enum.Ready
 }
 
 func (a AnimeGo) Rating(document *goquery.Document) float32 {
