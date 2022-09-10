@@ -13,6 +13,10 @@ type App struct {
 	closer closer.Closers
 }
 
-func (a *App) Run() {
-	a.Listen()
+func (app *App) Run() {
+	app.Listen()
+}
+
+func (app *App) SetCloser() {
+	app.closer = closer.New(app.logger)
 }

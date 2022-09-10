@@ -9,7 +9,7 @@ import (
 
 const DefaultLoggerFileLocation string = "../../storage/logs/app.log"
 
-func (a *App) SetLogger() {
+func (app *App) SetLogger() {
 	file := createLogFile()
 
 	instance, err := logger.New(logger.Config{
@@ -21,8 +21,8 @@ func (a *App) SetLogger() {
 		log.Fatal(err)
 	}
 
-	a.logger = instance
-	a.closer.Add("logger", file)
+	app.logger = instance
+	app.closer.Add("logger", file)
 }
 
 func createLogFile() *os.File {

@@ -7,16 +7,16 @@ import (
 	"anilibrary-request-parser/pkg/logger"
 )
 
-func (a *App) ReadConfig() {
+func (app *App) ReadConfig() {
 	cfg, err := config.New()
 
 	if err != nil {
-		defer a.closer.Close()
+		defer app.closer.Close()
 
-		a.logger.Error("error while reading config", logger.Error(err))
+		app.logger.Error("error while reading config", logger.Error(err))
 
 		os.Exit(1)
 	}
 
-	a.config = cfg
+	app.config = cfg
 }

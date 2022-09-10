@@ -13,20 +13,20 @@ import (
 	"anilibrary-request-parser/pkg/logger"
 )
 
-func (a *App) Listen() {
-	router, err := a.Router()
+func (app *App) Listen() {
+	router, err := app.Router()
 
 	if err != nil {
-		a.logger.Error("error while creating router", logger.Error(err))
-		a.closer.Close()
+		app.logger.Error("error while creating router", logger.Error(err))
+		app.closer.Close()
 
 		os.Exit(1)
 	}
 
-	defer a.closer.Close()
+	defer app.closer.Close()
 
 	server := &http.Server{
-		Addr:         fmt.Sprintf("%s:%d", a.config.HTTP.Addr, a.config.HTTP.Port),
+		Addr:         fmt.Sprintf("%s:%d", app.config.HTTP.Addr, app.config.HTTP.Port),
 		Handler:      router,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 5 * time.Second,
@@ -37,12 +37,12 @@ func (a *App) Listen() {
 	defer stop()
 
 	go func() {
-		a.logger.Info("Starting server at", logger.String("addr", server.Addr))
+		app.logger.Info("Starting server at", logger.String("addr", server.Addr))
 
 		err = server.ListenAndServe()
 
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			a.logger.Error("error from server", logger.Error(err))
+			app.logger.Error("error from server", logger.Error(err))
 		}
 
 		stop()
@@ -50,12 +50,12 @@ func (a *App) Listen() {
 
 	<-ctx.Done()
 
-	a.logger.Info("Shutting down server")
+	app.logger.Info("Shutting down server")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	if err = server.Shutdown(ctx); err != nil {
-		a.logger.Error("error while shutting down server", logger.Error(err))
+		app.logger.Error("error while shutting down server", logger.Error(err))
 	}
 }
