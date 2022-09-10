@@ -19,3 +19,9 @@ func (r Response) JSON(code int, data any) error {
 
 	return json.NewEncoder(r.writer).Encode(data)
 }
+
+func (r Response) ErrorJSON(code int, err error) error {
+	return r.JSON(code, Error{
+		Message: err.Error(),
+	})
+}

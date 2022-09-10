@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	"anilibrary-request-parser/internal/adapter/scraper"
 	"anilibrary-request-parser/internal/domain/enum"
+	"anilibrary-request-parser/internal/infrastructure/scraper"
 	"github.com/PuerkitoBio/goquery"
 )
 

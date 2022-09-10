@@ -6,13 +6,13 @@ import (
 	"strings"
 	"time"
 
-	"anilibrary-request-parser/internal/adapter/client"
-	"anilibrary-request-parser/internal/adapter/scraper"
-	"anilibrary-request-parser/internal/adapter/scraper/animego"
-	"anilibrary-request-parser/internal/adapter/scraper/animevost"
-	"anilibrary-request-parser/internal/adapter/scraper/contract"
 	"anilibrary-request-parser/internal/domain/dto"
 	"anilibrary-request-parser/internal/domain/entity"
+	"anilibrary-request-parser/internal/infrastructure/client"
+	"anilibrary-request-parser/internal/infrastructure/scraper"
+	"anilibrary-request-parser/internal/infrastructure/scraper/animego"
+	"anilibrary-request-parser/internal/infrastructure/scraper/animevost"
+	"anilibrary-request-parser/internal/infrastructure/scraper/contract"
 )
 
 func (s *ScraperService) Process(dto dto.ParseDTO) (*entity.Anime, error) {

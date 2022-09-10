@@ -5,8 +5,8 @@ package scraper
 import (
 	"testing"
 
-	"anilibrary-request-parser/internal/adapter/db/redis/repository"
 	"anilibrary-request-parser/internal/domain/dto"
+	"anilibrary-request-parser/internal/domain/repository/mock"
 	"anilibrary-request-parser/internal/domain/service/anime"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
@@ -23,7 +23,7 @@ func composeService(t *testing.T) *anime.ScraperService {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	repo := repository.NewMockAnimeRepository(ctrl)
+	repo := mock.NewMockAnimeRepository(ctrl)
 	return anime.NewScraperService(repo)
 }
 

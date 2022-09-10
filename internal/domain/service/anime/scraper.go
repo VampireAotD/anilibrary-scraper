@@ -1,8 +1,8 @@
 package anime
 
 import (
-	"anilibrary-request-parser/internal/adapter/scraper"
 	"anilibrary-request-parser/internal/domain/repository"
+	"anilibrary-request-parser/internal/infrastructure/scraper"
 )
 
 type ScraperService struct {
