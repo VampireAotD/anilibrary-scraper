@@ -1,6 +1,4 @@
-// go:build test
-
-package scraper
+package scraper_test
 
 import (
 	"testing"
