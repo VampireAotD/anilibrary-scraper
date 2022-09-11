@@ -12,13 +12,13 @@ import (
 func (app *App) Router() (http.Handler, error) {
 	router := chi.NewRouter()
 
-	animeService, err := app.AnimeService()
+	controller, err := app.Controller()
 
 	if err != nil {
 		return nil, err
 	}
 
-	api.ComposeRoutes(router, app.logger, animeService)
+	api.ComposeRoutes(router, controller)
 
 	if app.flags.prom {
 		router.Handle("/metrics", routes.PrometheusRoutes())

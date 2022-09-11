@@ -10,7 +10,7 @@ import (
 )
 
 type RedisComposite struct {
-	client *redis.Client
+	Client *redis.Client
 }
 
 func NewRedisComposite(cfg config.Redis) (RedisComposite, error) {
@@ -32,11 +32,11 @@ func NewRedisComposite(cfg config.Redis) (RedisComposite, error) {
 		return composite, fmt.Errorf("while creating redis client : %w", err)
 	}
 
-	composite.client = client
+	composite.Client = client
 
 	return composite, nil
 }
 
 func (c RedisComposite) Close() error {
-	return c.client.Close()
+	return c.Client.Close()
 }

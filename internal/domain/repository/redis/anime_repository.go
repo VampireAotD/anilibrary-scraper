@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"anilibrary-request-parser/internal/domain/entity"
+	"anilibrary-request-parser/internal/domain/repository"
 	"github.com/go-redis/redis/v9"
 )
 
@@ -14,7 +15,7 @@ type AnimeRepository struct {
 	client *redis.Client
 }
 
-func NewAnimeRepository(client *redis.Client) *AnimeRepository {
+func NewAnimeRepository(client *redis.Client) repository.AnimeRepository {
 	return &AnimeRepository{client: client}
 }
 
