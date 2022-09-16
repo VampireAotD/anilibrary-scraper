@@ -5,7 +5,7 @@ import (
 )
 
 func main() {
-	application := app.Init()
+	application := app.Bootstrap()
 
 	application.Run()
 }

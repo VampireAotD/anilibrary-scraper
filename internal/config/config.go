@@ -15,6 +15,7 @@ type HTTP struct {
 
 type App struct {
 	Timezone string `env:"TIMEZONE" env-default:"Europe/Kiev"`
+	Env      Env    `env:"APP_ENV" env-default:"production"`
 }
 
 type Redis struct {

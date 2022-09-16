@@ -3,32 +3,28 @@ package app
 import (
 	"net/http"
 
+	"anilibrary-request-parser/internal/config"
 	"anilibrary-request-parser/internal/routes"
 	"anilibrary-request-parser/internal/routes/api"
-	"anilibrary-request-parser/pkg/logger"
 	"github.com/go-chi/chi/v5"
 )
 
-func (app *App) Router() (http.Handler, error) {
+func (app *App) Router() http.Handler {
 	router := chi.NewRouter()
 
 	controller, err := app.Controller()
 
 	if err != nil {
-		return nil, err
+		app.stopOnError("composing controller", err)
 	}
 
 	api.ComposeRoutes(router, controller)
 
-	if app.flags.prom {
-		router.Handle("/metrics", routes.PrometheusRoutes())
-		app.logger.Info("Prometheus metrics enabled", logger.String("endpoint", "/metrics"))
-	}
+	router.Handle("/metrics", routes.PrometheusRoutes())
 
-	if app.flags.pprof {
+	if app.config.App.Env == config.Local {
 		router.Mount("/debug", routes.ProfilerRoutes())
-		app.logger.Info("Pprof enabled", logger.String("endpoint", "/debug/pprof"))
 	}
 
-	return router, nil
+	return router
 }

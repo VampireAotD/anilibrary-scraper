@@ -15,7 +15,7 @@ import (
 // Services
 
 func WireScraperService(client *redis.Client) (*services.ScraperService, error) {
-	wire.Build(service.ScraperServiceProvider)
+	wire.Build(service.ScraperProviderSet)
 	return &services.ScraperService{}, nil
 }
 
