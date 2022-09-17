@@ -11,5 +11,5 @@ func (c Client) Request(url string) (*http.Response, error) {
 
 	c.DefaultHeaders(request)
 
-	return c.Do(request)
+	return c.base.Do(request)
 }

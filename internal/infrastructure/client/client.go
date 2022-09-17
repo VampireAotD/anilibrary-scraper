@@ -6,14 +6,14 @@ import (
 )
 
 type Client struct {
-	http.Client // better to do like this or `client http.Client?`
+	base http.Client
 }
 
-func New(client http.Client) *Client {
-	return &Client{Client: client}
+func New(client http.Client) Client {
+	return Client{base: client}
 }
 
-func DefaultClient() *Client {
+func DefaultClient() Client {
 	t := &http.Transport{
 		MaxIdleConns:        100,
 		MaxIdleConnsPerHost: 100,

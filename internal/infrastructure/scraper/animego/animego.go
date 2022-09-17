@@ -11,7 +11,7 @@ import (
 )
 
 type AnimeGo struct {
-	*scraper.Scraper // should this be embedded?
+	*scraper.Scraper
 }
 
 func New(Scraper *scraper.Scraper) *AnimeGo {

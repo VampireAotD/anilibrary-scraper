@@ -11,15 +11,15 @@ import (
 
 const sevenDaysInHours string = "168h"
 
-type AnimeRepository struct {
+type animeRepository struct {
 	client *redis.Client
 }
 
 func NewAnimeRepository(client *redis.Client) repository.AnimeRepository {
-	return &AnimeRepository{client: client}
+	return &animeRepository{client: client}
 }
 
-func (a *AnimeRepository) FindByUrl(ctx context.Context, url string) (*entity.Anime, error) {
+func (a *animeRepository) FindByUrl(ctx context.Context, url string) (*entity.Anime, error) {
 	res, err := a.client.Get(ctx, url).Bytes()
 
 	if err != nil {
@@ -31,7 +31,7 @@ func (a *AnimeRepository) FindByUrl(ctx context.Context, url string) (*entity.An
 	return anime.FromJSON(res)
 }
 
-func (a *AnimeRepository) Create(ctx context.Context, key string, anime entity.Anime) error {
+func (a *animeRepository) Create(ctx context.Context, key string, anime entity.Anime) error {
 	expire, _ := time.ParseDuration(sevenDaysInHours)
 	data, _ := anime.ToJSON()
 

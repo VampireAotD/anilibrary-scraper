@@ -14,15 +14,10 @@ type Scraper struct {
 	contract.Scraper
 
 	Url    string
-	Client *client.Client
+	Client client.Client
 }
 
-const (
-	MinimalAnimeRating   float32 = 0
-	MinimalAnimeEpisodes string  = "0 / ?"
-)
-
-func New(url string, client *client.Client) *Scraper {
+func New(url string, client client.Client) *Scraper {
 	return &Scraper{Url: url, Client: client}
 }
 
