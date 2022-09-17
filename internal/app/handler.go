@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"anilibrary-request-parser/internal/composite"
-	"anilibrary-request-parser/internal/controller/http/api/anime"
+	"anilibrary-request-parser/internal/handler/http/api/anime"
 	"anilibrary-request-parser/internal/providers"
 )
 

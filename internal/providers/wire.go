@@ -4,9 +4,9 @@
 package providers
 
 import (
-	"anilibrary-request-parser/internal/controller/http/api/anime"
 	"anilibrary-request-parser/internal/domain/service"
 	services "anilibrary-request-parser/internal/domain/service/anime"
+	"anilibrary-request-parser/internal/handler/http/api/anime"
 	"anilibrary-request-parser/pkg/logger"
 	"github.com/go-redis/redis/v9"
 	"github.com/google/wire"

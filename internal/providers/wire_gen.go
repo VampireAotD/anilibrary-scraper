@@ -7,9 +7,9 @@
 package providers
 
 import (
-	anime2 "anilibrary-request-parser/internal/controller/http/api/anime"
 	redis2 "anilibrary-request-parser/internal/domain/repository/redis"
 	"anilibrary-request-parser/internal/domain/service/anime"
+	anime2 "anilibrary-request-parser/internal/handler/http/api/anime"
 	"anilibrary-request-parser/pkg/logger"
 	"github.com/go-redis/redis/v9"
 )
