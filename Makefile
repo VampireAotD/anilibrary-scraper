@@ -3,6 +3,7 @@ export
 
 APP_PATH=./cmd/app
 BIN_PATH=./cmd/bin
+PROVIDERS_PATH=./internal/providers
 
 .PHONY: build
 build:
@@ -39,3 +40,7 @@ test:
 .PHONY: lint
 lint:
 	golangci-lint run
+
+.PHONY: wire
+wire:
+	(cd $(PROVIDERS_PATH) && go run github.com/google/wire/cmd/wire)
