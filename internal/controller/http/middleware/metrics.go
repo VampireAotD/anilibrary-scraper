@@ -4,21 +4,13 @@ import (
 	"net/http"
 	"time"
 
+	"anilibrary-request-parser/internal/metrics"
 	"github.com/go-chi/chi/v5"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
 func ResponseMetrics(next http.Handler) http.Handler {
-	buckets := []float64{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10}
-
-	responseHistogram := prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "http_api",
-		Name:      "parser_request_duration",
-		Help:      "Handler response time in seconds",
-		Buckets:   buckets,
-	}, []string{"route", "method"})
-
-	prometheus.MustRegister(responseHistogram)
+	prometheus.MustRegister(metrics.ResponseHistogram)
 
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		start := time.Now()
@@ -28,7 +20,7 @@ func ResponseMetrics(next http.Handler) http.Handler {
 		duration := time.Since(start)
 		route := routePattern(request)
 
-		responseHistogram.WithLabelValues(route, request.Method).Observe(duration.Seconds())
+		metrics.ResponseHistogram.WithLabelValues(route, request.Method).Observe(duration.Seconds())
 	})
 }
 
