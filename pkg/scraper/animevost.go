@@ -1,24 +1,22 @@
-package animevost
+package scraper
 
 import (
 	"strconv"
 	"strings"
 
 	"anilibrary-request-parser/internal/domain/enum"
-	"anilibrary-request-parser/internal/infrastructure/scraper"
 	"github.com/PuerkitoBio/goquery"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
 
 type AnimeVost struct {
-	*scraper.Scraper
 }
 
 const amountToMakeFloat int = 10
 
-func New(Scraper *scraper.Scraper) *AnimeVost {
-	return &AnimeVost{Scraper: Scraper}
+func NewAnimeVost() AnimeVost {
+	return AnimeVost{}
 }
 
 func (a AnimeVost) Title(document *goquery.Document) string {
@@ -43,13 +41,13 @@ func (a AnimeVost) Rating(document *goquery.Document) float32 {
 		value, err := strconv.Atoi(rating.Text())
 
 		if err != nil {
-			return scraper.MinimalAnimeRating
+			return MinimalAnimeRating
 		}
 
 		return float32(value / amountToMakeFloat)
 	}
 
-	return scraper.MinimalAnimeRating
+	return MinimalAnimeRating
 }
 
 func (a AnimeVost) Episodes(document *goquery.Document) string {
@@ -62,7 +60,7 @@ func (a AnimeVost) Episodes(document *goquery.Document) string {
 		return raw[0:end]
 	}
 
-	return scraper.MinimalAnimeEpisodes
+	return MinimalAnimeEpisodes
 }
 
 func (a AnimeVost) Genres(document *goquery.Document) []string {

@@ -2,58 +2,53 @@ package anime
 
 import (
 	"context"
-	"errors"
-	"strings"
+	"fmt"
+	"net/http"
 	"time"
 
 	"anilibrary-request-parser/internal/domain/dto"
 	"anilibrary-request-parser/internal/domain/entity"
-	"anilibrary-request-parser/internal/infrastructure/client"
-	"anilibrary-request-parser/internal/infrastructure/scraper"
-	"anilibrary-request-parser/internal/infrastructure/scraper/animego"
-	"anilibrary-request-parser/internal/infrastructure/scraper/animevost"
-	"anilibrary-request-parser/internal/infrastructure/scraper/contract"
+	"github.com/PuerkitoBio/goquery"
 )
 
 func (s *ScraperService) Process(dto dto.ParseDTO) (*entity.Anime, error) {
-	base := scraper.New(dto.Url, client.DefaultClient())
-	var instance contract.Scraper
-
-	switch true {
-	case strings.Contains(dto.Url, "animego.org"):
-		instance = animego.New(base)
-	case strings.Contains(dto.Url, "animevost.org"):
-		instance = animevost.New(base)
-	default:
-		return nil, errors.New("undefined scraper")
-	}
-
-	base.Scraper = instance
-	s.scraper = base
-
 	if dto.FromCache {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
 		anime, _ := s.repository.FindByUrl(ctx, dto.Url)
-
 		if anime != nil {
 			return anime, nil
 		}
 	}
 
-	anime, err := s.scraper.Process()
-
+	scraper, err := s.composeScraper(dto.Url)
 	if err != nil {
-		return anime, err
+		return nil, err
 	}
+
+	s.scraper = scraper
+
+	response, err := s.client.Request(dto.Url)
+	if err != nil || response.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("sending request %v", err)
+	}
+
+	defer response.Body.Close()
+
+	document, err := goquery.NewDocumentFromReader(response.Body)
+	if err != nil {
+		return nil, fmt.Errorf("creating document %v", err)
+	}
+
+	anime := s.scrape(document)
 
 	if dto.FromCache {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
-		_ = s.repository.Create(ctx, dto.Url, *anime)
+		_ = s.repository.Create(ctx, dto.Url, anime)
 	}
 
-	return anime, nil
+	return &anime, nil
 }

@@ -1,4 +1,4 @@
-package scraper_test
+package anime_test
 
 import (
 	"testing"

@@ -1,11 +1,11 @@
-package contract
+package scraper
 
 import (
 	"anilibrary-request-parser/internal/domain/enum"
 	"github.com/PuerkitoBio/goquery"
 )
 
-type Scraper interface {
+type Contract interface {
 	Title(document *goquery.Document) string
 	Status(document *goquery.Document) enum.Status
 	Rating(document *goquery.Document) float32

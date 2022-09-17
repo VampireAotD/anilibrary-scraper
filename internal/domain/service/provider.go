@@ -6,7 +6,4 @@ import (
 	"github.com/google/wire"
 )
 
-var ScraperProviderSet = wire.NewSet(
-	redis.NewAnimeRepository,
-	anime.NewScraperService,
-)
+var ScraperProviderSet = wire.NewSet(redis.NewAnimeRepository, anime.NewScraperService)

@@ -1,4 +1,4 @@
-package animego
+package scraper
 
 import (
 	"regexp"
@@ -6,16 +6,14 @@ import (
 	"strings"
 
 	"anilibrary-request-parser/internal/domain/enum"
-	"anilibrary-request-parser/internal/infrastructure/scraper"
 	"github.com/PuerkitoBio/goquery"
 )
 
 type AnimeGo struct {
-	*scraper.Scraper
 }
 
-func New(Scraper *scraper.Scraper) *AnimeGo {
-	return &AnimeGo{Scraper: Scraper}
+func NewAnimeGo() AnimeGo {
+	return AnimeGo{}
 }
 
 func (a AnimeGo) Title(document *goquery.Document) string {
@@ -39,13 +37,13 @@ func (a AnimeGo) Rating(document *goquery.Document) float32 {
 		value, err := strconv.ParseFloat(strings.Replace(rating.Text(), ",", ".", 1), 64)
 
 		if err != nil {
-			return scraper.MinimalAnimeRating
+			return MinimalAnimeRating
 		}
 
 		return float32(value)
 	}
 
-	return scraper.MinimalAnimeRating
+	return MinimalAnimeRating
 }
 
 func (a AnimeGo) Episodes(document *goquery.Document) string {
@@ -53,7 +51,7 @@ func (a AnimeGo) Episodes(document *goquery.Document) string {
 		return episodesText.Text()
 	}
 
-	return scraper.MinimalAnimeEpisodes
+	return MinimalAnimeEpisodes
 }
 
 func (a AnimeGo) Genres(document *goquery.Document) []string {
