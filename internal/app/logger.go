@@ -12,17 +12,11 @@ const DefaultLoggerFileLocation string = "../../storage/logs/app.log"
 func (app *App) InitLogger() {
 	file := createLogFile()
 
-	instance, err := logger.New(logger.Config{
-		ConsoleOutput: os.Stdout,
-		LogFile:       file,
+	app.logger = logger.NewLogger(os.Stdout, file)
+	app.closer.Add("logger", func() error {
+		_ = app.logger.Sync()
+		return file.Close()
 	})
-
-	if err != nil {
-		log.Fatalf("while creating logger: %s", err)
-	}
-
-	app.logger = instance
-	app.closer.Add("logger", file)
 }
 
 func createLogFile() *os.File {

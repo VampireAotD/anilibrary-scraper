@@ -3,19 +3,18 @@ package app
 import (
 	"fmt"
 
-	"anilibrary-request-parser/internal/composite"
 	"anilibrary-request-parser/internal/handler/http/api/anime"
 	"anilibrary-request-parser/internal/providers"
 )
 
 func (app *App) Controller() (anime.Controller, error) {
-	redisComposite, err := composite.NewRedisComposite(app.config.Redis)
+	redisProvider, err := providers.NewRedisProvider(app.config.Redis)
 
 	if err != nil {
-		return anime.Controller{}, fmt.Errorf("redis composite: %w", err)
+		return anime.Controller{}, fmt.Errorf("redis client: %w", err)
 	}
 
-	app.closer.Add("redis composite", redisComposite)
+	app.closer.Add("redis client", redisProvider.Close)
 
-	return providers.WireAnimeController(redisComposite.Client, app.logger.Named("api/http"))
+	return providers.WireAnimeController(redisProvider, app.logger.Named("api/http"))
 }

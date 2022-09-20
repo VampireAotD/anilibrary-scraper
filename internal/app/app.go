@@ -6,17 +6,17 @@ import (
 
 	"anilibrary-request-parser/internal/config"
 	"anilibrary-request-parser/pkg/closer"
-	"anilibrary-request-parser/pkg/logger"
+	"go.uber.org/zap"
 )
 
 type App struct {
-	logger logger.Logger
+	logger *zap.Logger
 	config config.Config
 	closer closer.Closers
 }
 
 func (app *App) stopOnError(info string, err error) {
-	app.logger.Error(info, logger.Error(err))
+	app.logger.Error(info, zap.Error(err))
 	os.Exit(1)
 }
 

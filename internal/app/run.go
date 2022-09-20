@@ -11,11 +11,10 @@ import (
 	"time"
 
 	"anilibrary-request-parser/internal/handler/http/server"
-	"anilibrary-request-parser/pkg/logger"
+	"go.uber.org/zap"
 )
 
 func (app *App) Run() {
-	defer app.logger.Sync()
 	defer app.closer.Close(app.logger)
 
 	httpServer := server.NewHTTPServer(
@@ -29,12 +28,12 @@ func (app *App) Run() {
 	go func() {
 		defer stop()
 
-		app.logger.Info("Starting server at", logger.String("addr", httpServer.Address()))
+		app.logger.Info("Starting server at", zap.String("addr", httpServer.Addr))
 
-		err := httpServer.Start()
+		err := httpServer.ListenAndServe()
 
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			app.logger.Error("while closing server", logger.Error(err))
+			app.logger.Error("while closing server", zap.Error(err))
 		}
 	}()
 
@@ -46,6 +45,6 @@ func (app *App) Run() {
 	defer cancel()
 
 	if err := httpServer.Shutdown(ctx); err != nil {
-		app.logger.Error("error while shutting down server", logger.Error(err))
+		app.logger.Error("error while shutting down server", zap.Error(err))
 	}
 }

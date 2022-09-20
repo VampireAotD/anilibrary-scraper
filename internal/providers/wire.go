@@ -7,9 +7,9 @@ import (
 	"anilibrary-request-parser/internal/domain/service"
 	services "anilibrary-request-parser/internal/domain/service/anime"
 	"anilibrary-request-parser/internal/handler/http/api/anime"
-	"anilibrary-request-parser/pkg/logger"
 	"github.com/go-redis/redis/v9"
 	"github.com/google/wire"
+	"go.uber.org/zap"
 )
 
 // Services
@@ -21,7 +21,7 @@ func WireScraperService(client *redis.Client) (*services.ScraperService, error) 
 
 // Controllers
 
-func WireAnimeController(client *redis.Client, logger logger.Logger) (anime.Controller, error) {
+func WireAnimeController(client *redis.Client, logger *zap.Logger) (anime.Controller, error) {
 	wire.Build(WireScraperService, anime.NewController)
 	return anime.Controller{}, nil
 }

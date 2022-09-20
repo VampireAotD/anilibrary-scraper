@@ -8,10 +8,6 @@ import (
 )
 
 func TestCreateLogger(t *testing.T) {
-	logger, err := New(Config{
-		ConsoleOutput: io.Discard,
-	})
-
-	require.NoError(t, err)
+	logger := NewLogger(io.Discard)
 	require.NotNil(t, logger)
 }

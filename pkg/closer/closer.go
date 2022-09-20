@@ -1,15 +1,14 @@
 package closer
 
 import (
-	"io"
 	"sync"
 
-	"anilibrary-request-parser/pkg/logger"
+	"go.uber.org/zap"
 )
 
 type Closer struct {
 	scope    string
-	callback io.Closer
+	callback func() error
 }
 
 type Closers struct {
@@ -17,7 +16,7 @@ type Closers struct {
 	closers []Closer
 }
 
-func (c *Closers) Add(scope string, callback io.Closer) {
+func (c *Closers) Add(scope string, callback func() error) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
@@ -29,16 +28,16 @@ func (c *Closers) Add(scope string, callback io.Closer) {
 	c.closers = append(c.closers, closer)
 }
 
-func (c *Closers) Close(log logger.Logger) {
+func (c *Closers) Close(logger *zap.Logger) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
 	for i := range c.closers {
 		closer := c.closers[len(c.closers)-1-i]
 
-		log.Info("Closing", logger.String("instance", closer.scope))
-		if err := closer.callback.Close(); err != nil {
-			log.Error("close", logger.String("scope", closer.scope), logger.Error(err))
+		logger.Info("Closing", zap.String("instance", closer.scope))
+		if err := closer.callback(); err != nil {
+			logger.Error("close", zap.String("scope", closer.scope), zap.Error(err))
 		}
 	}
 

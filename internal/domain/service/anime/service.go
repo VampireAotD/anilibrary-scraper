@@ -6,8 +6,8 @@ import (
 
 	"anilibrary-request-parser/internal/domain/entity"
 	"anilibrary-request-parser/internal/domain/repository"
-	"anilibrary-request-parser/internal/infrastructure/client"
-	"anilibrary-request-parser/pkg/scraper"
+	"anilibrary-request-parser/internal/scraper"
+	"anilibrary-request-parser/internal/scraper/client"
 	"github.com/PuerkitoBio/goquery"
 )
 
