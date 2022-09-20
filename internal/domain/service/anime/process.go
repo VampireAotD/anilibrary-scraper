@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"anilibrary-request-parser/internal/domain/dto"
-	"anilibrary-request-parser/internal/domain/entity"
+	"anilibrary-scraper/internal/domain/dto"
+	"anilibrary-scraper/internal/domain/entity"
 	"github.com/PuerkitoBio/goquery"
 )
 

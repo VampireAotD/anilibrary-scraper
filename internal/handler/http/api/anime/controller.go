@@ -1,7 +1,7 @@
 package anime
 
 import (
-	"anilibrary-request-parser/internal/domain/service/anime"
+	"anilibrary-scraper/internal/domain/service/anime"
 	"go.uber.org/zap"
 )
 

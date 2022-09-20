@@ -10,7 +10,7 @@ import (
 	"syscall"
 	"time"
 
-	"anilibrary-request-parser/internal/handler/http/server"
+	"anilibrary-scraper/internal/handler/http/server"
 	"go.uber.org/zap"
 )
 

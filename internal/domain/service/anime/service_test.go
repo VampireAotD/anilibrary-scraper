@@ -3,9 +3,9 @@ package anime_test
 import (
 	"testing"
 
-	"anilibrary-request-parser/internal/domain/dto"
-	"anilibrary-request-parser/internal/domain/repository/mock"
-	"anilibrary-request-parser/internal/domain/service/anime"
+	"anilibrary-scraper/internal/domain/dto"
+	"anilibrary-scraper/internal/domain/repository/mock"
+	"anilibrary-scraper/internal/domain/service/anime"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 )

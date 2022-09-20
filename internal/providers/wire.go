@@ -4,9 +4,9 @@
 package providers
 
 import (
-	"anilibrary-request-parser/internal/domain/service"
-	services "anilibrary-request-parser/internal/domain/service/anime"
-	"anilibrary-request-parser/internal/handler/http/api/anime"
+	"anilibrary-scraper/internal/domain/service"
+	services "anilibrary-scraper/internal/domain/service/anime"
+	"anilibrary-scraper/internal/handler/http/api/anime"
 	"github.com/go-redis/redis/v9"
 	"github.com/google/wire"
 	"go.uber.org/zap"

@@ -4,10 +4,10 @@ import (
 	"errors"
 	"strings"
 
-	"anilibrary-request-parser/internal/domain/entity"
-	"anilibrary-request-parser/internal/domain/repository"
-	"anilibrary-request-parser/internal/scraper"
-	"anilibrary-request-parser/internal/scraper/client"
+	"anilibrary-scraper/internal/domain/entity"
+	"anilibrary-scraper/internal/domain/repository"
+	"anilibrary-scraper/internal/scraper"
+	"anilibrary-scraper/internal/scraper/client"
 	"github.com/PuerkitoBio/goquery"
 )
 

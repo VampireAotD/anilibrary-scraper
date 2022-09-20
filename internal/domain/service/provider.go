@@ -1,8 +1,8 @@
 package service
 
 import (
-	"anilibrary-request-parser/internal/domain/repository/redis"
-	"anilibrary-request-parser/internal/domain/service/anime"
+	"anilibrary-scraper/internal/domain/repository/redis"
+	"anilibrary-scraper/internal/domain/service/anime"
 	"github.com/google/wire"
 )
 

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"runtime"
 
-	"anilibrary-request-parser/internal/config"
+	"anilibrary-scraper/internal/config"
 	"github.com/go-redis/redis/v9"
 )
 

@@ -1,8 +1,8 @@
 package api
 
 import (
-	"anilibrary-request-parser/internal/handler/http/api/anime"
-	"anilibrary-request-parser/internal/handler/http/middleware"
+	"anilibrary-scraper/internal/handler/http/api/anime"
+	"anilibrary-scraper/internal/handler/http/middleware"
 	"github.com/go-chi/chi/v5"
 )
 

@@ -3,9 +3,9 @@ package router
 import (
 	"net/http"
 
-	"anilibrary-request-parser/internal/handler/http/api/anime"
-	"anilibrary-request-parser/internal/handler/http/routes"
-	"anilibrary-request-parser/internal/handler/http/routes/api"
+	"anilibrary-scraper/internal/handler/http/api/anime"
+	"anilibrary-scraper/internal/handler/http/routes"
+	"anilibrary-scraper/internal/handler/http/routes/api"
 	"github.com/go-chi/chi/v5"
 )
 

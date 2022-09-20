@@ -3,8 +3,8 @@ package app
 import (
 	"fmt"
 
-	"anilibrary-request-parser/internal/handler/http/api/anime"
-	"anilibrary-request-parser/internal/providers"
+	"anilibrary-scraper/internal/handler/http/api/anime"
+	"anilibrary-scraper/internal/providers"
 )
 
 func (app *App) Controller() (anime.Controller, error) {

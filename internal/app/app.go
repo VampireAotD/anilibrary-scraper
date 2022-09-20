@@ -4,8 +4,8 @@ import (
 	"os"
 	"time"
 
-	"anilibrary-request-parser/internal/config"
-	"anilibrary-request-parser/pkg/closer"
+	"anilibrary-scraper/internal/config"
+	"anilibrary-scraper/pkg/closer"
 	"go.uber.org/zap"
 )
 

@@ -5,8 +5,8 @@ import (
 	"errors"
 	"net/http"
 
-	"anilibrary-request-parser/internal/domain/dto"
-	"anilibrary-request-parser/pkg/response"
+	"anilibrary-scraper/internal/domain/dto"
+	"anilibrary-scraper/pkg/response"
 	"go.uber.org/zap"
 )
 

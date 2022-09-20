@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 
-	"anilibrary-request-parser/internal/domain/entity"
+	"anilibrary-scraper/internal/domain/entity"
 )
 
 //go:generate mockgen -source=contract.go -destination=./mock/repository_mock.go -package=mock
@@ -14,4 +14,3 @@ type (
 		Create(ctx context.Context, key string, anime entity.Anime) error
 	}
 )
-

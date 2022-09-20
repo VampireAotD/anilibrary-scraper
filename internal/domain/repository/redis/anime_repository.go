@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"anilibrary-request-parser/internal/domain/entity"
-	"anilibrary-request-parser/internal/domain/repository"
+	"anilibrary-scraper/internal/domain/entity"
+	"anilibrary-scraper/internal/domain/repository"
 	"github.com/go-redis/redis/v9"
 )
 

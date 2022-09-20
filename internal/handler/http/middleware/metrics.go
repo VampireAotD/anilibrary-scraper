@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"anilibrary-request-parser/internal/metrics"
+	"anilibrary-scraper/internal/metrics"
 	"github.com/go-chi/chi/v5"
 	"github.com/prometheus/client_golang/prometheus"
 )

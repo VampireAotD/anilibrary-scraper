@@ -3,8 +3,8 @@ package app
 import (
 	"net/http"
 
-	"anilibrary-request-parser/internal/config"
-	"anilibrary-request-parser/internal/handler/http/router"
+	"anilibrary-scraper/internal/config"
+	"anilibrary-scraper/internal/handler/http/router"
 )
 
 func (app *App) Router() http.Handler {

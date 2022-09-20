@@ -3,7 +3,7 @@ package entity
 import (
 	"encoding/json"
 
-	"anilibrary-request-parser/internal/domain/enum"
+	"anilibrary-scraper/internal/domain/enum"
 )
 
 type Anime struct {

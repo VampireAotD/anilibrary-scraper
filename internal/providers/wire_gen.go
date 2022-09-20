@@ -7,9 +7,9 @@
 package providers
 
 import (
-	redis2 "anilibrary-request-parser/internal/domain/repository/redis"
-	"anilibrary-request-parser/internal/domain/service/anime"
-	anime2 "anilibrary-request-parser/internal/handler/http/api/anime"
+	redis2 "anilibrary-scraper/internal/domain/repository/redis"
+	"anilibrary-scraper/internal/domain/service/anime"
+	anime2 "anilibrary-scraper/internal/handler/http/api/anime"
 	"github.com/go-redis/redis/v9"
 	"go.uber.org/zap"
 )

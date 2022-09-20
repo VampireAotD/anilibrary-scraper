@@ -1,4 +1,4 @@
-module anilibrary-request-parser
+module anilibrary-scraper
 
 go 1.19
 

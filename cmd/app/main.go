@@ -1,7 +1,7 @@
 package main
 
 import (
-	"anilibrary-request-parser/internal/app"
+	"anilibrary-scraper/internal/app"
 )
 
 func main() {

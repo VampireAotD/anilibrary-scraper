@@ -23,7 +23,7 @@ services:
     depends_on:
       redis:
         condition: service_healthy
-    container_name: anilibrary-request-parser
+    container_name: anilibrary-scraper
     build: .
     command:
       - "-pprof"

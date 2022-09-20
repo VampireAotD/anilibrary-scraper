@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"anilibrary-request-parser/pkg/logger"
+	"anilibrary-scraper/pkg/logger"
 )
 
 const DefaultLoggerFileLocation string = "../../storage/logs/app.log"
