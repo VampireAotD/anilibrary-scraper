@@ -7,10 +7,10 @@ import (
 
 type Controller struct {
 	logger  logger.Contract
-	service *anime.ScraperService
+	service anime.ScraperService
 }
 
-func NewController(logger logger.Contract, service *anime.ScraperService) Controller {
+func NewController(logger logger.Contract, service anime.ScraperService) Controller {
 	return Controller{
 		logger:  logger,
 		service: service,

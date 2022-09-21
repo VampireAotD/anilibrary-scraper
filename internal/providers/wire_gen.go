@@ -16,7 +16,7 @@ import (
 
 // Injectors from wire.go:
 
-func WireScraperService(client *redis.Client) (*anime.ScraperService, error) {
+func WireScraperService(client *redis.Client) (anime.ScraperService, error) {
 	animeRepository := redis2.NewAnimeRepository(client)
 	scraperService := anime.NewScraperService(animeRepository)
 	return scraperService, nil

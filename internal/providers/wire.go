@@ -14,9 +14,9 @@ import (
 
 // Services
 
-func WireScraperService(client *redis.Client) (*services.ScraperService, error) {
+func WireScraperService(client *redis.Client) (services.ScraperService, error) {
 	wire.Build(service.ScraperProviderSet)
-	return &services.ScraperService{}, nil
+	return services.ScraperService{}, nil
 }
 
 // Controllers

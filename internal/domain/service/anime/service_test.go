@@ -17,7 +17,7 @@ func composeDto(testCase string) dto.ParseDTO {
 	}
 }
 
-func composeService(t *testing.T) *anime.ScraperService {
+func composeService(t *testing.T) anime.ScraperService {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 

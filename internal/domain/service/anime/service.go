@@ -17,8 +17,8 @@ type ScraperService struct {
 	client     client.Client
 }
 
-func NewScraperService(repository repository.AnimeRepository) *ScraperService {
-	return &ScraperService{
+func NewScraperService(repository repository.AnimeRepository) ScraperService {
+	return ScraperService{
 		repository: repository,
 		client:     client.DefaultClient(),
 	}
