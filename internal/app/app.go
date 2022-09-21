@@ -6,17 +6,17 @@ import (
 
 	"anilibrary-scraper/internal/config"
 	"anilibrary-scraper/pkg/closer"
-	"go.uber.org/zap"
+	"anilibrary-scraper/pkg/logger"
 )
 
 type App struct {
-	logger *zap.Logger
+	logger logger.Contract
 	config config.Config
 	closer closer.Closers
 }
 
 func (app *App) stopOnError(info string, err error) {
-	app.logger.Error(info, zap.Error(err))
+	app.logger.Error(info, logger.Error(err))
 	os.Exit(1)
 }
 

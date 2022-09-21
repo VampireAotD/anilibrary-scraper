@@ -9,7 +9,21 @@ import (
 
 const timeEncoderLayout string = "02/01/2006 15:04:05"
 
-func NewLogger(console io.Writer, files ...io.Writer) *zap.Logger {
+type Contract interface {
+	Debug(msg string, fields ...Field)
+	Info(msg string, fields ...Field)
+	Warn(msg string, fields ...Field)
+	Error(msg string, fields ...Field)
+	Named(s string) *Logger
+	With(fields ...Field) *Logger
+	Sync() error
+}
+
+type Logger struct {
+	base *zap.Logger
+}
+
+func NewLogger(console io.Writer, files ...io.Writer) *Logger {
 	pe := zap.NewProductionEncoderConfig()
 
 	// file
@@ -51,8 +65,50 @@ func NewLogger(console io.Writer, files ...io.Writer) *zap.Logger {
 		)
 	}
 
-	return zap.New(
+	return &Logger{base: zap.New(
 		zapcore.NewTee(cores...),
 		zap.AddCaller(),
-	)
+	)}
+}
+
+func (l *Logger) Debug(msg string, fields ...Field) {
+	l.base.Debug(msg, fields...)
+}
+
+func (l *Logger) Info(msg string, fields ...Field) {
+	l.base.Info(msg, fields...)
+}
+
+func (l *Logger) Warn(msg string, fields ...Field) {
+	l.base.Warn(msg, fields...)
+}
+
+func (l *Logger) Error(msg string, fields ...Field) {
+	l.base.Error(msg, fields...)
+}
+
+func (l *Logger) Named(s string) *Logger {
+	if l.base == nil {
+		return l
+	}
+
+	l.base = l.base.Named(s)
+	return l
+}
+
+func (l *Logger) With(fields ...Field) *Logger {
+	if l.base == nil {
+		return l
+	}
+
+	l.base = l.base.With(fields...)
+	return l
+}
+
+func (l *Logger) Sync() error {
+	if l.base == nil {
+		return nil
+	}
+
+	return l.base.Sync()
 }

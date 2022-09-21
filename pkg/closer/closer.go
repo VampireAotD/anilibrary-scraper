@@ -3,7 +3,7 @@ package closer
 import (
 	"sync"
 
-	"go.uber.org/zap"
+	"anilibrary-scraper/pkg/logger"
 )
 
 type Closer struct {
@@ -28,16 +28,16 @@ func (c *Closers) Add(scope string, callback func() error) {
 	c.closers = append(c.closers, closer)
 }
 
-func (c *Closers) Close(logger *zap.Logger) {
+func (c *Closers) Close(log logger.Contract) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
 	for i := range c.closers {
 		closer := c.closers[len(c.closers)-1-i]
 
-		logger.Info("Closing", zap.String("instance", closer.scope))
+		log.Info("Closing", logger.String("instance", closer.scope))
 		if err := closer.callback(); err != nil {
-			logger.Error("close", zap.String("scope", closer.scope), zap.Error(err))
+			log.Error("close", logger.String("scope", closer.scope), logger.Error(err))
 		}
 	}
 

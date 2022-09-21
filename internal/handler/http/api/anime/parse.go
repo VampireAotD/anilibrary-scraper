@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	"anilibrary-scraper/internal/domain/dto"
+	"anilibrary-scraper/pkg/logger"
 	"anilibrary-scraper/pkg/response"
-	"go.uber.org/zap"
 )
 
 func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
@@ -21,18 +21,18 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 	err := parseDTO.Validate()
 
 	if err != nil {
-		c.logger.Error("while decoding incoming url", zap.Error(err))
+		c.logger.Error("while decoding incoming url", logger.Error(err))
 		_ = resp.ErrorJSON(http.StatusUnprocessableEntity, errors.New("invalid url"))
 		return
 	}
 
 	defer r.Body.Close()
 
-	c.logger.Info("Scraping", zap.String("url", parseDTO.Url))
+	c.logger.Info("Scraping", logger.String("url", parseDTO.Url))
 	entity, err := c.service.Process(parseDTO)
 
 	if err != nil {
-		c.logger.Error("while scraping", zap.Error(err))
+		c.logger.Error("while scraping", logger.Error(err))
 		_ = resp.ErrorJSON(http.StatusUnprocessableEntity, errors.New("invalid url"))
 		return
 	}

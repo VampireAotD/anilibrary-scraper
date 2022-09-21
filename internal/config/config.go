@@ -2,6 +2,12 @@ package config
 
 import "time"
 
+type Env string
+
+const (
+	Local Env = "local"
+)
+
 type Config struct {
 	App   App
 	HTTP  HTTP

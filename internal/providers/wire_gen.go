@@ -10,8 +10,8 @@ import (
 	redis2 "anilibrary-scraper/internal/domain/repository/redis"
 	"anilibrary-scraper/internal/domain/service/anime"
 	anime2 "anilibrary-scraper/internal/handler/http/api/anime"
+	"anilibrary-scraper/pkg/logger"
 	"github.com/go-redis/redis/v9"
-	"go.uber.org/zap"
 )
 
 // Injectors from wire.go:
@@ -22,11 +22,11 @@ func WireScraperService(client *redis.Client) (*anime.ScraperService, error) {
 	return scraperService, nil
 }
 
-func WireAnimeController(client *redis.Client, logger *zap.Logger) (anime2.Controller, error) {
+func WireAnimeController(client *redis.Client, logger2 logger.Contract) (anime2.Controller, error) {
 	scraperService, err := WireScraperService(client)
 	if err != nil {
 		return anime2.Controller{}, err
 	}
-	controller := anime2.NewController(logger, scraperService)
+	controller := anime2.NewController(logger2, scraperService)
 	return controller, nil
 }
