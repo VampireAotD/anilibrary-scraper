@@ -77,3 +77,11 @@ func (a AnimeGo) VoiceActing(document *goquery.Document) []string {
 
 	return nil
 }
+
+func (a AnimeGo) Image(document *goquery.Document) string {
+	if attr, exists := document.Find(".anime-poster img").First().Attr("src"); exists {
+		return strings.Replace(attr, "/media/cache/thumbs_250x350", "", 1)
+	}
+
+	return ""
+}

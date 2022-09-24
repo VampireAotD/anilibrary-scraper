@@ -7,6 +7,7 @@ import (
 )
 
 type Anime struct {
+	Image       string      `json:"image"`
 	Title       string      `json:"title"`
 	Status      enum.Status `json:"status"`
 	Episodes    string      `json:"episodes"`

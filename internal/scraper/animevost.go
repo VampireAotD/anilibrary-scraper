@@ -77,3 +77,11 @@ func (a AnimeVost) Genres(document *goquery.Document) []string {
 func (a AnimeVost) VoiceActing(document *goquery.Document) []string {
 	return []string{"AnimeVost"}
 }
+
+func (a AnimeVost) Image(document *goquery.Document) string {
+	if attr, exists := document.Find(".imgRadius").First().Attr("src"); exists {
+		return attr
+	}
+
+	return ""
+}
