@@ -1,6 +1,5 @@
 ## build stage
-FROM golang:1.19-alpine AS build-env
-RUN apk --no-cache add build-base git curl tzdata
+FROM golang:1.19-alpine AS builder
 ADD . /build
 WORKDIR /build/cmd/app
 
@@ -10,7 +9,9 @@ RUN CGO_ENABLED=0 GOOS=linux go build -ldflags '-w -s -extldflags "-static"' -o=
 
 ## final stage
 FROM alpine:latest
-COPY --from=build-env /build/cmd/app /cmd/app
+RUN apk --no-cache add tzdata
+
+COPY --from=builder /build/cmd/app /cmd/app
 
 WORKDIR /cmd/app
 
