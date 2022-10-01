@@ -6,20 +6,24 @@ import (
 	"net/url"
 
 	"anilibrary-scraper/internal/domain/entity"
-	"anilibrary-scraper/internal/domain/enum"
 	"anilibrary-scraper/internal/scraper/client"
 	"github.com/PuerkitoBio/goquery"
 )
 
 type Contract interface {
 	Title(document *goquery.Document) string
-	Status(document *goquery.Document) enum.Status
+	Status(document *goquery.Document) entity.Status
 	Rating(document *goquery.Document) float32
 	Episodes(document *goquery.Document) string
 	Genres(document *goquery.Document) []string
 	VoiceActing(document *goquery.Document) []string
 	Image(document *goquery.Document) string
 }
+
+const (
+	MinimalAnimeRating   float32 = 0
+	MinimalAnimeEpisodes string  = "0 / ?"
+)
 
 type Scraper[I Contract] struct {
 	url    string

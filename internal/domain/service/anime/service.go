@@ -20,7 +20,7 @@ func NewScraperService(repository repository.AnimeRepository) ScraperService {
 	}
 }
 
-func (s *ScraperService) scrape(url string) (entity.Anime, error) {
+func (s ScraperService) scrape(url string) (entity.Anime, error) {
 	switch true {
 	case strings.Contains(url, "animego.org"):
 		instance := scraper.New(url, client.DefaultClient())

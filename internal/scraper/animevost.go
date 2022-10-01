@@ -4,11 +4,13 @@ import (
 	"strconv"
 	"strings"
 
-	"anilibrary-scraper/internal/domain/enum"
+	"anilibrary-scraper/internal/domain/entity"
 	"github.com/PuerkitoBio/goquery"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
+
+var _ Contract = (*AnimeVost)(nil)
 
 type AnimeVost struct {
 }
@@ -28,12 +30,12 @@ func (a AnimeVost) Title(document *goquery.Document) string {
 	return ""
 }
 
-func (a AnimeVost) Status(document *goquery.Document) enum.Status {
+func (a AnimeVost) Status(document *goquery.Document) entity.Status {
 	if status := document.Find("#nexttime").First(); status != nil {
-		return enum.Ongoing
+		return entity.Ongoing
 	}
 
-	return enum.Ready
+	return entity.Ready
 }
 
 func (a AnimeVost) Rating(document *goquery.Document) float32 {

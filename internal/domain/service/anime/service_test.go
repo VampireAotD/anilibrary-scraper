@@ -10,8 +10,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func composeDto(testCase string) dto.ParseDTO {
-	return dto.ParseDTO{
+func composeDto(testCase string) dto.RequestDTO {
+	return dto.RequestDTO{
 		Url:       testCase,
 		FromCache: false,
 	}

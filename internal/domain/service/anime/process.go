@@ -9,7 +9,7 @@ import (
 	"anilibrary-scraper/internal/domain/entity"
 )
 
-func (s *ScraperService) Process(dto dto.ParseDTO) (*entity.Anime, error) {
+func (s ScraperService) Process(dto dto.RequestDTO) (*entity.Anime, error) {
 	if dto.FromCache {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()

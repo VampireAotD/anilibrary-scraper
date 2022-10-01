@@ -2,18 +2,24 @@ package entity
 
 import (
 	"encoding/json"
+)
 
-	"anilibrary-scraper/internal/domain/enum"
+type Status string
+
+const (
+	Ongoing  Status = "Онгоинг"
+	Announce Status = "Анонс"
+	Ready    Status = "Вышел"
 )
 
 type Anime struct {
-	Image       string      `json:"image"`
-	Title       string      `json:"title"`
-	Status      enum.Status `json:"status"`
-	Episodes    string      `json:"episodes"`
-	Genres      []string    `json:"genres"`
-	VoiceActing []string    `json:"voice_acting"`
-	Rating      float32     `json:"rating"`
+	Image       string   `json:"image"`
+	Title       string   `json:"title"`
+	Status      Status   `json:"status"`
+	Episodes    string   `json:"episodes"`
+	Genres      []string `json:"genres"`
+	VoiceActing []string `json:"voice_acting"`
+	Rating      float32  `json:"rating"`
 }
 
 func (a *Anime) FromJSON(data []byte) (*Anime, error) {

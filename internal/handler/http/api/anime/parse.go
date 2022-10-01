@@ -13,7 +13,7 @@ import (
 func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 	resp := response.New(w)
 
-	parseDTO := dto.ParseDTO{
+	parseDTO := dto.RequestDTO{
 		FromCache: true,
 	}
 

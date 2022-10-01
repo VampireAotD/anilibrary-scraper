@@ -12,5 +12,8 @@ func Bootstrap() *App {
 	app.logger.Info("Setting timezone")
 	app.SetTimezone()
 
+	app.logger.Info("Setting redis connection")
+	app.SetRedisConnection()
+
 	return &app
 }
