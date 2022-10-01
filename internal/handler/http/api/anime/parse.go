@@ -12,14 +12,12 @@ import (
 
 func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 	resp := response.New(w)
-
 	parseDTO := dto.RequestDTO{
 		FromCache: true,
 	}
 
 	json.NewDecoder(r.Body).Decode(&parseDTO)
 	err := parseDTO.Validate()
-
 	if err != nil {
 		c.logger.Error("while decoding incoming url", logger.Error(err))
 		_ = resp.ErrorJSON(http.StatusUnprocessableEntity, errors.New("invalid url"))
@@ -30,7 +28,6 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 
 	c.logger.Info("Scraping", logger.String("url", parseDTO.Url))
 	entity, err := c.service.Process(parseDTO)
-
 	if err != nil {
 		c.logger.Error("while scraping", logger.Error(err))
 		_ = resp.ErrorJSON(http.StatusUnprocessableEntity, errors.New("invalid url"))
