@@ -34,21 +34,16 @@ func New(url string, client client.Client) Scraper[Contract] {
 	return Scraper[Contract]{url: url, client: client}
 }
 
-func (s Scraper[I]) Scrape(instance I) (entity.Anime, error) {
+func (s Scraper[I]) Scrape(instance I) (*entity.Anime, error) {
 	response, err := s.client.Request(s.url)
-	if err != nil {
-		return entity.Anime{}, fmt.Errorf("sending request %v", err)
+	if err != nil || response.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("sending request %w, status code %d", err, response.StatusCode)
 	}
-
-	if response.StatusCode != http.StatusOK {
-		return entity.Anime{}, fmt.Errorf("bad status code: %d", response.StatusCode)
-	}
-
 	defer response.Body.Close()
 
 	document, err := goquery.NewDocumentFromReader(response.Body)
 	if err != nil {
-		return entity.Anime{}, fmt.Errorf("creating document %v", err)
+		return nil, fmt.Errorf("creating document %v", err)
 	}
 
 	var anime entity.Anime
@@ -63,5 +58,5 @@ func (s Scraper[I]) Scrape(instance I) (entity.Anime, error) {
 	anime.Genres = instance.Genres(document)
 	anime.VoiceActing = instance.VoiceActing(document)
 
-	return anime, nil
+	return &anime, nil
 }

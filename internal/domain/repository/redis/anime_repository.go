@@ -28,7 +28,6 @@ func (a AnimeRepository) FindByUrl(ctx context.Context, url string) (*entity.Ani
 	}
 
 	var anime entity.Anime
-
 	return anime.FromJSON(res)
 }
 

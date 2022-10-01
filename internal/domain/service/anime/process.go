@@ -29,8 +29,8 @@ func (s ScraperService) Process(dto dto.RequestDTO) (*entity.Anime, error) {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
-		_ = s.repository.Create(ctx, dto.Url, anime)
+		_ = s.repository.Create(ctx, dto.Url, *anime)
 	}
 
-	return &anime, nil
+	return anime, nil
 }

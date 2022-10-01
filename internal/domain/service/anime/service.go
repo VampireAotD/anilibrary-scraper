@@ -20,7 +20,7 @@ func NewScraperService(repository repository.AnimeRepository) ScraperService {
 	}
 }
 
-func (s ScraperService) scrape(url string) (entity.Anime, error) {
+func (s ScraperService) scrape(url string) (*entity.Anime, error) {
 	switch true {
 	case strings.Contains(url, "animego.org"):
 		instance := scraper.New(url, client.DefaultClient())
@@ -29,6 +29,6 @@ func (s ScraperService) scrape(url string) (entity.Anime, error) {
 		instance := scraper.New(url, client.DefaultClient())
 		return instance.Scrape(scraper.NewAnimeVost())
 	default:
-		return entity.Anime{}, errors.New("undefined scraper")
+		return nil, errors.New("undefined scraper")
 	}
 }

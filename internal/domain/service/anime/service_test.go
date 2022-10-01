@@ -4,28 +4,41 @@ import (
 	"testing"
 
 	"anilibrary-scraper/internal/domain/dto"
-	"anilibrary-scraper/internal/domain/repository/mock"
+	"anilibrary-scraper/internal/domain/repository/mocks"
 	"anilibrary-scraper/internal/domain/service/anime"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
 )
 
-func composeDto(testCase string) dto.RequestDTO {
+type ScraperServiceSuite struct {
+	suite.Suite
+
+	repositoryMock *mocks.MockAnimeRepository
+	service        anime.ScraperService
+}
+
+func TestScraperServiceSuite(t *testing.T) {
+	suite.Run(t, new(ScraperServiceSuite))
+}
+
+func (suite *ScraperServiceSuite) SetupSuite() {
+	ctrl := gomock.NewController(suite.T())
+	defer ctrl.Finish()
+
+	suite.repositoryMock = mocks.NewMockAnimeRepository(ctrl)
+	suite.service = anime.NewScraperService(suite.repositoryMock)
+}
+
+func (suite *ScraperServiceSuite) composeDto(testCase string) dto.RequestDTO {
 	return dto.RequestDTO{
 		Url:       testCase,
-		FromCache: false,
+		FromCache: true,
 	}
 }
 
-func composeService(t *testing.T) anime.ScraperService {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	repo := mock.NewMockAnimeRepository(ctrl)
-	return anime.NewScraperService(repo)
-}
-
-func TestScraperService(t *testing.T) {
+func (suite *ScraperServiceSuite) TestProcess() {
+	t := suite.T()
 	cases := []struct {
 		name         string
 		url          string
@@ -48,21 +61,25 @@ func TestScraperService(t *testing.T) {
 		},
 	}
 
-	t.Run("Scraper tests", func(t *testing.T) {
-		service := composeService(t)
+	for _, testCase := range cases {
+		t.Run(testCase.name, func(t *testing.T) {
+			suite.repositoryMock.EXPECT().
+				FindByUrl(gomock.Any(), gomock.Any()).
+				Return(nil, nil)
 
-		for _, testCase := range cases {
-			t.Run(testCase.name, func(t *testing.T) {
-				result, err := service.Process(composeDto(testCase.url))
+			suite.repositoryMock.EXPECT().
+				Create(gomock.Any(), testCase.url, gomock.Any()).
+				Return(nil)
 
-				if testCase.requireError {
-					require.Error(t, err, testCase.name)
-					require.Nil(t, result)
-				} else {
-					require.NoError(t, err, testCase.name)
-					require.NotNil(t, result)
-				}
-			})
-		}
-	})
+			result, err := suite.service.Process(suite.composeDto(testCase.url))
+
+			if testCase.requireError {
+				require.Error(t, err, testCase.name)
+				require.Nil(t, result)
+			} else {
+				require.NoError(t, err, testCase.name)
+				require.NotNil(t, result)
+			}
+		})
+	}
 }
