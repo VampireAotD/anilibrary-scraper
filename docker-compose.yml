@@ -25,9 +25,6 @@ services:
         condition: service_healthy
     container_name: anilibrary-scraper
     build: .
-    command:
-      - "-pprof"
-      - "-prom"
     env_file:
       - .env
     volumes:
@@ -36,6 +33,7 @@ services:
       - "8080:8080"
     networks:
       - local
+      - shared
 
   prometheus:
     image: prom/prometheus:v2.38.0
@@ -68,6 +66,9 @@ services:
 networks:
   local:
     driver: bridge
+  shared:
+    name: anilibrary
+    external: true
 
 volumes:
   redis-data:

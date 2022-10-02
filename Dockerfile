@@ -11,8 +11,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build -ldflags '-w -s -extldflags "-static"' -o=
 FROM alpine:latest
 RUN apk --no-cache add tzdata
 
-COPY --from=builder /build/cmd/app /cmd/app
+COPY --from=builder /build/cmd/app /cmd/bin
 
-WORKDIR /cmd/app
+WORKDIR /cmd/bin
 
 ENTRYPOINT ["./scraper"]
