@@ -5,7 +5,7 @@ package providers
 
 import (
 	"anilibrary-scraper/internal/domain/service"
-	services "anilibrary-scraper/internal/domain/service/anime"
+	"anilibrary-scraper/internal/domain/service/scraper"
 	"anilibrary-scraper/internal/handler/http/api/anime"
 	"anilibrary-scraper/pkg/logger"
 	"github.com/go-redis/redis/v9"
@@ -14,9 +14,9 @@ import (
 
 // Services
 
-func WireScraperService(client *redis.Client) services.ScraperService {
+func WireScraperService(client *redis.Client) scraper.Service {
 	wire.Build(service.ScraperProviderSet)
-	return services.ScraperService{}
+	return scraper.Service{}
 }
 
 // Controllers

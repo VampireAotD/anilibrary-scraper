@@ -8,22 +8,22 @@ package providers
 
 import (
 	redis2 "anilibrary-scraper/internal/domain/repository/redis"
-	"anilibrary-scraper/internal/domain/service/anime"
-	anime2 "anilibrary-scraper/internal/handler/http/api/anime"
+	"anilibrary-scraper/internal/domain/service/scraper"
+	"anilibrary-scraper/internal/handler/http/api/anime"
 	"anilibrary-scraper/pkg/logger"
 	"github.com/go-redis/redis/v9"
 )
 
 // Injectors from wire.go:
 
-func WireScraperService(client *redis.Client) anime.ScraperService {
+func WireScraperService(client *redis.Client) scraper.Service {
 	animeRepository := redis2.NewAnimeRepository(client)
-	scraperService := anime.NewScraperService(animeRepository)
-	return scraperService
+	service := scraper.NewScraperService(animeRepository)
+	return service
 }
 
-func WireAnimeController(client *redis.Client, logger2 logger.Contract) anime2.Controller {
-	scraperService := WireScraperService(client)
-	controller := anime2.NewController(logger2, scraperService)
+func WireAnimeController(client *redis.Client, logger2 logger.Contract) anime.Controller {
+	service := WireScraperService(client)
+	controller := anime.NewController(logger2, service)
 	return controller
 }

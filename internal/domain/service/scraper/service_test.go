@@ -1,11 +1,11 @@
-package anime_test
+package scraper_test
 
 import (
 	"testing"
 
 	"anilibrary-scraper/internal/domain/dto"
 	"anilibrary-scraper/internal/domain/repository/mocks"
-	"anilibrary-scraper/internal/domain/service/anime"
+	"anilibrary-scraper/internal/domain/service/scraper"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -15,7 +15,7 @@ type ScraperServiceSuite struct {
 	suite.Suite
 
 	repositoryMock *mocks.MockAnimeRepository
-	service        anime.ScraperService
+	service        scraper.Service
 }
 
 func TestScraperServiceSuite(t *testing.T) {
@@ -27,7 +27,7 @@ func (suite *ScraperServiceSuite) SetupSuite() {
 	defer ctrl.Finish()
 
 	suite.repositoryMock = mocks.NewMockAnimeRepository(ctrl)
-	suite.service = anime.NewScraperService(suite.repositoryMock)
+	suite.service = scraper.NewScraperService(suite.repositoryMock)
 }
 
 func (suite *ScraperServiceSuite) composeDto(testCase string) dto.RequestDTO {
