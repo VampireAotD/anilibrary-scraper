@@ -17,7 +17,7 @@ type AnimeRepository struct {
 	client *redis.Client
 }
 
-func NewAnimeRepository(client *redis.Client) repository.AnimeRepository {
+func NewAnimeRepository(client *redis.Client) AnimeRepository {
 	return AnimeRepository{client: client}
 }
 

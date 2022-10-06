@@ -1,13 +1,11 @@
 package app
 
 import (
-	"net/http"
 	"os"
 	"time"
 
 	"anilibrary-scraper/internal/app/providers"
 	"anilibrary-scraper/internal/config"
-	"anilibrary-scraper/internal/handler/http/router"
 	"anilibrary-scraper/pkg/closer"
 	"anilibrary-scraper/pkg/logger"
 	"github.com/go-redis/redis/v9"
@@ -51,13 +49,4 @@ func (app *App) SetRedisConnection() {
 
 	app.connection = client
 	app.closer.Add("redis", app.connection.Close)
-}
-
-func (app *App) Router() http.Handler {
-	controller, err := providers.WireAnimeController(app.connection, app.logger.Named("api/http"))
-	if err != nil {
-		app.stopOnError("composing controller", err)
-	}
-
-	return router.NewRouter(app.config.App.Env == config.Local, controller)
 }

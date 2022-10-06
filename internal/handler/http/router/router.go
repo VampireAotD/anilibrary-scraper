@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"anilibrary-scraper/internal/handler/http/api/anime"
-	"anilibrary-scraper/internal/handler/http/routes"
-	"anilibrary-scraper/internal/handler/http/routes/api"
+	"anilibrary-scraper/internal/handler/http/router/routes"
+	"anilibrary-scraper/internal/handler/http/router/routes/api"
 	"github.com/go-chi/chi/v5"
 )
 

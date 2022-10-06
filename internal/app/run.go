@@ -10,6 +10,9 @@ import (
 	"syscall"
 	"time"
 
+	"anilibrary-scraper/internal/app/providers"
+	"anilibrary-scraper/internal/config"
+	"anilibrary-scraper/internal/handler/http/router"
 	"anilibrary-scraper/internal/handler/http/server"
 	"anilibrary-scraper/pkg/logger"
 )
@@ -19,7 +22,10 @@ func (app *App) Run() {
 
 	httpServer := server.NewHTTPServer(
 		fmt.Sprintf("%s:%d", app.config.HTTP.Addr, app.config.HTTP.Port),
-		app.Router(),
+		router.NewRouter(
+			app.config.App.Env == config.Local,
+			providers.WireAnimeController(app.connection, app.logger.Named("api/http")),
+		),
 	)
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill, syscall.SIGINT, syscall.SIGTERM)

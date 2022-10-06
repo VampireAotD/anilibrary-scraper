@@ -14,14 +14,14 @@ import (
 
 // Services
 
-func WireScraperService(client *redis.Client) (services.ScraperService, error) {
+func WireScraperService(client *redis.Client) services.ScraperService {
 	wire.Build(service.ScraperProviderSet)
-	return services.ScraperService{}, nil
+	return services.ScraperService{}
 }
 
 // Controllers
 
-func WireAnimeController(client *redis.Client, logger logger.Contract) (anime.Controller, error) {
+func WireAnimeController(client *redis.Client, logger logger.Contract) anime.Controller {
 	wire.Build(WireScraperService, anime.NewController)
-	return anime.Controller{}, nil
+	return anime.Controller{}
 }
