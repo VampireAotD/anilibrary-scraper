@@ -9,6 +9,6 @@ type RequestDTO struct {
 	FromCache bool
 }
 
-func (dto *RequestDTO) Validate() error {
+func (dto RequestDTO) Validate() error {
 	return validator.New().Struct(dto)
 }

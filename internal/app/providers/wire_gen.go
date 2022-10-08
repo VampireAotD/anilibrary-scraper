@@ -10,7 +10,6 @@ import (
 	redis2 "anilibrary-scraper/internal/domain/repository/redis"
 	"anilibrary-scraper/internal/domain/service/scraper"
 	"anilibrary-scraper/internal/handler/http/api/anime"
-	"anilibrary-scraper/pkg/logger"
 	"github.com/go-redis/redis/v9"
 )
 
@@ -22,8 +21,8 @@ func WireScraperService(client *redis.Client) scraper.Service {
 	return service
 }
 
-func WireAnimeController(client *redis.Client, logger2 logger.Contract) anime.Controller {
+func WireAnimeController(client *redis.Client) anime.Controller {
 	service := WireScraperService(client)
-	controller := anime.NewController(logger2, service)
+	controller := anime.NewController(service)
 	return controller
 }

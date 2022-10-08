@@ -20,11 +20,16 @@ import (
 func (app *App) Run() {
 	defer app.closer.Close(app.logger)
 
+	address := fmt.Sprintf("%s:%d", app.config.HTTP.Addr, app.config.HTTP.Port)
 	httpServer := server.NewHTTPServer(
-		fmt.Sprintf("%s:%d", app.config.HTTP.Addr, app.config.HTTP.Port),
+		address,
 		router.NewRouter(
-			app.config.App.Env == config.Local,
-			providers.WireAnimeController(app.connection, app.logger.Named("api/http")),
+			router.Config{
+				Url:             address,
+				EnableProfiling: app.config.App.Env == config.Local,
+				Logger:          app.logger.Named("api/http"),
+				Handler:         providers.WireAnimeController(app.connection),
+			},
 		),
 	)
 

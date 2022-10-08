@@ -1,6 +1,10 @@
 package config
 
-import "time"
+import (
+	"time"
+
+	"github.com/ilyakaznacheev/cleanenv"
+)
 
 type Env string
 
@@ -12,6 +16,17 @@ type Config struct {
 	App   App
 	HTTP  HTTP
 	Redis Redis
+}
+
+func New() (Config, error) {
+	var cfg Config
+
+	err := cleanenv.ReadEnv(&cfg)
+	if err != nil {
+		return Config{}, err
+	}
+
+	return cfg, nil
 }
 
 type HTTP struct {
