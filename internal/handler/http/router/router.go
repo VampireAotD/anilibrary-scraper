@@ -5,11 +5,11 @@ import (
 
 	"anilibrary-scraper/internal/handler/http/api/anime"
 	"anilibrary-scraper/internal/handler/http/middleware"
-	"anilibrary-scraper/internal/handler/http/router/routes"
 	"anilibrary-scraper/internal/handler/http/router/routes/api"
 	"anilibrary-scraper/pkg/logger"
 	"github.com/go-chi/chi/v5"
 	chiMiddleware "github.com/go-chi/chi/v5/middleware"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type Config struct {
@@ -19,16 +19,14 @@ type Config struct {
 	Handler         anime.Controller
 }
 
-func NewRouter(config Config) http.Handler {
+func NewRouter(config *Config) http.Handler {
 	router := chi.NewRouter()
 
-	router.Use(chiMiddleware.Recoverer)
-	router.Use(middleware.Logger(config.Logger))
+	router.Use(chiMiddleware.Recoverer, middleware.Logger(config.Logger))
 
-	router.Handle("/metrics", routes.PrometheusRoutes())
-
+	router.Handle("/metrics", promhttp.Handler())
 	if config.EnableProfiling {
-		router.Mount("/debug", routes.ProfilerRoutes())
+		router.Mount("/debug", chiMiddleware.Profiler())
 	}
 
 	api.ComposeRoutes(router, config.Handler)

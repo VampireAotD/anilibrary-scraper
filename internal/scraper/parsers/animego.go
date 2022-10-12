@@ -1,4 +1,4 @@
-package scraper
+package parsers
 
 import (
 	"regexp"
@@ -37,7 +37,6 @@ func (a AnimeGo) Status(document *goquery.Document) entity.Status {
 func (a AnimeGo) Rating(document *goquery.Document) float32 {
 	if rating := document.Find(".rating-value").First(); rating != nil {
 		value, err := strconv.ParseFloat(strings.Replace(rating.Text(), ",", ".", 1), 64)
-
 		if err != nil {
 			return MinimalAnimeRating
 		}
@@ -73,7 +72,6 @@ func (a AnimeGo) Genres(document *goquery.Document) []string {
 func (a AnimeGo) VoiceActing(document *goquery.Document) []string {
 	if voiceActingText := document.Find(".anime-info .row dt:contains(Озвучка) + dd").First(); voiceActingText != nil {
 		regex := regexp.MustCompile(`,\s+`)
-
 		return strings.Split(regex.ReplaceAllString(voiceActingText.Text(), ","), ",")
 	}
 

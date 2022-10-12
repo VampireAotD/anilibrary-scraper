@@ -1,4 +1,4 @@
-package scraper
+package parsers
 
 import (
 	"strconv"
@@ -22,9 +22,9 @@ func NewAnimeVost() AnimeVost {
 }
 
 func (a AnimeVost) Title(document *goquery.Document) string {
-	if title := document.Find(".shortstoryHead h1").First(); title != nil {
-		raw := title.Text()
-		return strings.TrimSpace(raw[0:strings.Index(raw, " /")])
+	if title := document.Find(".shortstoryHead h1").First(); title != nil && title.Text() != "" {
+		raw := strings.TrimSpace(title.Text())
+		return raw[0:strings.Index(raw, "/")]
 	}
 
 	return ""
@@ -41,7 +41,6 @@ func (a AnimeVost) Status(document *goquery.Document) entity.Status {
 func (a AnimeVost) Rating(document *goquery.Document) float32 {
 	if rating := document.Find(".current-rating").First(); rating != nil {
 		value, err := strconv.Atoi(rating.Text())
-
 		if err != nil {
 			return MinimalAnimeRating
 		}
@@ -82,7 +81,7 @@ func (a AnimeVost) VoiceActing(document *goquery.Document) []string {
 
 func (a AnimeVost) Image(document *goquery.Document) string {
 	if attr, exists := document.Find(".imgRadius").First().Attr("src"); exists {
-		return attr
+		return AnimeVostUrl + attr
 	}
 
 	return ""

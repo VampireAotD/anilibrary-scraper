@@ -1,40 +1,44 @@
 package scraper
 
 import (
+	"bytes"
+	"encoding/base64"
+	"errors"
 	"fmt"
 	"net/http"
-	"net/url"
+	"strings"
+	"sync"
 
 	"anilibrary-scraper/internal/domain/entity"
 	"anilibrary-scraper/internal/scraper/client"
+	"anilibrary-scraper/internal/scraper/parsers"
 	"github.com/PuerkitoBio/goquery"
 )
 
-type Contract interface {
-	Title(document *goquery.Document) string
-	Status(document *goquery.Document) entity.Status
-	Rating(document *goquery.Document) float32
-	Episodes(document *goquery.Document) string
-	Genres(document *goquery.Document) []string
-	VoiceActing(document *goquery.Document) []string
-	Image(document *goquery.Document) string
-}
+var ErrUndefinedScraper = errors.New("undefined scraper")
 
-const (
-	MinimalAnimeRating   float32 = 0
-	MinimalAnimeEpisodes string  = "0 / ?"
-)
-
-type Scraper[I Contract] struct {
+type Scraper[I parsers.Contract] struct {
 	url    string
 	client client.Client
 }
 
-func New(url string, client client.Client) Scraper[Contract] {
-	return Scraper[Contract]{url: url, client: client}
+func Scrape(url string) (*entity.Anime, error) {
+	scraper := Scraper[parsers.Contract]{
+		url:    url,
+		client: client.DefaultClient(),
+	}
+
+	switch true {
+	case strings.Contains(url, parsers.AnimeGoUrl):
+		return scraper.process(parsers.NewAnimeGo())
+	case strings.Contains(url, parsers.AnimeVostUrl):
+		return scraper.process(parsers.NewAnimeVost())
+	default:
+		return nil, ErrUndefinedScraper
+	}
 }
 
-func (s Scraper[I]) Scrape(instance I) (*entity.Anime, error) {
+func (s Scraper[I]) process(instance I) (*entity.Anime, error) {
 	response, err := s.client.Request(s.url)
 	if err != nil || response.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("sending request %w, status code %d", err, response.StatusCode)
@@ -46,17 +50,60 @@ func (s Scraper[I]) Scrape(instance I) (*entity.Anime, error) {
 		return nil, fmt.Errorf("creating document %v", err)
 	}
 
-	var anime entity.Anime
+	anime := &entity.Anime{}
+	var wg sync.WaitGroup
 
-	parse, _ := url.Parse(s.url)
+	wg.Add(7)
 
-	anime.Image = fmt.Sprintf("%s://%s%s", parse.Scheme, parse.Host, instance.Image(document)) // TODO fix this
-	anime.Title = instance.Title(document)
-	anime.Status = instance.Status(document)
-	anime.Rating = instance.Rating(document)
-	anime.Episodes = instance.Episodes(document)
-	anime.Genres = instance.Genres(document)
-	anime.VoiceActing = instance.VoiceActing(document)
+	go func(anime *entity.Anime) {
+		defer wg.Done()
 
-	return &anime, nil
+		img, err := s.client.Request(instance.Image(document))
+		if err != nil {
+			return
+		}
+		defer img.Body.Close()
+
+		var buff bytes.Buffer
+		defer buff.Reset()
+
+		_, err = buff.ReadFrom(img.Body)
+		if err != nil {
+			return
+		}
+
+		anime.Image = fmt.Sprintf(
+			"data:%s;base64,%s",
+			http.DetectContentType(buff.Bytes()),
+			base64.StdEncoding.EncodeToString(buff.Bytes()),
+		)
+	}(anime)
+	go func(anime *entity.Anime) {
+		defer wg.Done()
+		anime.Title = instance.Title(document)
+	}(anime)
+	go func(anime *entity.Anime) {
+		defer wg.Done()
+		anime.Status = instance.Status(document)
+	}(anime)
+	go func(anime *entity.Anime) {
+		defer wg.Done()
+		anime.Rating = instance.Rating(document)
+	}(anime)
+	go func(anime *entity.Anime) {
+		defer wg.Done()
+		anime.Episodes = instance.Episodes(document)
+	}(anime)
+	go func(anime *entity.Anime) {
+		defer wg.Done()
+		anime.Genres = instance.Genres(document)
+	}(anime)
+	go func(anime *entity.Anime) {
+		defer wg.Done()
+		anime.VoiceActing = instance.VoiceActing(document)
+	}(anime)
+
+	wg.Wait()
+
+	return anime, nil
 }

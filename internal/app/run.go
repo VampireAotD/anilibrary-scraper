@@ -24,7 +24,7 @@ func (app *App) Run() {
 	httpServer := server.NewHTTPServer(
 		address,
 		router.NewRouter(
-			router.Config{
+			&router.Config{
 				Url:             address,
 				EnableProfiling: app.config.App.Env == config.Local,
 				Logger:          app.logger.Named("api/http"),
@@ -33,7 +33,13 @@ func (app *App) Run() {
 		),
 	)
 
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill, syscall.SIGINT, syscall.SIGTERM)
+	ctx, stop := signal.NotifyContext(
+		context.Background(),
+		os.Interrupt,
+		os.Kill,
+		syscall.SIGINT,
+		syscall.SIGTERM,
+	)
 	defer stop()
 
 	go func() {
@@ -42,7 +48,6 @@ func (app *App) Run() {
 		app.logger.Info("Starting server at", logger.String("addr", httpServer.Addr))
 
 		err := httpServer.ListenAndServe()
-
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			app.logger.Error("while closing server", logger.Error(err))
 		}

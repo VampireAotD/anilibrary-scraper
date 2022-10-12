@@ -5,7 +5,7 @@ import (
 )
 
 type RequestDTO struct {
-	Url       string `json:"url" validate:"url"`
+	Url       string `json:"url" validate:"required,url"`
 	FromCache bool
 }
 
