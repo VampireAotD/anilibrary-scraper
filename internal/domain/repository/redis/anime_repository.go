@@ -31,7 +31,7 @@ func (a AnimeRepository) FindByUrl(ctx context.Context, url string) (*entity.Ani
 	return anime.FromJSON(res)
 }
 
-func (a AnimeRepository) Create(ctx context.Context, key string, anime entity.Anime) error {
+func (a AnimeRepository) Create(ctx context.Context, key string, anime *entity.Anime) error {
 	expire, _ := time.ParseDuration(sevenDaysInHours)
 	data, _ := anime.ToJSON()
 

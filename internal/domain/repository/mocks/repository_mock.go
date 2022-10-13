@@ -36,7 +36,7 @@ func (m *MockAnimeRepository) EXPECT() *MockAnimeRepositoryMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockAnimeRepository) Create(ctx context.Context, key string, anime entity.Anime) error {
+func (m *MockAnimeRepository) Create(ctx context.Context, key string, anime *entity.Anime) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", ctx, key, anime)
 	ret0, _ := ret[0].(error)

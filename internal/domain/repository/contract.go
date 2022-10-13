@@ -11,6 +11,6 @@ import (
 type (
 	AnimeRepository interface {
 		FindByUrl(ctx context.Context, url string) (*entity.Anime, error)
-		Create(ctx context.Context, key string, anime entity.Anime) error
+		Create(ctx context.Context, key string, anime *entity.Anime) error
 	}
 )

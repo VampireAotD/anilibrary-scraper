@@ -34,7 +34,7 @@ func (s Service) Process(dto dto.RequestDTO) (*entity.Anime, error) {
 	}
 
 	if dto.FromCache {
-		_ = s.repository.Create(context.Background(), dto.Url, *anime)
+		_ = s.repository.Create(context.Background(), dto.Url, anime)
 	}
 
 	return anime, nil

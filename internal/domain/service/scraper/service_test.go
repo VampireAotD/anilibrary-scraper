@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"anilibrary-scraper/internal/domain/dto"
+	"anilibrary-scraper/internal/domain/entity"
 	"anilibrary-scraper/internal/domain/repository/mocks"
 	"anilibrary-scraper/internal/domain/service/scraper"
 	"github.com/golang/mock/gomock"
@@ -39,47 +40,73 @@ func (suite *ScraperServiceSuite) composeDto(testCase string) dto.RequestDTO {
 
 func (suite *ScraperServiceSuite) TestProcess() {
 	t := suite.T()
-	cases := []struct {
-		name         string
-		url          string
-		requireError bool
-	}{
-		{
-			name:         "Random url",
-			url:          "https://google.com",
-			requireError: true,
-		},
-		{
-			name:         "AnimeGo",
-			url:          "https://animego.org/anime/naruto-102",
-			requireError: false,
-		},
-		{
-			name:         "AnimeVostOrg",
-			url:          "https://animevost.org/tip/tv/5-naruto-shippuuden12.html",
-			requireError: false,
-		},
-	}
 
-	for _, testCase := range cases {
-		t.Run(testCase.name, func(t *testing.T) {
-			suite.repositoryMock.EXPECT().
-				FindByUrl(gomock.Any(), gomock.Any()).
-				Return(nil, nil)
+	t.Run("Retrieve from cache", func(t *testing.T) {
+		const url string = "https://animego.org/anime/blich-tysyacheletnyaya-krovavaya-voyna-2129"
+		anime := &entity.Anime{
+			Title:    "Блич: Тысячелетняя кровавая война",
+			Status:   "Онгоинг",
+			Episodes: "1 / ?",
+			Rating:   9.6,
+		}
 
-			suite.repositoryMock.EXPECT().
-				Create(gomock.Any(), testCase.url, gomock.Any()).
-				Return(nil)
+		suite.repositoryMock.EXPECT().
+			FindByUrl(gomock.Any(), url).
+			Return(anime, nil)
 
-			result, err := suite.service.Process(suite.composeDto(testCase.url))
-
-			if testCase.requireError {
-				require.Error(t, err, testCase.name)
-				require.Nil(t, result)
-			} else {
-				require.NoError(t, err, testCase.name)
-				require.NotNil(t, result)
-			}
+		cached, err := suite.service.Process(dto.RequestDTO{
+			Url:       url,
+			FromCache: true,
 		})
-	}
+
+		require.NotNil(t, cached)
+		require.NoError(t, err)
+		require.Equal(t, anime, cached)
+	})
+
+	t.Run("Without cache", func(t *testing.T) {
+		cases := []struct {
+			name         string
+			url          string
+			requireError bool
+		}{
+			{
+				name:         "Random url",
+				url:          "https://google.com",
+				requireError: true,
+			},
+			{
+				name:         "AnimeGo",
+				url:          "https://animego.org/anime/naruto-102",
+				requireError: false,
+			},
+			{
+				name:         "AnimeVostOrg",
+				url:          "https://animevost.org/tip/tv/5-naruto-shippuuden12.html",
+				requireError: false,
+			},
+		}
+
+		for _, testCase := range cases {
+			t.Run(testCase.name, func(t *testing.T) {
+				suite.repositoryMock.EXPECT().
+					FindByUrl(gomock.Any(), gomock.Any()).
+					Return(nil, nil)
+
+				suite.repositoryMock.EXPECT().
+					Create(gomock.Any(), testCase.url, gomock.Any()).
+					Return(nil)
+
+				result, err := suite.service.Process(suite.composeDto(testCase.url))
+
+				if testCase.requireError {
+					require.Error(t, err, testCase.name)
+					require.Nil(t, result)
+				} else {
+					require.NoError(t, err, testCase.name)
+					require.NotNil(t, result)
+				}
+			})
+		}
+	})
 }
