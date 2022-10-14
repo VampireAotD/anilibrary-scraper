@@ -10,6 +10,8 @@ import (
 	"anilibrary-scraper/internal/scraper"
 )
 
+//var _ service.ScraperService = (*Service)(nil)
+
 type Service struct {
 	repository repository.AnimeRepository
 }

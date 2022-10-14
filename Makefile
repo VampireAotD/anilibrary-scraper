@@ -23,10 +23,6 @@ all : clean build run
 
 .PHONY: up
 up:
-	docker-compose up
-
-.PHONY: compose-build
-compose-build:
 	docker-compose up --build
 
 .PHONY: down

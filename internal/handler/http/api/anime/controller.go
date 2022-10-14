@@ -5,17 +5,17 @@ import (
 	"net/http"
 
 	"anilibrary-scraper/internal/domain/dto"
-	"anilibrary-scraper/internal/domain/service/scraper"
+	"anilibrary-scraper/internal/domain/service"
 	"anilibrary-scraper/internal/handler/http/middleware"
 	"anilibrary-scraper/pkg/logger"
 	"anilibrary-scraper/pkg/response"
 )
 
 type Controller struct {
-	service scraper.Service
+	service service.ScraperService
 }
 
-func NewController(service scraper.Service) Controller {
+func NewController(service service.ScraperService) Controller {
 	return Controller{
 		service: service,
 	}

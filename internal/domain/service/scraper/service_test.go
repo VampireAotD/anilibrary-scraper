@@ -15,7 +15,7 @@ import (
 type ScraperServiceSuite struct {
 	suite.Suite
 
-	repositoryMock *mocks.MockAnimeRepository
+	repositoryMock *mocks.MockAnimeRepositoryMockRecorder
 	service        scraper.Service
 }
 
@@ -27,8 +27,10 @@ func (suite *ScraperServiceSuite) SetupSuite() {
 	ctrl := gomock.NewController(suite.T())
 	defer ctrl.Finish()
 
-	suite.repositoryMock = mocks.NewMockAnimeRepository(ctrl)
-	suite.service = scraper.NewScraperService(suite.repositoryMock)
+	repository := mocks.NewMockAnimeRepository(ctrl)
+
+	suite.repositoryMock = repository.EXPECT()
+	suite.service = scraper.NewScraperService(repository)
 }
 
 func (suite *ScraperServiceSuite) composeDto(testCase string) dto.RequestDTO {
@@ -47,12 +49,10 @@ func (suite *ScraperServiceSuite) TestProcess() {
 			Title:    "Блич: Тысячелетняя кровавая война",
 			Status:   "Онгоинг",
 			Episodes: "1 / ?",
-			Rating:   9.6,
+			Rating:   9.7,
 		}
 
-		suite.repositoryMock.EXPECT().
-			FindByUrl(gomock.Any(), url).
-			Return(anime, nil)
+		suite.repositoryMock.FindByUrl(gomock.Any(), url).Return(anime, nil)
 
 		cached, err := suite.service.Process(dto.RequestDTO{
 			Url:       url,
@@ -71,7 +71,12 @@ func (suite *ScraperServiceSuite) TestProcess() {
 			requireError bool
 		}{
 			{
-				name:         "Random url",
+				name:         "Invalid url",
+				url:          "",
+				requireError: true,
+			},
+			{
+				name:         "Unsupported url",
 				url:          "https://google.com",
 				requireError: true,
 			},
@@ -89,13 +94,8 @@ func (suite *ScraperServiceSuite) TestProcess() {
 
 		for _, testCase := range cases {
 			t.Run(testCase.name, func(t *testing.T) {
-				suite.repositoryMock.EXPECT().
-					FindByUrl(gomock.Any(), gomock.Any()).
-					Return(nil, nil)
-
-				suite.repositoryMock.EXPECT().
-					Create(gomock.Any(), testCase.url, gomock.Any()).
-					Return(nil)
+				suite.repositoryMock.FindByUrl(gomock.Any(), gomock.Any()).Return(nil, nil)
+				suite.repositoryMock.Create(gomock.Any(), testCase.url, gomock.Any()).Return(nil)
 
 				result, err := suite.service.Process(suite.composeDto(testCase.url))
 
