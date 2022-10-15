@@ -15,7 +15,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-var ErrUndefinedScraper = errors.New("undefined scraper")
+var ErrUnsupportedScraper = errors.New("unsupported scraper")
 
 type Scraper[I parsers.Contract] struct {
 	url    string
@@ -34,7 +34,7 @@ func Scrape(url string) (*entity.Anime, error) {
 	case strings.Contains(url, parsers.AnimeVostUrl):
 		return scraper.process(parsers.NewAnimeVost())
 	default:
-		return nil, ErrUndefinedScraper
+		return nil, ErrUnsupportedScraper
 	}
 }
 

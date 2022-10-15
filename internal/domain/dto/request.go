@@ -1,8 +1,12 @@
 package dto
 
 import (
+	"errors"
+
 	"github.com/go-playground/validator/v10"
 )
+
+var ErrInvalidUrl = errors.New("invalid url")
 
 type RequestDTO struct {
 	Url       string `json:"url" validate:"required,url"`
@@ -10,5 +14,9 @@ type RequestDTO struct {
 }
 
 func (dto RequestDTO) Validate() error {
-	return validator.New().Struct(dto)
+	if validator.New().Struct(dto) != nil {
+		return ErrInvalidUrl
+	}
+
+	return nil
 }

@@ -43,70 +43,65 @@ func (suite *ScraperServiceSuite) composeDto(testCase string) dto.RequestDTO {
 func (suite *ScraperServiceSuite) TestProcess() {
 	t := suite.T()
 
-	t.Run("Retrieve from cache", func(t *testing.T) {
-		const url string = "https://animego.org/anime/blich-tysyacheletnyaya-krovavaya-voyna-2129"
-		anime := &entity.Anime{
-			Title:    "Блич: Тысячелетняя кровавая война",
-			Status:   "Онгоинг",
-			Episodes: "1 / ?",
-			Rating:   9.7,
+	t.Run("Errors", func(t *testing.T) {
+		testCases := []string{"", "https://google.com"}
+
+		for _, testCase := range testCases {
+			suite.repositoryMock.FindByUrl(gomock.Any(), gomock.Any()).Return(nil, nil)
+			suite.repositoryMock.Create(gomock.Any(), testCase, gomock.Any()).Return(nil)
+
+			result, err := suite.service.Process(suite.composeDto(testCase))
+
+			require.Error(t, err)
+			require.Nil(t, result)
 		}
-
-		suite.repositoryMock.FindByUrl(gomock.Any(), url).Return(anime, nil)
-
-		cached, err := suite.service.Process(dto.RequestDTO{
-			Url:       url,
-			FromCache: true,
-		})
-
-		require.NotNil(t, cached)
-		require.NoError(t, err)
-		require.Equal(t, anime, cached)
 	})
 
-	t.Run("Without cache", func(t *testing.T) {
-		cases := []struct {
-			name         string
-			url          string
-			requireError bool
-		}{
-			{
-				name:         "Invalid url",
-				url:          "",
-				requireError: true,
-			},
-			{
-				name:         "Unsupported url",
-				url:          "https://google.com",
-				requireError: true,
-			},
-			{
-				name:         "AnimeGo",
-				url:          "https://animego.org/anime/naruto-102",
-				requireError: false,
-			},
-			{
-				name:         "AnimeVostOrg",
-				url:          "https://animevost.org/tip/tv/5-naruto-shippuuden12.html",
-				requireError: false,
-			},
-		}
+	t.Run("Supported urls", func(t *testing.T) {
+		t.Run("Retrieve from cache", func(t *testing.T) {
+			const url string = "https://animego.org/anime/blich-tysyacheletnyaya-krovavaya-voyna-2129"
+			anime := &entity.Anime{
+				Title:    "Блич: Тысячелетняя кровавая война",
+				Status:   "Онгоинг",
+				Episodes: "1 / ?",
+				Rating:   9.7,
+			}
 
-		for _, testCase := range cases {
-			t.Run(testCase.name, func(t *testing.T) {
-				suite.repositoryMock.FindByUrl(gomock.Any(), gomock.Any()).Return(nil, nil)
-				suite.repositoryMock.Create(gomock.Any(), testCase.url, gomock.Any()).Return(nil)
+			suite.repositoryMock.FindByUrl(gomock.Any(), url).Return(anime, nil)
 
-				result, err := suite.service.Process(suite.composeDto(testCase.url))
+			cached, err := suite.service.Process(suite.composeDto(url))
 
-				if testCase.requireError {
-					require.Error(t, err, testCase.name)
-					require.Nil(t, result)
-				} else {
-					require.NoError(t, err, testCase.name)
+			require.NotNil(t, cached)
+			require.NoError(t, err)
+			require.Equal(t, anime, cached)
+		})
+
+		t.Run("Without cache", func(t *testing.T) {
+			cases := []struct {
+				name string
+				url  string
+			}{
+				{
+					name: "AnimeGo",
+					url:  "https://animego.org/anime/naruto-102",
+				},
+				{
+					name: "AnimeVostOrg",
+					url:  "https://animevost.org/tip/tv/5-naruto-shippuuden12.html",
+				},
+			}
+
+			for _, testCase := range cases {
+				t.Run(testCase.name, func(t *testing.T) {
+					suite.repositoryMock.FindByUrl(gomock.Any(), gomock.Any()).Return(nil, nil)
+					suite.repositoryMock.Create(gomock.Any(), testCase.url, gomock.Any()).Return(nil)
+
+					result, err := suite.service.Process(suite.composeDto(testCase.url))
+
+					require.NoError(t, err)
 					require.NotNil(t, result)
-				}
-			})
-		}
+				})
+			}
+		})
 	})
 }

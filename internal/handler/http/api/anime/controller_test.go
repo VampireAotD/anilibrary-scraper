@@ -3,7 +3,6 @@ package anime
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -14,6 +13,7 @@ import (
 	"anilibrary-scraper/internal/domain/entity"
 	"anilibrary-scraper/internal/domain/service/mocks"
 	"anilibrary-scraper/internal/handler/http/middleware"
+	"anilibrary-scraper/internal/scraper"
 	"anilibrary-scraper/pkg/logger"
 	"anilibrary-scraper/pkg/response"
 	"github.com/golang/mock/gomock"
@@ -67,60 +67,60 @@ func composeDTO(url string) dto.RequestDTO {
 func (suite *AnimeControllerSuite) TestParse() {
 	t := suite.T()
 
-	expected := &entity.Anime{
-		Title:    "Блич: Тысячелетняя кровавая война",
-		Status:   "Онгоинг",
-		Episodes: "1 / ?",
-		Rating:   9.7,
-	}
+	t.Run("Bad request", func(t *testing.T) {
+		testCases := []struct {
+			name, url  string
+			statusCode int
+			err        error
+		}{
+			{
+				name:       "Invalid url",
+				url:        "",
+				statusCode: http.StatusUnprocessableEntity,
+				err:        dto.ErrInvalidUrl,
+			},
+			{
+				name:       "Unsupported url",
+				url:        "https://www.google.com/",
+				statusCode: http.StatusUnprocessableEntity,
+				err:        scraper.ErrUnsupportedScraper,
+			},
+		}
 
-	testCases := []struct {
-		name, url    string
-		statusCode   int
-		requireError bool
-	}{
-		{
-			name:         "Invalid url",
-			url:          "",
-			statusCode:   http.StatusUnprocessableEntity,
-			requireError: true,
-		},
-		{
-			name:         "Unsupported url",
-			url:          "https://www.google.com/",
-			statusCode:   http.StatusUnprocessableEntity,
-			requireError: true,
-		},
-		{
-			name:         "Supported url",
-			url:          "https://animego.org/anime/blich-tysyacheletnyaya-krovavaya-voyna-2129",
-			statusCode:   http.StatusOK,
-			requireError: false,
-		},
-	}
+		for _, testCase := range testCases {
+			suite.serviceMock.Process(composeDTO(testCase.url)).Return(nil, testCase.err)
 
-	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			if testCase.requireError {
-				suite.serviceMock.Process(composeDTO(testCase.url)).Return(nil, errors.New("expected error"))
-			} else {
-				suite.serviceMock.Process(composeDTO(testCase.url)).Return(expected, nil)
-			}
 			resp := suite.sendParseRequest(testCase.url)
 
 			decoder := json.NewDecoder(resp.Body)
 			decoder.DisallowUnknownFields()
 
+			var err response.Error
+			require.NoError(t, decoder.Decode(&err))
 			require.Equal(t, testCase.statusCode, resp.Code)
+			require.Equal(t, err.Message, testCase.err.Error())
+		}
+	})
 
-			if testCase.requireError {
-				var err response.Error
-				require.NoError(t, decoder.Decode(&err))
-			} else {
-				var anime *entity.Anime
-				require.NoError(t, decoder.Decode(&anime))
-				require.Equal(t, expected, anime)
-			}
-		})
-	}
+	t.Run("Supported urls", func(t *testing.T) {
+		const url string = "https://animego.org/anime/naruto-uragannye-hroniki-103"
+		expected := &entity.Anime{
+			Title:    "Наруто: Ураганные хроники",
+			Status:   "Вышел",
+			Episodes: "500",
+			Rating:   9.5,
+		}
+
+		suite.serviceMock.Process(composeDTO(url)).Return(expected, nil)
+		resp := suite.sendParseRequest(url)
+
+		decoder := json.NewDecoder(resp.Body)
+		decoder.DisallowUnknownFields()
+
+		var anime *entity.Anime
+
+		require.NoError(t, decoder.Decode(&anime))
+		require.Equal(t, http.StatusOK, resp.Code)
+		require.Equal(t, expected, anime)
+	})
 }

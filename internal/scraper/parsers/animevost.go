@@ -22,9 +22,9 @@ func NewAnimeVost() AnimeVost {
 }
 
 func (a AnimeVost) Title(document *goquery.Document) string {
-	if title := document.Find(".shortstoryHead h1").First(); title != nil && title.Text() != "" {
+	if title := document.Find(".shortstoryHead h1, .infoContent h3").First(); title != nil && title.Text() != "" {
 		raw := strings.TrimSpace(title.Text())
-		return raw[0:strings.Index(raw, "/")]
+		return raw[0:strings.Index(raw, " /")]
 	}
 
 	return ""
@@ -80,7 +80,7 @@ func (a AnimeVost) VoiceActing(document *goquery.Document) []string {
 }
 
 func (a AnimeVost) Image(document *goquery.Document) string {
-	if attr, exists := document.Find(".imgRadius").First().Attr("src"); exists {
+	if attr, exists := document.Find(".imgRadius, .infoContent img").First().Attr("src"); exists {
 		return AnimeVostUrl + attr
 	}
 
