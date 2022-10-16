@@ -29,6 +29,7 @@ make up # docker-compose up --build
 * `6379` - **Redis**
 * `9090` - **Prometheus** 
 * `3000` - **Grafana**
+* `16686` - **Jaeger**
 
 ---
 

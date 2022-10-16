@@ -52,6 +52,7 @@ func (suite *AnimeControllerSuite) sendParseRequest(url string) *httptest.Respon
 	)
 
 	ctx := middleware.WithLogger(request.Context(), logger.NewLogger(io.Discard))
+	ctx = middleware.WithTracer(ctx)
 	handler(recorder, request.WithContext(ctx))
 
 	return recorder

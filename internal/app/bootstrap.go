@@ -15,5 +15,8 @@ func Bootstrap() *App {
 	app.logger.Info("Setting redis connection")
 	app.SetRedisConnection()
 
+	app.logger.Info("Setting Jaeger tracing")
+	app.JaegerTracer()
+
 	return &app
 }

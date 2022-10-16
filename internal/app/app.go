@@ -50,3 +50,14 @@ func (app *App) SetRedisConnection() {
 	app.connection = client
 	app.closer.Add("redis", app.connection.Close)
 }
+
+func (app *App) JaegerTracer() {
+	err := providers.NewJaegerTracerProvider(
+		app.config.Jaeger.TraceEndpoint,
+		app.config.App.Name,
+		string(app.config.App.Env),
+	)
+	if err != nil {
+		app.stopOnError("jaeger tracing", err)
+	}
+}

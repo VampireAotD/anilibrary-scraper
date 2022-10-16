@@ -63,6 +63,16 @@ services:
     networks:
       - local
 
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    ports:
+      - "5778:5778"
+      - "16686:16686"
+      - "14268:14268"
+    networks:
+      - local
+
 networks:
   local:
     driver: bridge

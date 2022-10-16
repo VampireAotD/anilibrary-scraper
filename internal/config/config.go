@@ -13,9 +13,10 @@ const (
 )
 
 type Config struct {
-	App   App
-	HTTP  HTTP
-	Redis Redis
+	App    App
+	HTTP   HTTP
+	Redis  Redis
+	Jaeger Jaeger
 }
 
 func New() (Config, error) {
@@ -37,6 +38,7 @@ type HTTP struct {
 type App struct {
 	Timezone string `env:"TIMEZONE" env-default:"Europe/Kiev"`
 	Env      Env    `env:"APP_ENV" env-default:"production"`
+	Name     string `env:"APP_NAME" env-default:"anilibrary-scraper"`
 }
 
 type Redis struct {
@@ -45,4 +47,8 @@ type Redis struct {
 	PoolTimeout time.Duration `env:"REDIS_POOL_TIMEOUT" env-default:"5s"`
 	PoolSize    int           `env:"REDIS_POOL_SIZE" env-default:"-1"`
 	IdleSize    int           `env:"REDIS_IDLE_SIZE" env-default:"-1"`
+}
+
+type Jaeger struct {
+	TraceEndpoint string `env:"JAEGER_TRACE_ENDPOINT"`
 }

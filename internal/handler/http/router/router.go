@@ -22,7 +22,11 @@ type Config struct {
 func NewRouter(config *Config) http.Handler {
 	router := chi.NewRouter()
 
-	router.Use(chiMiddleware.Recoverer, middleware.Logger(config.Logger))
+	router.Use(
+		chiMiddleware.Recoverer,
+		middleware.Tracer,
+		middleware.Logger(config.Logger),
+	)
 
 	router.Handle("/metrics", promhttp.Handler())
 	if config.EnableProfiling {
