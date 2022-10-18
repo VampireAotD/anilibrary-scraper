@@ -1,6 +1,8 @@
 package providers
 
 import (
+	"fmt"
+
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -15,7 +17,7 @@ func NewJaegerTracerProvider(endpoint, serviceName, environment string) error {
 		),
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("jaeger exporter: %w", err)
 	}
 
 	provider := sdktrace.NewTracerProvider(
