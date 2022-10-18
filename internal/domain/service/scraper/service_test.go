@@ -1,6 +1,7 @@
 package scraper_test
 
 import (
+	"context"
 	"testing"
 
 	"anilibrary-scraper/internal/domain/dto"
@@ -50,7 +51,7 @@ func (suite *ScraperServiceSuite) TestProcess() {
 			suite.repositoryMock.FindByUrl(gomock.Any(), gomock.Any()).Return(nil, nil)
 			suite.repositoryMock.Create(gomock.Any(), testCase, gomock.Any()).Return(nil)
 
-			result, err := suite.service.Process(suite.composeDto(testCase))
+			result, err := suite.service.Process(context.Background(), suite.composeDto(testCase))
 
 			require.Error(t, err)
 			require.Nil(t, result)
@@ -69,7 +70,7 @@ func (suite *ScraperServiceSuite) TestProcess() {
 
 			suite.repositoryMock.FindByUrl(gomock.Any(), url).Return(anime, nil)
 
-			cached, err := suite.service.Process(suite.composeDto(url))
+			cached, err := suite.service.Process(context.Background(), suite.composeDto(url))
 
 			require.NotNil(t, cached)
 			require.NoError(t, err)
@@ -96,7 +97,7 @@ func (suite *ScraperServiceSuite) TestProcess() {
 					suite.repositoryMock.FindByUrl(gomock.Any(), gomock.Any()).Return(nil, nil)
 					suite.repositoryMock.Create(gomock.Any(), testCase.url, gomock.Any()).Return(nil)
 
-					result, err := suite.service.Process(suite.composeDto(testCase.url))
+					result, err := suite.service.Process(context.Background(), suite.composeDto(testCase.url))
 
 					require.NoError(t, err)
 					require.NotNil(t, result)

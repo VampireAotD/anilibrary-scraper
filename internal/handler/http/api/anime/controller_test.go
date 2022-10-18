@@ -89,7 +89,7 @@ func (suite *AnimeControllerSuite) TestParse() {
 		}
 
 		for _, testCase := range testCases {
-			suite.serviceMock.Process(composeDTO(testCase.url)).Return(nil, testCase.err)
+			suite.serviceMock.Process(gomock.Any(), composeDTO(testCase.url)).Return(nil, testCase.err)
 
 			resp := suite.sendParseRequest(testCase.url)
 
@@ -112,7 +112,7 @@ func (suite *AnimeControllerSuite) TestParse() {
 			Rating:   9.5,
 		}
 
-		suite.serviceMock.Process(composeDTO(url)).Return(expected, nil)
+		suite.serviceMock.Process(gomock.Any(), composeDTO(url)).Return(expected, nil)
 		resp := suite.sendParseRequest(url)
 
 		decoder := json.NewDecoder(resp.Body)

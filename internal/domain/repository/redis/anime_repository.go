@@ -7,6 +7,7 @@ import (
 	"anilibrary-scraper/internal/domain/entity"
 	"anilibrary-scraper/internal/domain/repository"
 	"github.com/go-redis/redis/v9"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const sevenDaysInHours string = "168h"
@@ -18,12 +19,18 @@ type AnimeRepository struct {
 }
 
 func NewAnimeRepository(client *redis.Client) AnimeRepository {
-	return AnimeRepository{client: client}
+	return AnimeRepository{
+		client: client,
+	}
 }
 
 func (a AnimeRepository) FindByUrl(ctx context.Context, url string) (*entity.Anime, error) {
+	span := trace.SpanFromContext(ctx)
+	defer span.End()
+
 	res, err := a.client.Get(ctx, url).Bytes()
 	if err != nil {
+		span.RecordError(err)
 		return nil, err
 	}
 

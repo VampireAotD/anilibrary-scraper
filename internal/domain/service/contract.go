@@ -1,6 +1,8 @@
 package service
 
 import (
+	"context"
+
 	"anilibrary-scraper/internal/domain/dto"
 	"anilibrary-scraper/internal/domain/entity"
 )
@@ -9,6 +11,6 @@ import (
 
 type (
 	ScraperService interface {
-		Process(dto dto.RequestDTO) (*entity.Anime, error)
+		Process(ctx context.Context, dto dto.RequestDTO) (*entity.Anime, error)
 	}
 )

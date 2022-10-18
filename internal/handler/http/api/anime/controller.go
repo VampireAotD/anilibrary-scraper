@@ -24,7 +24,7 @@ func NewController(service service.ScraperService) Controller {
 func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 	log := middleware.MustGetLogger(r.Context())
 	tracer := middleware.MustGetTracer(r.Context())
-	_, span := tracer.Start(r.Context(), "Parse")
+	ctx, span := tracer.Start(r.Context(), "Parse")
 	defer span.End()
 
 	resp := response.New(w)
@@ -43,7 +43,7 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 
 	log.Info("Scraping", logging.String("url", parseDTO.Url))
 
-	entity, err := c.service.Process(parseDTO)
+	entity, err := c.service.Process(ctx, parseDTO)
 	if err != nil {
 		span.RecordError(err)
 		log.Error("while scraping", logging.Error(err))
