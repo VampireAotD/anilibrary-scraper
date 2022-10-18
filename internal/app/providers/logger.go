@@ -4,30 +4,29 @@ import (
 	"fmt"
 	"os"
 
-	"anilibrary-scraper/pkg/logger"
+	"anilibrary-scraper/pkg/logging"
 )
 
 const DefaultLoggerFileLocation string = "../../storage/logs/app.log"
 
-func NewLoggerProvider() (logger.Contract, func(), error) {
+func NewLoggerProvider() (logging.Contract, func(), error) {
 	file, err := createLogFile()
 	if err != nil {
 		return nil, nil, err
 	}
 
-	logs := logger.NewLogger(os.Stdout, file)
+	logger := logging.NewLogger(os.Stdout, file)
 	cleanup := func() {
-		logs.Info("closing logger")
-
-		_ = logs.Sync()
+		logger.Info("closing logger")
+		_ = logger.Sync()
 		if err := file.Close(); err != nil {
-			logs.Error("closing logger file", logger.Error(err))
+			logger.Error("closing logger file", logging.Error(err))
 		}
 	}
 
-	logs.Info("Initialized logger")
+	logger.Info("Initialized logger")
 
-	return logs, cleanup, nil
+	return logger, cleanup, nil
 }
 
 func createLogFile() (*os.File, error) {

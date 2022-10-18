@@ -9,14 +9,14 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"anilibrary-scraper/pkg/logger"
+	"anilibrary-scraper/pkg/logging"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/require"
 )
 
 func TestLogger(t *testing.T) {
 	var buff bytes.Buffer
-	log := logger.NewLogger(io.Discard, &buff)
+	log := logging.NewLogger(io.Discard, &buff)
 
 	t.Run("WithLogger", func(t *testing.T) {
 		ctx := WithLogger(context.Background(), log)

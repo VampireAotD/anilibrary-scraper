@@ -14,7 +14,7 @@ import (
 	"anilibrary-scraper/internal/domain/service/mocks"
 	"anilibrary-scraper/internal/handler/http/middleware"
 	"anilibrary-scraper/internal/scraper"
-	"anilibrary-scraper/pkg/logger"
+	"anilibrary-scraper/pkg/logging"
 	"anilibrary-scraper/pkg/response"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
@@ -51,7 +51,7 @@ func (suite *AnimeControllerSuite) sendParseRequest(url string) *httptest.Respon
 		bytes.NewBufferString(fmt.Sprintf(`{"url":"%s"}`, url)),
 	)
 
-	ctx := middleware.WithLogger(request.Context(), logger.NewLogger(io.Discard))
+	ctx := middleware.WithLogger(request.Context(), logging.NewLogger(io.Discard))
 	ctx = middleware.WithTracer(ctx)
 	handler(recorder, request.WithContext(ctx))
 

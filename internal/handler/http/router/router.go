@@ -6,7 +6,7 @@ import (
 	"anilibrary-scraper/internal/handler/http/api/anime"
 	"anilibrary-scraper/internal/handler/http/middleware"
 	"anilibrary-scraper/internal/handler/http/router/routes/api"
-	"anilibrary-scraper/pkg/logger"
+	"anilibrary-scraper/pkg/logging"
 	"github.com/go-chi/chi/v5"
 	chiMiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -15,7 +15,7 @@ import (
 type Config struct {
 	Url             string
 	EnableProfiling bool
-	Logger          logger.Contract
+	Logger          logging.Contract
 	Handler         anime.Controller
 }
 

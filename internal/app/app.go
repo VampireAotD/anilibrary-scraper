@@ -14,17 +14,17 @@ import (
 	"anilibrary-scraper/internal/config"
 	"anilibrary-scraper/internal/handler/http/router"
 	"anilibrary-scraper/internal/handler/http/server"
-	"anilibrary-scraper/pkg/logger"
+	"anilibrary-scraper/pkg/logging"
 	"github.com/go-redis/redis/v9"
 )
 
 type App struct {
-	logger     logger.Contract
+	logger     logging.Contract
 	config     config.Config
 	connection *redis.Client
 }
 
-func New(logger logger.Contract, config config.Config, connection *redis.Client) *App {
+func New(logger logging.Contract, config config.Config, connection *redis.Client) *App {
 	return &App{
 		logger:     logger,
 		config:     config,
@@ -55,7 +55,7 @@ func Bootstrap() (*App, func()) {
 }
 
 func (app *App) stopOnError(info string, err error) {
-	app.logger.Error(info, logger.Error(err))
+	app.logger.Error(info, logging.Error(err))
 	os.Exit(1)
 }
 
@@ -85,11 +85,11 @@ func (app *App) Run() {
 	go func() {
 		defer stop()
 
-		app.logger.Info("Starting server at", logger.String("addr", httpServer.Addr))
+		app.logger.Info("Starting server at", logging.String("addr", httpServer.Addr))
 
 		err := httpServer.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			app.logger.Error("while closing server", logger.Error(err))
+			app.logger.Error("while closing server", logging.Error(err))
 		}
 	}()
 
@@ -101,6 +101,6 @@ func (app *App) Run() {
 	defer cancel()
 
 	if err := httpServer.Shutdown(ctx); err != nil {
-		app.logger.Error("error while shutting down server", logger.Error(err))
+		app.logger.Error("error while shutting down server", logging.Error(err))
 	}
 }
