@@ -10,7 +10,6 @@ import (
 	"syscall"
 	"time"
 
-	"anilibrary-scraper/internal/app/providers"
 	"anilibrary-scraper/internal/config"
 	"anilibrary-scraper/internal/handler/http/router"
 	"anilibrary-scraper/internal/handler/http/server"
@@ -18,8 +17,6 @@ import (
 )
 
 func (app *App) Run() {
-	defer app.closer.Close(app.logger)
-
 	address := fmt.Sprintf("%s:%d", app.config.HTTP.Addr, app.config.HTTP.Port)
 	httpServer := server.NewHTTPServer(
 		address,
@@ -28,7 +25,7 @@ func (app *App) Run() {
 				Url:             address,
 				EnableProfiling: app.config.App.Env == config.Local,
 				Logger:          app.logger.Named("api/http"),
-				Handler:         providers.WireAnimeController(app.connection),
+				Handler:         WireAnimeController(app.connection),
 			},
 		),
 	)

@@ -4,9 +4,11 @@
 //go:build !wireinject
 // +build !wireinject
 
-package providers
+package app
 
 import (
+	"anilibrary-scraper/internal/app/providers"
+	"anilibrary-scraper/internal/config"
 	redis2 "anilibrary-scraper/internal/domain/repository/redis"
 	"anilibrary-scraper/internal/domain/service/scraper"
 	"anilibrary-scraper/internal/handler/http/api/anime"
@@ -20,4 +22,27 @@ func WireAnimeController(client *redis.Client) anime.Controller {
 	service := scraper.NewScraperService(animeRepository)
 	controller := anime.NewController(service)
 	return controller
+}
+
+func WireApp() (*App, func(), error) {
+	contract, cleanup, err := providers.NewLoggerProvider()
+	if err != nil {
+		return nil, nil, err
+	}
+	configConfig, err := config.New()
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	configRedis := configConfig.Redis
+	client, cleanup2, err := providers.NewRedisProvider(configRedis, contract)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	app := New(contract, configConfig, client)
+	return app, func() {
+		cleanup2()
+		cleanup()
+	}, nil
 }

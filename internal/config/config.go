@@ -15,8 +15,8 @@ const (
 type Config struct {
 	App    App
 	HTTP   HTTP
-	Redis  Redis
 	Jaeger Jaeger
+	Redis  Redis
 }
 
 func New() (Config, error) {

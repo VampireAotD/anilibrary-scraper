@@ -3,7 +3,7 @@ export
 
 APP_PATH=./cmd/app
 BIN_PATH=./cmd/bin
-PROVIDERS_PATH=./internal/app/providers
+PROVIDERS_PATH=./internal/app
 
 .PHONY: build
 build:

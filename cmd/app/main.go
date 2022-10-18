@@ -5,7 +5,8 @@ import (
 )
 
 func main() {
-	application := app.Bootstrap()
+	application, cleanup := app.Bootstrap()
+	defer cleanup()
 
 	application.Run()
 }
