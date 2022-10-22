@@ -11,6 +11,7 @@ import (
 
 type (
 	ScraperService interface {
+		// Process method scraping all data from given url
 		Process(ctx context.Context, dto dto.RequestDTO) (*entity.Anime, error)
 	}
 )

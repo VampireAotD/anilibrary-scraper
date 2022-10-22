@@ -10,7 +10,10 @@ import (
 
 type (
 	AnimeRepository interface {
+		// FindByUrl method searching cached/stored anime and returns nil if not found
 		FindByUrl(ctx context.Context, url string) (*entity.Anime, error)
+
+		// Create method creates anime cache/record
 		Create(ctx context.Context, key string, anime *entity.Anime) error
 	}
 )

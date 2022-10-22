@@ -37,6 +37,10 @@ test:
 lint:
 	golangci-lint run
 
+.PHONY: generate
+generate:
+	go generate ./...
+
 .PHONY: wire
 wire:
 	(cd $(PROVIDERS_PATH) && go run github.com/google/wire/cmd/wire)

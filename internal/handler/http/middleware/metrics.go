@@ -10,6 +10,7 @@ import (
 )
 
 func ResponseMetrics(next http.Handler) http.Handler {
+	metrics.IncrHttpRequestsCounter()
 	prometheus.MustRegister(metrics.ResponseHistogram)
 
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {

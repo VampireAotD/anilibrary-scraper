@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -55,8 +56,7 @@ func Bootstrap() (*App, func()) {
 }
 
 func (app *App) stopOnError(info string, err error) {
-	app.logger.Error(info, logging.Error(err))
-	os.Exit(1)
+	log.Fatalln(info, err)
 }
 
 func (app *App) Run() {

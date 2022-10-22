@@ -8,6 +8,7 @@ import (
 	"anilibrary-scraper/internal/domain/entity"
 	"anilibrary-scraper/internal/domain/repository"
 	"anilibrary-scraper/internal/domain/service"
+	"anilibrary-scraper/internal/metrics"
 	"anilibrary-scraper/internal/scraper"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -25,12 +26,15 @@ func NewScraperService(repository repository.AnimeRepository) Service {
 }
 
 func (s Service) Process(ctx context.Context, dto dto.RequestDTO) (*entity.Anime, error) {
-	span := trace.SpanFromContext(ctx)
+	ctx, span := trace.SpanFromContext(ctx).TracerProvider().
+		Tracer("ScraperService").
+		Start(ctx, "Process")
 	defer span.End()
 
 	if dto.FromCache {
 		anime, _ := s.repository.FindByUrl(ctx, dto.Url)
 		if anime != nil {
+			metrics.IncrCacheHitCounter()
 			return anime, nil
 		}
 	}

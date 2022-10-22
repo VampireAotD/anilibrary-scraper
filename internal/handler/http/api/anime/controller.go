@@ -7,6 +7,7 @@ import (
 	"anilibrary-scraper/internal/domain/dto"
 	"anilibrary-scraper/internal/domain/service"
 	"anilibrary-scraper/internal/handler/http/middleware"
+	"anilibrary-scraper/internal/metrics"
 	"anilibrary-scraper/pkg/logging"
 	"anilibrary-scraper/pkg/response"
 )
@@ -34,6 +35,7 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&parseDTO)
 	if err := parseDTO.Validate(); err != nil {
+		metrics.IncrHttpErrorsCounter()
 		span.RecordError(err)
 		log.Error("while decoding incoming url", logging.Error(err))
 
@@ -45,6 +47,7 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 
 	entity, err := c.service.Process(ctx, parseDTO)
 	if err != nil {
+		metrics.IncrHttpErrorsCounter()
 		span.RecordError(err)
 		log.Error("while scraping", logging.Error(err))
 
@@ -52,5 +55,6 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	metrics.IncrHttpSuccessCounter()
 	_ = resp.JSON(http.StatusOK, entity)
 }

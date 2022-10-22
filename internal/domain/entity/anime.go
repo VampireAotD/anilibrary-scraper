@@ -30,7 +30,6 @@ func (a *Anime) FromJSON(data []byte) (*Anime, error) {
 
 func (a *Anime) ToJSON() ([]byte, error) {
 	bytes, err := json.Marshal(a)
-
 	if err != nil {
 		return nil, err
 	}

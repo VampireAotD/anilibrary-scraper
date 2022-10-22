@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"anilibrary-scraper/internal/domain/entity"
+	"anilibrary-scraper/internal/metrics"
 	"anilibrary-scraper/internal/scraper/client"
 	"anilibrary-scraper/internal/scraper/parsers"
 	"github.com/PuerkitoBio/goquery"
@@ -17,11 +18,15 @@ import (
 
 var ErrUnsupportedScraper = errors.New("unsupported scraper")
 
+// Scraper is a basically a factory of all parsers that can resolve parser for current url
+// and scrape all data concurrently
 type Scraper[I parsers.Contract] struct {
 	url    string
 	client client.Client
 }
 
+// Scrape method resolves parser for supported url and scrape all data
+// throws error if url is not supported
 func Scrape(url string) (*entity.Anime, error) {
 	scraper := Scraper[parsers.Contract]{
 		url:    url,
@@ -57,6 +62,7 @@ func (s Scraper[I]) process(instance I) (*entity.Anime, error) {
 
 	go func(anime *entity.Anime) {
 		defer wg.Done()
+		defer s.recover()
 
 		img, err := s.client.Request(instance.Image(document))
 		if err != nil {
@@ -80,30 +86,48 @@ func (s Scraper[I]) process(instance I) (*entity.Anime, error) {
 	}(anime)
 	go func(anime *entity.Anime) {
 		defer wg.Done()
+		defer s.recover()
+
 		anime.Title = instance.Title(document)
 	}(anime)
 	go func(anime *entity.Anime) {
 		defer wg.Done()
+		defer s.recover()
+
 		anime.Status = instance.Status(document)
 	}(anime)
 	go func(anime *entity.Anime) {
 		defer wg.Done()
+		defer s.recover()
+
 		anime.Rating = instance.Rating(document)
 	}(anime)
 	go func(anime *entity.Anime) {
 		defer wg.Done()
+		defer s.recover()
+
 		anime.Episodes = instance.Episodes(document)
 	}(anime)
 	go func(anime *entity.Anime) {
 		defer wg.Done()
+		defer s.recover()
+
 		anime.Genres = instance.Genres(document)
 	}(anime)
 	go func(anime *entity.Anime) {
 		defer wg.Done()
+		defer s.recover()
+
 		anime.VoiceActing = instance.VoiceActing(document)
 	}(anime)
 
 	wg.Wait()
 
 	return anime, nil
+}
+
+func (s Scraper[I]) recover() {
+	if err := recover(); err != nil {
+		metrics.IncrPanicCounter()
+	}
 }
