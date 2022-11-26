@@ -14,6 +14,6 @@ type (
 		FindByUrl(ctx context.Context, url string) (*entity.Anime, error)
 
 		// Create method creates anime cache/record
-		Create(ctx context.Context, key string, anime *entity.Anime) error
+		Create(ctx context.Context, key string, entity *entity.Anime) error
 	}
 )

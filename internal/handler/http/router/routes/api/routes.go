@@ -1,8 +1,8 @@
 package api
 
 import (
-	"anilibrary-scraper/internal/handler/http/api/anime"
 	"anilibrary-scraper/internal/handler/http/middleware"
+	"anilibrary-scraper/internal/handler/http/v1/anime"
 	"github.com/go-chi/chi/v5"
 )
 

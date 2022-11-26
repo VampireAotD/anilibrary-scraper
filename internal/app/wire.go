@@ -6,8 +6,8 @@ package app
 import (
 	"anilibrary-scraper/internal/app/providers"
 	"anilibrary-scraper/internal/config"
-	"anilibrary-scraper/internal/handler/http/api"
-	"anilibrary-scraper/internal/handler/http/api/anime"
+	"anilibrary-scraper/internal/handler/http/v1"
+	"anilibrary-scraper/internal/handler/http/v1/anime"
 	"github.com/go-redis/redis/v9"
 	"github.com/google/wire"
 )
@@ -15,7 +15,7 @@ import (
 // Handlers
 
 func WireAnimeController(client *redis.Client) anime.Controller {
-	wire.Build(api.AnimeControllerProviderSet)
+	wire.Build(v1.AnimeControllerProviderSet)
 	return anime.Controller{}
 }
 

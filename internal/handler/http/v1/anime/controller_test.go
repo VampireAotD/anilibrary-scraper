@@ -9,7 +9,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"anilibrary-scraper/internal/domain/dto"
 	"anilibrary-scraper/internal/domain/entity"
 	"anilibrary-scraper/internal/domain/service/mocks"
 	"anilibrary-scraper/internal/handler/http/middleware"
@@ -58,13 +57,6 @@ func (suite *AnimeControllerSuite) sendParseRequest(url string) *httptest.Respon
 	return recorder
 }
 
-func composeDTO(url string) dto.RequestDTO {
-	return dto.RequestDTO{
-		Url:       url,
-		FromCache: true,
-	}
-}
-
 func (suite *AnimeControllerSuite) TestParse() {
 	t := suite.T()
 
@@ -78,7 +70,7 @@ func (suite *AnimeControllerSuite) TestParse() {
 				name:       "Invalid url",
 				url:        "",
 				statusCode: http.StatusUnprocessableEntity,
-				err:        dto.ErrInvalidUrl,
+				err:        ErrInvalidUrl,
 			},
 			{
 				name:       "Unsupported url",
@@ -89,7 +81,7 @@ func (suite *AnimeControllerSuite) TestParse() {
 		}
 
 		for _, testCase := range testCases {
-			suite.serviceMock.Process(gomock.Any(), composeDTO(testCase.url)).Return(nil, testCase.err)
+			suite.serviceMock.Process(gomock.Any(), testCase.url).Return(nil, testCase.err)
 
 			resp := suite.sendParseRequest(testCase.url)
 
@@ -112,7 +104,7 @@ func (suite *AnimeControllerSuite) TestParse() {
 			Rating:   9.5,
 		}
 
-		suite.serviceMock.Process(gomock.Any(), composeDTO(url)).Return(expected, nil)
+		suite.serviceMock.Process(gomock.Any(), url).Return(expected, nil)
 		resp := suite.sendParseRequest(url)
 
 		decoder := json.NewDecoder(resp.Body)

@@ -1,11 +1,11 @@
-package api
+package v1
 
 import (
 	"anilibrary-scraper/internal/domain/repository"
 	"anilibrary-scraper/internal/domain/repository/redis"
 	"anilibrary-scraper/internal/domain/service"
 	"anilibrary-scraper/internal/domain/service/scraper"
-	"anilibrary-scraper/internal/handler/http/api/anime"
+	"anilibrary-scraper/internal/handler/http/v1/anime"
 	"github.com/google/wire"
 )
 

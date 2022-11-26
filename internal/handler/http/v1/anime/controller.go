@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"anilibrary-scraper/internal/domain/dto"
 	"anilibrary-scraper/internal/domain/service"
 	"anilibrary-scraper/internal/handler/http/middleware"
 	"anilibrary-scraper/internal/metrics"
@@ -29,12 +28,13 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 	defer span.End()
 
 	resp := response.New(w)
-	parseDTO := dto.RequestDTO{
-		FromCache: true,
-	}
 
-	json.NewDecoder(r.Body).Decode(&parseDTO)
-	if err := parseDTO.Validate(); err != nil {
+	var request ScrapeRequest
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	decoder.Decode(&request)
+
+	if err := request.Validate(); err != nil {
 		metrics.IncrHttpErrorsCounter()
 		span.RecordError(err)
 		log.Error("while decoding incoming url", logging.Error(err))
@@ -43,9 +43,9 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Info("Scraping", logging.String("url", parseDTO.Url))
+	log.Info("Scraping", logging.String("url", request.Url))
 
-	entity, err := c.service.Process(ctx, parseDTO)
+	entity, err := c.service.Process(ctx, request.Url)
 	if err != nil {
 		metrics.IncrHttpErrorsCounter()
 		span.RecordError(err)

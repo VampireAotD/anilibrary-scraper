@@ -23,6 +23,8 @@ var ErrUnsupportedScraper = errors.New("unsupported scraper")
 type Scraper[I parsers.Contract] struct {
 	url    string
 	client client.Client
+	wg     *sync.WaitGroup
+	anime  *entity.Anime
 }
 
 // Scrape method resolves parser for supported url and scrape all data
@@ -31,6 +33,8 @@ func Scrape(url string) (*entity.Anime, error) {
 	scraper := Scraper[parsers.Contract]{
 		url:    url,
 		client: client.DefaultClient(),
+		wg:     &sync.WaitGroup{},
+		anime:  &entity.Anime{},
 	}
 
 	switch true {
@@ -40,6 +44,21 @@ func Scrape(url string) (*entity.Anime, error) {
 		return scraper.process(parsers.NewAnimeVost())
 	default:
 		return nil, ErrUnsupportedScraper
+	}
+}
+
+type processor func(anime *entity.Anime)
+
+func (s Scraper[I]) parse(callback processor) {
+	defer s.recover()
+	defer s.wg.Done()
+
+	callback(s.anime)
+}
+
+func (s Scraper[I]) recover() {
+	if err := recover(); err != nil {
+		metrics.IncrPanicCounter()
 	}
 }
 
@@ -55,15 +74,9 @@ func (s Scraper[I]) process(instance I) (*entity.Anime, error) {
 		return nil, fmt.Errorf("creating document %v", err)
 	}
 
-	anime := &entity.Anime{}
-	var wg sync.WaitGroup
+	s.wg.Add(7)
 
-	wg.Add(7)
-
-	go func(anime *entity.Anime) {
-		defer wg.Done()
-		defer s.recover()
-
+	go s.parse(func(anime *entity.Anime) {
 		img, err := s.client.Request(instance.Image(document))
 		if err != nil {
 			return
@@ -83,51 +96,33 @@ func (s Scraper[I]) process(instance I) (*entity.Anime, error) {
 			http.DetectContentType(buff.Bytes()),
 			base64.StdEncoding.EncodeToString(buff.Bytes()),
 		)
-	}(anime)
-	go func(anime *entity.Anime) {
-		defer wg.Done()
-		defer s.recover()
+	})
 
+	go s.parse(func(anime *entity.Anime) {
 		anime.Title = instance.Title(document)
-	}(anime)
-	go func(anime *entity.Anime) {
-		defer wg.Done()
-		defer s.recover()
+	})
 
+	go s.parse(func(anime *entity.Anime) {
 		anime.Status = instance.Status(document)
-	}(anime)
-	go func(anime *entity.Anime) {
-		defer wg.Done()
-		defer s.recover()
+	})
 
+	go s.parse(func(anime *entity.Anime) {
 		anime.Rating = instance.Rating(document)
-	}(anime)
-	go func(anime *entity.Anime) {
-		defer wg.Done()
-		defer s.recover()
+	})
 
+	go s.parse(func(anime *entity.Anime) {
 		anime.Episodes = instance.Episodes(document)
-	}(anime)
-	go func(anime *entity.Anime) {
-		defer wg.Done()
-		defer s.recover()
+	})
 
+	go s.parse(func(anime *entity.Anime) {
 		anime.Genres = instance.Genres(document)
-	}(anime)
-	go func(anime *entity.Anime) {
-		defer wg.Done()
-		defer s.recover()
+	})
 
+	go s.parse(func(anime *entity.Anime) {
 		anime.VoiceActing = instance.VoiceActing(document)
-	}(anime)
+	})
 
-	wg.Wait()
+	s.wg.Wait()
 
-	return anime, nil
-}
-
-func (s Scraper[I]) recover() {
-	if err := recover(); err != nil {
-		metrics.IncrPanicCounter()
-	}
+	return s.anime, nil
 }

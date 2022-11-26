@@ -5,7 +5,6 @@
 package mocks
 
 import (
-	dto "anilibrary-scraper/internal/domain/dto"
 	entity "anilibrary-scraper/internal/domain/entity"
 	context "context"
 	reflect "reflect"
@@ -37,16 +36,16 @@ func (m *MockScraperService) EXPECT() *MockScraperServiceMockRecorder {
 }
 
 // Process mocks base method.
-func (m *MockScraperService) Process(ctx context.Context, dto dto.RequestDTO) (*entity.Anime, error) {
+func (m *MockScraperService) Process(ctx context.Context, url string) (*entity.Anime, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Process", ctx, dto)
+	ret := m.ctrl.Call(m, "Process", ctx, url)
 	ret0, _ := ret[0].(*entity.Anime)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Process indicates an expected call of Process.
-func (mr *MockScraperServiceMockRecorder) Process(ctx, dto interface{}) *gomock.Call {
+func (mr *MockScraperServiceMockRecorder) Process(ctx, url interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Process", reflect.TypeOf((*MockScraperService)(nil).Process), ctx, dto)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Process", reflect.TypeOf((*MockScraperService)(nil).Process), ctx, url)
 }
