@@ -36,17 +36,17 @@ func (m *MockAnimeRepository) EXPECT() *MockAnimeRepositoryMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockAnimeRepository) Create(ctx context.Context, key string, anime *entity.Anime) error {
+func (m *MockAnimeRepository) Create(ctx context.Context, key string, entity *entity.Anime) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", ctx, key, anime)
+	ret := m.ctrl.Call(m, "Create", ctx, key, entity)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockAnimeRepositoryMockRecorder) Create(ctx, key, anime interface{}) *gomock.Call {
+func (mr *MockAnimeRepositoryMockRecorder) Create(ctx, key, entity interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockAnimeRepository)(nil).Create), ctx, key, anime)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockAnimeRepository)(nil).Create), ctx, key, entity)
 }
 
 // FindByUrl mocks base method.

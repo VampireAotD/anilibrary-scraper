@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"anilibrary-scraper/internal/domain/entity"
+	"anilibrary-scraper/internal/scraper/parsers/model"
 	"github.com/PuerkitoBio/goquery"
 )
 
@@ -26,12 +26,12 @@ func (a AnimeGo) Title(document *goquery.Document) string {
 	return ""
 }
 
-func (a AnimeGo) Status(document *goquery.Document) entity.Status {
+func (a AnimeGo) Status(document *goquery.Document) model.Status {
 	if status := document.Find(".anime-info .row dt:contains(Статус) + dd").First(); status != nil {
-		return entity.Status(status.Text())
+		return model.Status(status.Text())
 	}
 
-	return entity.Ready
+	return model.Ready
 }
 
 func (a AnimeGo) Rating(document *goquery.Document) float32 {

@@ -1,8 +1,20 @@
 package parsers
 
 import (
-	"anilibrary-scraper/internal/domain/entity"
+	"anilibrary-scraper/internal/scraper/parsers/model"
 	"github.com/PuerkitoBio/goquery"
+)
+
+// Urls to scrape
+const (
+	AnimeGoUrl   string = "https://animego.org"
+	AnimeVostUrl string = "https://animevost.org"
+)
+
+// Default values
+const (
+	MinimalAnimeRating   float32 = 0
+	MinimalAnimeEpisodes string  = "0 / ?"
 )
 
 type Contract interface {
@@ -10,7 +22,7 @@ type Contract interface {
 	Title(document *goquery.Document) string
 
 	// Status method scraping current anime status
-	Status(document *goquery.Document) entity.Status
+	Status(document *goquery.Document) model.Status
 
 	// Rating method scraping current anime rating and returns parsers.MinimalAnimeRating if none found
 	Rating(document *goquery.Document) float32

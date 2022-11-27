@@ -13,6 +13,7 @@ import (
 	"anilibrary-scraper/internal/metrics"
 	"anilibrary-scraper/internal/scraper/client"
 	"anilibrary-scraper/internal/scraper/parsers"
+	"anilibrary-scraper/internal/scraper/parsers/model"
 	"github.com/PuerkitoBio/goquery"
 )
 
@@ -24,7 +25,7 @@ type Scraper[I parsers.Contract] struct {
 	url    string
 	client client.Client
 	wg     *sync.WaitGroup
-	anime  *entity.Anime
+	anime  *model.Anime
 }
 
 // Scrape method resolves parser for supported url and scrape all data
@@ -34,7 +35,7 @@ func Scrape(url string) (*entity.Anime, error) {
 		url:    url,
 		client: client.DefaultClient(),
 		wg:     &sync.WaitGroup{},
-		anime:  &entity.Anime{},
+		anime:  &model.Anime{},
 	}
 
 	switch true {
@@ -47,7 +48,7 @@ func Scrape(url string) (*entity.Anime, error) {
 	}
 }
 
-type processor func(anime *entity.Anime)
+type processor func(anime *model.Anime)
 
 func (s Scraper[I]) parse(callback processor) {
 	defer s.recover()
@@ -76,7 +77,7 @@ func (s Scraper[I]) process(instance I) (*entity.Anime, error) {
 
 	s.wg.Add(7)
 
-	go s.parse(func(anime *entity.Anime) {
+	go s.parse(func(anime *model.Anime) {
 		img, err := s.client.Request(instance.Image(document))
 		if err != nil {
 			return
@@ -98,31 +99,31 @@ func (s Scraper[I]) process(instance I) (*entity.Anime, error) {
 		)
 	})
 
-	go s.parse(func(anime *entity.Anime) {
+	go s.parse(func(anime *model.Anime) {
 		anime.Title = instance.Title(document)
 	})
 
-	go s.parse(func(anime *entity.Anime) {
+	go s.parse(func(anime *model.Anime) {
 		anime.Status = instance.Status(document)
 	})
 
-	go s.parse(func(anime *entity.Anime) {
+	go s.parse(func(anime *model.Anime) {
 		anime.Rating = instance.Rating(document)
 	})
 
-	go s.parse(func(anime *entity.Anime) {
+	go s.parse(func(anime *model.Anime) {
 		anime.Episodes = instance.Episodes(document)
 	})
 
-	go s.parse(func(anime *entity.Anime) {
+	go s.parse(func(anime *model.Anime) {
 		anime.Genres = instance.Genres(document)
 	})
 
-	go s.parse(func(anime *entity.Anime) {
+	go s.parse(func(anime *model.Anime) {
 		anime.VoiceActing = instance.VoiceActing(document)
 	})
 
 	s.wg.Wait()
 
-	return s.anime, nil
+	return s.anime.ToEntity(), nil
 }

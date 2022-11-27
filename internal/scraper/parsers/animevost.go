@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"strings"
 
-	"anilibrary-scraper/internal/domain/entity"
+	"anilibrary-scraper/internal/scraper/parsers/model"
 	"github.com/PuerkitoBio/goquery"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
@@ -30,12 +30,12 @@ func (a AnimeVost) Title(document *goquery.Document) string {
 	return ""
 }
 
-func (a AnimeVost) Status(document *goquery.Document) entity.Status {
+func (a AnimeVost) Status(document *goquery.Document) model.Status {
 	if status := document.Find("#nexttime").First(); status != nil {
-		return entity.Ongoing
+		return model.Ongoing
 	}
 
-	return entity.Ready
+	return model.Ready
 }
 
 func (a AnimeVost) Rating(document *goquery.Document) float32 {
