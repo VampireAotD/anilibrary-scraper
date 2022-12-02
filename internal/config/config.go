@@ -36,9 +36,8 @@ type HTTP struct {
 }
 
 type App struct {
-	Timezone string `env:"TIMEZONE" env-default:"Europe/Kiev"`
-	Env      Env    `env:"APP_ENV" env-default:"production"`
-	Name     string `env:"APP_NAME" env-default:"anilibrary-scraper"`
+	Env  Env    `env:"APP_ENV" env-default:"production"`
+	Name string `env:"APP_NAME" env-default:"anilibrary-scraper"`
 }
 
 type Redis struct {

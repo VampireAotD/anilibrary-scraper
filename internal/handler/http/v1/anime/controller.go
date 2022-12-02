@@ -22,7 +22,7 @@ func NewController(service service.ScraperService) Controller {
 }
 
 func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
-	log := middleware.MustGetLogger(r.Context())
+	logger := middleware.MustGetLogger(r.Context())
 	tracer := middleware.MustGetTracer(r.Context())
 	ctx, span := tracer.Start(r.Context(), "Parse")
 	defer span.End()
@@ -37,19 +37,19 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 	if err := request.Validate(); err != nil {
 		metrics.IncrHttpErrorsCounter()
 		span.RecordError(err)
-		log.Error("while decoding incoming url", logging.Error(err))
+		logger.Error("while decoding incoming url", logging.Error(err))
 
 		_ = resp.ErrorJSON(http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	log.Info("Scraping", logging.String("url", request.Url))
+	logger.Info("Scraping", logging.String("url", request.Url))
 
 	entity, err := c.service.Process(ctx, request.Url)
 	if err != nil {
 		metrics.IncrHttpErrorsCounter()
 		span.RecordError(err)
-		log.Error("while scraping", logging.Error(err))
+		logger.Error("while scraping", logging.Error(err))
 
 		_ = resp.ErrorJSON(http.StatusUnprocessableEntity, err)
 		return

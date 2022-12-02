@@ -1,20 +1,19 @@
 package scraper
 
 import (
-	"bytes"
 	"encoding/base64"
 	"errors"
 	"fmt"
 	"net/http"
 	"strings"
 	"sync"
+	"time"
 
 	"anilibrary-scraper/internal/domain/entity"
 	"anilibrary-scraper/internal/metrics"
 	"anilibrary-scraper/internal/scraper/client"
 	"anilibrary-scraper/internal/scraper/parsers"
 	"anilibrary-scraper/internal/scraper/parsers/model"
-	"github.com/PuerkitoBio/goquery"
 )
 
 var ErrUnsupportedScraper = errors.New("unsupported scraper")
@@ -23,7 +22,7 @@ var ErrUnsupportedScraper = errors.New("unsupported scraper")
 // and scrape all data concurrently
 type Scraper[I parsers.Contract] struct {
 	url    string
-	client client.Client
+	client client.ChromeDp
 	wg     *sync.WaitGroup
 	anime  *model.Anime
 }
@@ -33,7 +32,7 @@ type Scraper[I parsers.Contract] struct {
 func Scrape(url string) (*entity.Anime, error) {
 	scraper := Scraper[parsers.Contract]{
 		url:    url,
-		client: client.DefaultClient(),
+		client: client.NewChromeDpClient(),
 		wg:     &sync.WaitGroup{},
 		anime:  &model.Anime{},
 	}
@@ -64,38 +63,24 @@ func (s Scraper[I]) recover() {
 }
 
 func (s Scraper[I]) process(instance I) (*entity.Anime, error) {
-	response, err := s.client.Request(s.url)
-	if err != nil || response.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("sending request %w, status code %d", err, response.StatusCode)
-	}
-	defer response.Body.Close()
-
-	document, err := goquery.NewDocumentFromReader(response.Body)
+	document, err := s.client.FetchDocument(60*time.Second, s.url)
 	if err != nil {
-		return nil, fmt.Errorf("creating document %v", err)
+		return nil, fmt.Errorf("scraper: %w", err)
 	}
 
 	s.wg.Add(7)
 
 	go s.parse(func(anime *model.Anime) {
-		img, err := s.client.Request(instance.Image(document))
+		responseBody, err := s.client.FetchResponseBody(60*time.Second, instance.Image(document))
 		if err != nil {
-			return
-		}
-		defer img.Body.Close()
-
-		var buff bytes.Buffer
-		defer buff.Reset()
-
-		_, err = buff.ReadFrom(img.Body)
-		if err != nil {
+			// TODO: handle error
 			return
 		}
 
 		anime.Image = fmt.Sprintf(
 			"data:%s;base64,%s",
-			http.DetectContentType(buff.Bytes()),
-			base64.StdEncoding.EncodeToString(buff.Bytes()),
+			http.DetectContentType(responseBody),
+			base64.StdEncoding.EncodeToString(responseBody),
 		)
 	})
 

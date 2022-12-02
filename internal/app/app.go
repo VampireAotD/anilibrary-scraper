@@ -39,10 +39,6 @@ func Bootstrap() (*App, func()) {
 		app.stopOnError("boostrap app", err)
 	}
 
-	err = providers.NewTimezoneProvider(app.config.App.Timezone, app.logger)
-	if err != nil {
-		app.stopOnError("timezone", err)
-	}
 	err = providers.NewJaegerTracerProvider(
 		app.config.Jaeger.TraceEndpoint,
 		app.config.App.Name,

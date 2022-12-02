@@ -43,4 +43,4 @@ generate:
 
 .PHONY: wire
 wire:
-	(cd $(PROVIDERS_PATH) && go run github.com/google/wire/cmd/wire)
+	(cd $(PROVIDERS_PATH) && go run github.com/google/wire/cmd/wire@latest)

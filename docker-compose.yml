@@ -24,7 +24,10 @@ services:
       redis:
         condition: service_healthy
     container_name: anilibrary-scraper
-    build: .
+    build:
+      context: .
+      args:
+        TIMEZONE: ${TIMEZONE:-Europe/Kiev}
     env_file:
       - .env
     volumes:
