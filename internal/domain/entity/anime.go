@@ -1,13 +1,33 @@
 package entity
 
+import (
+	"encoding/json"
+	"fmt"
+)
+
 type Status string
 
 type Anime struct {
-	Image       string
-	Title       string
-	Status      Status
-	Episodes    string
-	Genres      []string
-	VoiceActing []string
-	Rating      float32
+	Image       string   `json:"image"`
+	Title       string   `json:"title"`
+	Status      Status   `json:"status"`
+	Episodes    string   `json:"episodes"`
+	Genres      []string `json:"genres"`
+	VoiceActing []string `json:"voiceActing"`
+	Rating      float32  `json:"rating"`
+}
+
+func (a *Anime) FromJSON(data []byte) (*Anime, error) {
+	err := json.Unmarshal(data, a)
+
+	return a, err
+}
+
+func (a *Anime) ToJSON() ([]byte, error) {
+	bytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, fmt.Errorf("marshaling to entity: %w", err)
+	}
+
+	return bytes, nil
 }

@@ -98,10 +98,12 @@ func (suite *AnimeControllerSuite) TestParse() {
 	t.Run("Supported urls", func(t *testing.T) {
 		const url string = "https://animego.org/anime/naruto-uragannye-hroniki-103"
 		expected := &entity.Anime{
-			Title:    "Наруто: Ураганные хроники",
-			Status:   "Вышел",
-			Episodes: "500",
-			Rating:   9.5,
+			Title:       "Наруто: Ураганные хроники",
+			Status:      "Вышел",
+			Episodes:    "500",
+			Genres:      []string{"Боевые искусства", "Комедия", "Сёнэн", "Супер сила", "Экшен"},
+			VoiceActing: []string{"AniDUB", "AniLibria", "SHIZA Project", "2x2"},
+			Rating:      9.5,
 		}
 
 		suite.serviceMock.Process(gomock.Any(), url).Return(expected, nil)

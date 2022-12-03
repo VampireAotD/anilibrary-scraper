@@ -9,6 +9,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/chromedp/cdproto/network"
 	"github.com/chromedp/chromedp"
+	"github.com/corpix/uarand"
 )
 
 type ChromeDp struct{}
@@ -17,10 +18,26 @@ func NewChromeDpClient() ChromeDp {
 	return ChromeDp{}
 }
 
+// resolveAllocatorOptions method overrides some default settings for chromedp allocator
+// Returns slice with options
+func (c ChromeDp) resolveAllocatorOptions() []chromedp.ExecAllocatorOption {
+	return append(
+		chromedp.DefaultExecAllocatorOptions[:],
+		chromedp.Headless,
+		chromedp.DisableGPU,
+		chromedp.NoSandbox,
+		chromedp.WindowSize(1920, 1080),
+		chromedp.UserAgent(uarand.GetRandom()),
+	)
+}
+
 // FetchDocument method sends request to a given url with a defined timeout.
 // Returns goquery.Document or error if any.
 func (c ChromeDp) FetchDocument(timeout time.Duration, url string) (*goquery.Document, error) {
-	ctx, cancel := chromedp.NewContext(context.Background())
+	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), c.resolveAllocatorOptions()...)
+	defer cancel()
+
+	ctx, cancel := chromedp.NewContext(allocCtx)
 	defer cancel()
 
 	ctx, cancel = context.WithTimeout(ctx, timeout)
@@ -42,7 +59,10 @@ func (c ChromeDp) FetchDocument(timeout time.Duration, url string) (*goquery.Doc
 // FetchResponseBody method sends request to a given url with a defined timeout.
 // Returns slice of bytes or error if any.
 func (c ChromeDp) FetchResponseBody(timeout time.Duration, url string) ([]byte, error) {
-	ctx, cancel := chromedp.NewContext(context.Background())
+	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), c.resolveAllocatorOptions()...)
+	defer cancel()
+
+	ctx, cancel := chromedp.NewContext(allocCtx)
 	defer cancel()
 
 	ctx, cancel = context.WithTimeout(ctx, timeout)

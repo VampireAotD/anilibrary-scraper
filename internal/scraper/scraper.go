@@ -33,8 +33,8 @@ func Scrape(url string) (*entity.Anime, error) {
 	scraper := Scraper[parsers.Contract]{
 		url:    url,
 		client: client.NewChromeDpClient(),
-		wg:     &sync.WaitGroup{},
-		anime:  &model.Anime{},
+		wg:     new(sync.WaitGroup),
+		anime:  new(model.Anime),
 	}
 
 	switch true {

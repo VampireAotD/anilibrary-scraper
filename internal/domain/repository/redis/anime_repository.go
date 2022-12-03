@@ -7,7 +7,6 @@ import (
 
 	"anilibrary-scraper/internal/domain/entity"
 	"anilibrary-scraper/internal/domain/repository"
-	"anilibrary-scraper/internal/domain/repository/redis/model"
 	"github.com/go-redis/redis/v9"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -36,19 +35,19 @@ func (a AnimeRepository) FindByUrl(ctx context.Context, url string) (*entity.Ani
 		return nil, fmt.Errorf("while converting from bytes: %w", err)
 	}
 
-	var anime model.Anime
+	var anime entity.Anime
 	unmarshalled, err := anime.FromJSON(res)
 	if err != nil {
 		span.RecordError(err)
 		return nil, fmt.Errorf("while converting from bytes: %w", err)
 	}
 
-	return unmarshalled.ToEntity(), nil
+	return unmarshalled, nil
 }
 
 func (a AnimeRepository) Create(ctx context.Context, key string, entity *entity.Anime) error {
 	expire, _ := time.ParseDuration(sevenDaysInHours)
-	data, err := model.NewFromEntity(entity).ToJSON()
+	data, err := entity.ToJSON()
 	if err != nil {
 		return fmt.Errorf("while converting to json: %w", err)
 	}
