@@ -37,7 +37,7 @@ func Scrape(url string) (*entity.Anime, error) {
 		anime:  new(model.Anime),
 	}
 
-	switch true {
+	switch {
 	case strings.Contains(url, parsers.AnimeGoURL):
 		return scraper.process(parsers.NewAnimeGo())
 	case strings.Contains(url, parsers.AnimeVostURL):
