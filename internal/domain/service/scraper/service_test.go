@@ -40,7 +40,7 @@ func (suite *ScraperServiceSuite) TestProcess() {
 		testCases := []string{"", "https://google.com"}
 
 		for _, testCase := range testCases {
-			suite.repositoryMock.FindByUrl(gomock.Any(), gomock.Any()).Return(nil, nil)
+			suite.repositoryMock.FindByURL(gomock.Any(), gomock.Any()).Return(nil, nil)
 			suite.repositoryMock.Create(gomock.Any(), testCase, gomock.Any()).Return(nil)
 
 			result, err := suite.service.Process(context.Background(), testCase)
@@ -60,7 +60,7 @@ func (suite *ScraperServiceSuite) TestProcess() {
 				Rating:   9.7,
 			}
 
-			suite.repositoryMock.FindByUrl(gomock.Any(), url).Return(anime, nil)
+			suite.repositoryMock.FindByURL(gomock.Any(), url).Return(anime, nil)
 
 			cached, err := suite.service.Process(context.Background(), url)
 
@@ -86,7 +86,7 @@ func (suite *ScraperServiceSuite) TestProcess() {
 
 			for _, testCase := range cases {
 				t.Run(testCase.name, func(t *testing.T) {
-					suite.repositoryMock.FindByUrl(gomock.Any(), gomock.Any()).Return(nil, nil)
+					suite.repositoryMock.FindByURL(gomock.Any(), gomock.Any()).Return(nil, nil)
 					suite.repositoryMock.Create(gomock.Any(), testCase.url, gomock.Any()).Return(nil)
 
 					result, err := suite.service.Process(context.Background(), testCase.url)

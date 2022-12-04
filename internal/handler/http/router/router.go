@@ -13,10 +13,10 @@ import (
 )
 
 type Config struct {
-	Url             string
-	EnableProfiling bool
 	Logger          logging.Contract
 	Handler         anime.Controller
+	URL             string
+	EnableProfiling bool
 }
 
 func NewRouter(config *Config) http.Handler {

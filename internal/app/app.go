@@ -20,9 +20,9 @@ import (
 )
 
 type App struct {
+	connection *redis.Client
 	logger     logging.Contract
 	config     config.Config
-	connection *redis.Client
 }
 
 func New(logger logging.Contract, config config.Config, connection *redis.Client) *App {
@@ -61,7 +61,7 @@ func (app *App) Run() {
 		address,
 		router.NewRouter(
 			&router.Config{
-				Url:             address,
+				URL:             address,
 				EnableProfiling: app.config.App.Env == config.Local,
 				Logger:          app.logger.Named("api/http"),
 				Handler:         WireAnimeController(app.connection),

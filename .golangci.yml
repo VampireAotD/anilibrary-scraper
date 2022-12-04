@@ -3,6 +3,11 @@ linters-settings:
     check-shadowing: true
     enable:
       - fieldalignment
+  varnamelen:
+    min-name-length: 2
+    ignore-decls:
+      - w http.ResponseWriter
+      - r *http.Request
 
 linters:
   enable:
@@ -11,3 +16,10 @@ linters:
     - varnamelen
     - gci
     - goimports
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - govet
+        - goimports

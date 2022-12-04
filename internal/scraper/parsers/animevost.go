@@ -98,7 +98,7 @@ func (a AnimeVost) Synonyms(document *goquery.Document) []string {
 
 func (a AnimeVost) Image(document *goquery.Document) string {
 	if attr, exists := document.Find(".imgRadius, .infoContent img").First().Attr("src"); exists {
-		return AnimeVostUrl + attr
+		return AnimeVostURL + attr
 	}
 
 	return ""

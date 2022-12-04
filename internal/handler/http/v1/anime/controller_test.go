@@ -71,7 +71,7 @@ func (suite *AnimeControllerSuite) TestParse() {
 				name:       "Invalid url",
 				url:        "",
 				statusCode: http.StatusUnprocessableEntity,
-				err:        ErrInvalidUrl,
+				err:        ErrInvalidURL,
 			},
 			{
 				name:       "Unsupported url",

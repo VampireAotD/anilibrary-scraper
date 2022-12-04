@@ -21,10 +21,10 @@ var ErrUnsupportedScraper = errors.New("unsupported scraper")
 // Scraper is a basically a factory of all parsers that can resolve parser for current url
 // and scrape all data concurrently
 type Scraper[I parsers.Contract] struct {
-	url    string
 	client client.ChromeDp
 	wg     *sync.WaitGroup
 	anime  *model.Anime
+	url    string
 }
 
 // Scrape method resolves parser for supported url and scrape all data
@@ -38,9 +38,9 @@ func Scrape(url string) (*entity.Anime, error) {
 	}
 
 	switch true {
-	case strings.Contains(url, parsers.AnimeGoUrl):
+	case strings.Contains(url, parsers.AnimeGoURL):
 		return scraper.process(parsers.NewAnimeGo())
-	case strings.Contains(url, parsers.AnimeVostUrl):
+	case strings.Contains(url, parsers.AnimeVostURL):
 		return scraper.process(parsers.NewAnimeVost())
 	default:
 		return nil, ErrUnsupportedScraper

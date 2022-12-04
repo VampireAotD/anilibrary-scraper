@@ -32,10 +32,16 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 	var request ScrapeRequest
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
-	decoder.Decode(&request)
+	if err := decoder.Decode(&request); err != nil {
+		span.RecordError(err)
+		logger.Error("while decoding incoming request", logging.Error(err))
+
+		_ = resp.ErrorJSON(http.StatusUnprocessableEntity, err)
+		return
+	}
 
 	if err := request.Validate(); err != nil {
-		metrics.IncrHttpErrorsCounter()
+		metrics.IncrHTTPErrorsCounter()
 		span.RecordError(err)
 		logger.Error("while decoding incoming url", logging.Error(err))
 
@@ -43,11 +49,11 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logger.Info("Scraping", logging.String("url", request.Url))
+	logger.Info("Scraping", logging.String("url", request.URL))
 
-	entity, err := c.service.Process(ctx, request.Url)
+	entity, err := c.service.Process(ctx, request.URL)
 	if err != nil {
-		metrics.IncrHttpErrorsCounter()
+		metrics.IncrHTTPErrorsCounter()
 		span.RecordError(err)
 		logger.Error("while scraping", logging.Error(err))
 
@@ -55,6 +61,6 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	metrics.IncrHttpSuccessCounter()
+	metrics.IncrHTTPSuccessCounter()
 	_ = resp.JSON(http.StatusOK, entity)
 }

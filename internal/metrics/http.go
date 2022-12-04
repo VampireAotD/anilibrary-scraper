@@ -35,14 +35,14 @@ var (
 	}, []string{"route", "method"})
 )
 
-func IncrHttpRequestsCounter() {
+func IncrHTTPRequestsCounter() {
 	httpRequestsCounter.Inc()
 }
 
-func IncrHttpErrorsCounter() {
+func IncrHTTPErrorsCounter() {
 	httpRequestErrorsCounter.Inc()
 }
 
-func IncrHttpSuccessCounter() {
+func IncrHTTPSuccessCounter() {
 	httpRequestSuccessCounter.Inc()
 }

@@ -25,8 +25,8 @@ func NewAnimeRepository(client *redis.Client) AnimeRepository {
 	}
 }
 
-func (a AnimeRepository) FindByUrl(ctx context.Context, url string) (*entity.Anime, error) {
-	_, span := trace.SpanFromContext(ctx).TracerProvider().Tracer("AnimeRepository").Start(ctx, "FindByUrl")
+func (a AnimeRepository) FindByURL(ctx context.Context, url string) (*entity.Anime, error) {
+	_, span := trace.SpanFromContext(ctx).TracerProvider().Tracer("AnimeRepository").Start(ctx, "FindByURL")
 	defer span.End()
 
 	res, err := a.client.Get(ctx, url).Bytes()

@@ -7,8 +7,8 @@ import (
 
 // Urls to scrape
 const (
-	AnimeGoUrl   string = "https://animego.org"
-	AnimeVostUrl string = "https://animevost.org"
+	AnimeGoURL   string = "https://animego.org"
+	AnimeVostURL string = "https://animevost.org"
 )
 
 // Default values

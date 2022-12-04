@@ -49,17 +49,17 @@ func (mr *MockAnimeRepositoryMockRecorder) Create(ctx, key, entity interface{}) 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockAnimeRepository)(nil).Create), ctx, key, entity)
 }
 
-// FindByUrl mocks base method.
-func (m *MockAnimeRepository) FindByUrl(ctx context.Context, url string) (*entity.Anime, error) {
+// FindByURL mocks base method.
+func (m *MockAnimeRepository) FindByURL(ctx context.Context, url string) (*entity.Anime, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByUrl", ctx, url)
+	ret := m.ctrl.Call(m, "FindByURL", ctx, url)
 	ret0, _ := ret[0].(*entity.Anime)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// FindByUrl indicates an expected call of FindByUrl.
-func (mr *MockAnimeRepositoryMockRecorder) FindByUrl(ctx, url interface{}) *gomock.Call {
+// FindByURL indicates an expected call of FindByURL.
+func (mr *MockAnimeRepositoryMockRecorder) FindByURL(ctx, url interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByUrl", reflect.TypeOf((*MockAnimeRepository)(nil).FindByUrl), ctx, url)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByURL", reflect.TypeOf((*MockAnimeRepository)(nil).FindByURL), ctx, url)
 }
