@@ -2,6 +2,7 @@ package anime
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -98,11 +99,13 @@ func (suite *AnimeControllerSuite) TestParse() {
 	t.Run("Supported urls", func(t *testing.T) {
 		const url string = "https://animego.org/anime/naruto-uragannye-hroniki-103"
 		expected := &entity.Anime{
+			Image:       base64.StdEncoding.EncodeToString([]byte("data:image/jpeg;base64,random")),
 			Title:       "Наруто: Ураганные хроники",
 			Status:      "Вышел",
 			Episodes:    "500",
 			Genres:      []string{"Боевые искусства", "Комедия", "Сёнэн", "Супер сила", "Экшен"},
 			VoiceActing: []string{"AniDUB", "AniLibria", "SHIZA Project", "2x2"},
+			Synonyms:    []string{"Naruto: Shippuden", "ナルト- 疾風伝", "Naruto Hurricane Chronicles"},
 			Rating:      9.5,
 		}
 

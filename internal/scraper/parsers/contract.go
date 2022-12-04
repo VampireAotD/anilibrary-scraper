@@ -36,6 +36,9 @@ type Contract interface {
 	// VoiceActing method scraping all anime voice acting
 	VoiceActing(document *goquery.Document) []string
 
+	// Synonyms method scraping all similar anime names
+	Synonyms(document *goquery.Document) []string
+
 	// Image method scraping image url returns empty string if none found
 	Image(document *goquery.Document) string
 }

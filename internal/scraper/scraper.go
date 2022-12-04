@@ -68,7 +68,7 @@ func (s Scraper[I]) process(instance I) (*entity.Anime, error) {
 		return nil, fmt.Errorf("scraper: %w", err)
 	}
 
-	s.wg.Add(7)
+	s.wg.Add(8)
 
 	go s.parse(func(anime *model.Anime) {
 		responseBody, err := s.client.FetchResponseBody(60*time.Second, instance.Image(document))
@@ -106,6 +106,10 @@ func (s Scraper[I]) process(instance I) (*entity.Anime, error) {
 
 	go s.parse(func(anime *model.Anime) {
 		anime.VoiceActing = instance.VoiceActing(document)
+	})
+
+	go s.parse(func(anime *model.Anime) {
+		anime.Synonyms = instance.Synonyms(document)
 	})
 
 	s.wg.Wait()

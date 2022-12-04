@@ -11,8 +11,7 @@ import (
 
 var _ Contract = (*AnimeGo)(nil)
 
-type AnimeGo struct {
-}
+type AnimeGo struct{}
 
 func NewAnimeGo() AnimeGo {
 	return AnimeGo{}
@@ -73,6 +72,20 @@ func (a AnimeGo) VoiceActing(document *goquery.Document) []string {
 	if voiceActingText := document.Find(".anime-info .row dt:contains(Озвучка) + dd").First(); voiceActingText != nil {
 		regex := regexp.MustCompile(`,\s+`)
 		return strings.Split(regex.ReplaceAllString(voiceActingText.Text(), ","), ",")
+	}
+
+	return nil
+}
+
+func (a AnimeGo) Synonyms(document *goquery.Document) []string {
+	if synonymsList := document.Find(".synonyms ul li"); synonymsList != nil {
+		synonyms := make([]string, 0, synonymsList.Length())
+
+		synonymsList.Each(func(i int, selection *goquery.Selection) {
+			synonyms = append(synonyms, selection.First().Text())
+		})
+
+		return synonyms
 	}
 
 	return nil

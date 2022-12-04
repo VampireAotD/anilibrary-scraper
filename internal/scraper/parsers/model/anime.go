@@ -17,6 +17,7 @@ type Anime struct {
 	Episodes    string
 	Genres      []string
 	VoiceActing []string
+	Synonyms    []string
 	Rating      float32
 }
 
@@ -28,6 +29,7 @@ func (a *Anime) ToEntity() *entity.Anime {
 		Episodes:    a.Episodes,
 		Genres:      a.Genres,
 		VoiceActing: a.VoiceActing,
+		Synonyms:    a.Synonyms,
 		Rating:      a.Rating,
 	}
 }

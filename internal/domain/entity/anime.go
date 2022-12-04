@@ -14,6 +14,7 @@ type Anime struct {
 	Episodes    string   `json:"episodes"`
 	Genres      []string `json:"genres"`
 	VoiceActing []string `json:"voiceActing"`
+	Synonyms    []string `json:"synonyms"`
 	Rating      float32  `json:"rating"`
 }
 

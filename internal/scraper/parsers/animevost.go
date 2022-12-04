@@ -12,8 +12,7 @@ import (
 
 var _ Contract = (*AnimeVost)(nil)
 
-type AnimeVost struct {
-}
+type AnimeVost struct{}
 
 const amountToMakeFloat int = 10
 
@@ -77,6 +76,24 @@ func (a AnimeVost) Genres(document *goquery.Document) []string {
 
 func (a AnimeVost) VoiceActing(document *goquery.Document) []string {
 	return []string{"AnimeVost"}
+}
+
+func (a AnimeVost) Synonyms(document *goquery.Document) []string {
+	if title := document.Find(".shortstoryHead h1, .infoContent h3").First(); title != nil && title.Text() != "" {
+		text := strings.TrimSpace(title.Text())
+		start := strings.Index(text, "/ ")
+		end := strings.Index(text, " [")
+
+		if start < 0 || end < 0 {
+			return nil
+		}
+
+		synonym := strings.TrimLeft(text[start:end], "/ ")
+
+		return []string{synonym}
+	}
+
+	return nil
 }
 
 func (a AnimeVost) Image(document *goquery.Document) string {
