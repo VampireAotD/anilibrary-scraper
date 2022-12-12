@@ -14,7 +14,7 @@ import (
 
 type ChromeDp struct{}
 
-func NewChromeDpClient() ChromeDp {
+func NewChromeDp() ChromeDp {
 	return ChromeDp{}
 }
 

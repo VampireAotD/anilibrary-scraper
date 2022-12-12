@@ -6,7 +6,7 @@ import (
 	"anilibrary-scraper/internal/domain/entity"
 )
 
-//go:generate mockgen -source=contract.go -destination=./mocks/repository_mock.go -package=mocks
+//go:generate mockgen -source=contract.go -destination=./repository_mocks.go -package=repository
 
 type (
 	AnimeRepository interface {

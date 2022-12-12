@@ -11,20 +11,19 @@ import (
 	"testing"
 
 	"anilibrary-scraper/internal/domain/entity"
-	"anilibrary-scraper/internal/domain/service/mocks"
+	"anilibrary-scraper/internal/domain/service"
 	"anilibrary-scraper/internal/handler/http/middleware"
 	"anilibrary-scraper/internal/scraper"
 	"anilibrary-scraper/pkg/logging"
 	"anilibrary-scraper/pkg/response"
 	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
 
 type AnimeControllerSuite struct {
 	suite.Suite
 
-	serviceMock *mocks.MockScraperServiceMockRecorder
+	serviceMock *service.MockScraperServiceMockRecorder
 	controller  Controller
 }
 
@@ -36,10 +35,10 @@ func (suite *AnimeControllerSuite) SetupSuite() {
 	ctrl := gomock.NewController(suite.T())
 	defer ctrl.Finish()
 
-	service := mocks.NewMockScraperService(ctrl)
+	serviceMock := service.NewMockScraperService(ctrl)
 
-	suite.serviceMock = service.EXPECT()
-	suite.controller = NewController(service)
+	suite.serviceMock = serviceMock.EXPECT()
+	suite.controller = NewController(serviceMock)
 }
 
 func (suite *AnimeControllerSuite) sendParseRequest(url string) *httptest.ResponseRecorder {
@@ -60,6 +59,7 @@ func (suite *AnimeControllerSuite) sendParseRequest(url string) *httptest.Respon
 
 func (suite *AnimeControllerSuite) TestParse() {
 	t := suite.T()
+	require := suite.Require()
 
 	t.Run("Bad request", func(t *testing.T) {
 		testCases := []struct {
@@ -90,9 +90,9 @@ func (suite *AnimeControllerSuite) TestParse() {
 			decoder.DisallowUnknownFields()
 
 			var err response.Error
-			require.NoError(t, decoder.Decode(&err))
-			require.Equal(t, testCase.statusCode, resp.Code)
-			require.Equal(t, err.Message, testCase.err.Error())
+			require.NoError(decoder.Decode(&err))
+			require.Equal(testCase.statusCode, resp.Code)
+			require.Equal(err.Message, testCase.err.Error())
 		}
 	})
 
@@ -117,8 +117,8 @@ func (suite *AnimeControllerSuite) TestParse() {
 
 		var anime *entity.Anime
 
-		require.NoError(t, decoder.Decode(&anime))
-		require.Equal(t, http.StatusOK, resp.Code)
-		require.Equal(t, expected, anime)
+		require.NoError(decoder.Decode(&anime))
+		require.Equal(http.StatusOK, resp.Code)
+		require.Equal(expected, anime)
 	})
 }

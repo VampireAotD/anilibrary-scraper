@@ -16,11 +16,13 @@ var _ service.ScraperService = (*Service)(nil)
 
 type Service struct {
 	repository repository.AnimeRepository
+	scraper    scraper.Contract
 }
 
-func NewScraperService(repository repository.AnimeRepository) Service {
+func NewScraperService(repository repository.AnimeRepository, scraper scraper.Contract) Service {
 	return Service{
 		repository: repository,
+		scraper:    scraper,
 	}
 }
 
@@ -34,7 +36,7 @@ func (s Service) Process(ctx context.Context, url string) (*entity.Anime, error)
 		return anime, nil
 	}
 
-	anime, err := scraper.Scrape(url)
+	anime, err := s.scraper.Scrape(ctx, url)
 	if err != nil {
 		span.RecordError(err)
 		return nil, fmt.Errorf("while scraping: %w", err)
