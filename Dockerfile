@@ -10,6 +10,8 @@ RUN apk --no-cache add tzdata
 
 COPY --from=modules /go/pkg /go/pkg
 
+RUN adduser -D anilibrary
+
 ADD . /build
 WORKDIR /build/cmd/app
 
@@ -18,10 +20,13 @@ RUN CGO_ENABLED=0 GOOS=linux go build -ldflags '-w -s -extldflags "-static"' -o=
 ## final stage
 FROM chromedp/headless-shell:latest
 
-ARG TIMEZONE
-
 COPY --from=builder /usr/share/zoneinfo/ /usr/share/zoneinfo/
+COPY --from=builder /etc/passwd /etc/passwd
 COPY --from=builder /build/cmd/app /cmd/bin
+
+USER anilibrary
+
+ARG TIMEZONE
 
 ENV TZ=$TIMEZONE
 
