@@ -68,6 +68,7 @@ func NewLogger(console io.Writer, files ...io.Writer) *Logger {
 	return &Logger{base: zap.New(
 		zapcore.NewTee(cores...),
 		zap.AddCaller(),
+		zap.AddCallerSkip(1),
 	)}
 }
 

@@ -1,7 +1,11 @@
 package providers
 
 import (
+	"context"
 	"fmt"
+	"time"
+
+	"anilibrary-scraper/pkg/logging"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/jaeger"
@@ -11,14 +15,14 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.12.0"
 )
 
-func NewJaegerTracerProvider(endpoint, serviceName, environment string) error {
+func NewJaegerTracerProvider(endpoint, serviceName, environment string, logger logging.Contract) (func(), error) {
 	exporter, err := jaeger.New(
 		jaeger.WithCollectorEndpoint(
 			jaeger.WithEndpoint(endpoint),
 		),
 	)
 	if err != nil {
-		return fmt.Errorf("jaeger exporter: %w", err)
+		return nil, fmt.Errorf("jaeger exporter: %w", err)
 	}
 
 	provider := sdktrace.NewTracerProvider(
@@ -36,5 +40,16 @@ func NewJaegerTracerProvider(endpoint, serviceName, environment string) error {
 		propagation.Baggage{},
 	))
 
-	return nil
+	closer := func() {
+		logger.Info("closing jaeger")
+
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		if err := provider.Shutdown(ctx); err != nil {
+			logger.Error("jaeger provider", logging.Error(err))
+		}
+	}
+
+	return closer, nil
 }

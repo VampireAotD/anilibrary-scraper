@@ -6,6 +6,7 @@ require (
 	github.com/PuerkitoBio/goquery v1.8.0
 	github.com/chromedp/cdproto v0.0.0-20221126224343-3a0787b8dd28
 	github.com/chromedp/chromedp v0.8.6
+	github.com/corpix/uarand v0.2.0
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/go-playground/validator/v10 v10.11.0
 	github.com/go-redis/redis/v9 v9.0.0-beta.2
@@ -28,7 +29,6 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/chromedp/sysutil v1.0.0 // indirect
-	github.com/corpix/uarand v0.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/go-logr/logr v1.2.3 // indirect

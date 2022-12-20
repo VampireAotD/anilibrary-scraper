@@ -49,5 +49,5 @@ type Redis struct {
 }
 
 type Jaeger struct {
-	TraceEndpoint string `env:"JAEGER_TRACE_ENDPOINT"`
+	TraceEndpoint string `env:"JAEGER_TRACE_ENDPOINT" env-required:""`
 }

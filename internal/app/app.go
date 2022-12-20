@@ -16,6 +16,7 @@ import (
 	"anilibrary-scraper/internal/handler/http/router"
 	"anilibrary-scraper/internal/handler/http/server"
 	"anilibrary-scraper/pkg/logging"
+
 	"github.com/go-redis/redis/v9"
 )
 
@@ -34,18 +35,24 @@ func New(logger logging.Contract, config config.Config, connection *redis.Client
 }
 
 func Bootstrap() (*App, func()) {
-	app, cleanup, err := WireApp()
+	app, closers, err := WireApp()
 	if err != nil {
 		app.stopOnError("boostrap app", err)
 	}
 
-	err = providers.NewJaegerTracerProvider(
+	jaegerCloser, err := providers.NewJaegerTracerProvider(
 		app.config.Jaeger.TraceEndpoint,
 		app.config.App.Name,
 		string(app.config.App.Env),
+		app.logger,
 	)
 	if err != nil {
 		app.stopOnError("tracer", err)
+	}
+
+	cleanup := func() {
+		jaegerCloser()
+		closers()
 	}
 
 	return app, cleanup

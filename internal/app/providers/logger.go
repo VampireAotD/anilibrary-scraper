@@ -16,7 +16,8 @@ func NewLoggerProvider() (logging.Contract, func(), error) {
 	}
 
 	logger := logging.NewLogger(os.Stdout, file)
-	cleanup := func() {
+
+	closer := func() {
 		logger.Info("closing logger")
 		_ = logger.Sync()
 		if err := file.Close(); err != nil {
@@ -26,7 +27,7 @@ func NewLoggerProvider() (logging.Contract, func(), error) {
 
 	logger.Info("Initialized logger")
 
-	return logger, cleanup, nil
+	return logger, closer, nil
 }
 
 func createLogFile() (*os.File, error) {

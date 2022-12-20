@@ -7,6 +7,7 @@ import (
 
 	"anilibrary-scraper/internal/config"
 	"anilibrary-scraper/pkg/logging"
+
 	"github.com/go-redis/redis/v9"
 )
 
@@ -36,12 +37,12 @@ func NewRedisProvider(cfg config.Redis, logger logging.Contract) (*redis.Client,
 		return nil, nil, fmt.Errorf("ping : %w", err)
 	}
 
-	cleanup := func() {
+	closer := func() {
 		logger.Info("closing redis connection")
 		if err := client.Close(); err != nil {
 			logger.Error("redis close", logging.Error(err))
 		}
 	}
 
-	return client, cleanup, nil
+	return client, closer, nil
 }
