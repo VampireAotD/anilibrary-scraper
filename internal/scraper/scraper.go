@@ -1,0 +1,118 @@
+package scraper
+
+import (
+	"context"
+	"encoding/base64"
+	"fmt"
+	"net/http"
+	"strings"
+	"sync"
+	"time"
+
+	"anilibrary-scraper/internal/domain/entity"
+	"anilibrary-scraper/internal/metrics"
+	"anilibrary-scraper/internal/scraper/client"
+	"anilibrary-scraper/internal/scraper/parsers"
+	"anilibrary-scraper/internal/scraper/parsers/model"
+	"go.opentelemetry.io/otel/trace"
+)
+
+// Scraper is a basically a factory of all parsers that can resolve parser for current url
+// and scrape all data concurrently
+type Scraper struct {
+	client client.ChromeDp
+	wg     *sync.WaitGroup
+	anime  *model.Anime
+}
+
+func New() Scraper {
+	return Scraper{
+		client: client.NewChromeDp(),
+		wg:     new(sync.WaitGroup),
+		anime:  new(model.Anime),
+	}
+}
+
+type processor func(anime *model.Anime)
+
+func (s Scraper) recover() {
+	if err := recover(); err != nil {
+		metrics.IncrPanicCounter()
+	}
+}
+
+func (s Scraper) parse(callback processor) {
+	defer s.recover()
+	defer s.wg.Done()
+
+	callback(s.anime)
+}
+
+func (s Scraper) Scrape(ctx context.Context, url string) (*entity.Anime, error) {
+	_, span := trace.SpanFromContext(ctx).TracerProvider().Tracer("Scraper").Start(ctx, "Scrape")
+	defer span.End()
+
+	var parser parsers.Contract
+
+	switch {
+	case strings.Contains(url, parsers.AnimeGoURL):
+		parser = parsers.NewAnimeGo()
+	case strings.Contains(url, parsers.AnimeVostURL):
+		parser = parsers.NewAnimeVost()
+	default:
+		return nil, ErrUnsupportedScraper
+	}
+
+	document, err := s.client.FetchDocument(60*time.Second, url)
+	if err != nil {
+		return nil, fmt.Errorf("scraper: %w", err)
+	}
+
+	s.wg.Add(8)
+
+	go s.parse(func(anime *model.Anime) {
+		responseBody, err := s.client.FetchResponseBody(60*time.Second, parser.Image(document))
+		if err != nil {
+			span.RecordError(err)
+			return
+		}
+
+		anime.Image = fmt.Sprintf(
+			"data:%s;base64,%s",
+			http.DetectContentType(responseBody),
+			base64.StdEncoding.EncodeToString(responseBody),
+		)
+	})
+
+	go s.parse(func(anime *model.Anime) {
+		anime.Title = parser.Title(document)
+	})
+
+	go s.parse(func(anime *model.Anime) {
+		anime.Status = parser.Status(document)
+	})
+
+	go s.parse(func(anime *model.Anime) {
+		anime.Rating = parser.Rating(document)
+	})
+
+	go s.parse(func(anime *model.Anime) {
+		anime.Episodes = parser.Episodes(document)
+	})
+
+	go s.parse(func(anime *model.Anime) {
+		anime.Genres = parser.Genres(document)
+	})
+
+	go s.parse(func(anime *model.Anime) {
+		anime.VoiceActing = parser.VoiceActing(document)
+	})
+
+	go s.parse(func(anime *model.Anime) {
+		anime.Synonyms = parser.Synonyms(document)
+	})
+
+	s.wg.Wait()
+
+	return s.anime.ToEntity(), nil
+}
