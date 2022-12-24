@@ -21,6 +21,17 @@ func NewController(service service.ScraperService) Controller {
 	}
 }
 
+// Parse
+//
+//	@Summary		Scrape anime data
+//	@Description	Scrape anime data
+//	@Tags			anime
+//	@Accept			json
+//	@Produce		json
+//	@Param			url	body		string	true	"Url to scrape from"	Format(url)
+//	@Success		200	{object}	entity.Anime
+//	@Failure		422	{object}	response.Error
+//	@Router			/anime/parse [post]
 func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 	logger := middleware.MustGetLogger(r.Context())
 	tracer := middleware.MustGetTracer(r.Context())

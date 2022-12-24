@@ -44,3 +44,11 @@ generate:
 .PHONY: wire
 wire:
 	(cd $(PROVIDERS_PATH) && go run github.com/google/wire/cmd/wire@latest)
+
+.PHONY: swag
+swag:
+	swag init -g $(APP_PATH)/main.go
+
+.PHONY: swag-fmt
+swag-fmt:
+	swag fmt
