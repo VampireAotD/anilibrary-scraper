@@ -1,0 +1,71 @@
+basePath: /api/v1
+definitions:
+  entity.Anime:
+    properties:
+      episodes:
+        type: string
+      genres:
+        items:
+          type: string
+        type: array
+      image:
+        type: string
+      rating:
+        type: number
+      status:
+        type: string
+      synonyms:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+      voiceActing:
+        items:
+          type: string
+        type: array
+    type: object
+  response.Error:
+    properties:
+      message:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Microservice for scraping anime data
+  license:
+    name: Boost Software License, Version 1.0
+    url: https://www.boost.org/LICENSE_1_0.txt
+  termsOfService: http://swagger.io/terms/
+  title: Anilibrary-scraper
+  version: "1.0"
+paths:
+  /anime/parse:
+    post:
+      consumes:
+      - application/json
+      description: Scrape anime data
+      parameters:
+      - description: Url to scrape from
+        format: url
+        in: body
+        name: url
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.Anime'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/response.Error'
+      summary: Scrape anime data
+      tags:
+      - anime
+swagger: "2.0"
