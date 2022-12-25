@@ -20,7 +20,7 @@ Compile into binary:
 make all
 ```
 
-Deploy locally with docker:
+With docker:
 
 ```shell
 make up # docker-compose up --build
@@ -30,9 +30,13 @@ make up # docker-compose up --build
 
 * `8080` - **HTTP**
 * `6379` - **Redis**
-* `9090` - **Prometheus** 
-* `3000` - **Grafana**
-* `16686` - **Jaeger**
+* `16686` - **Jaeger UI**
+
+---
+
+## Monitoring
+
+Prometheus' metrics are sent to [monitoring](https://github.com/VampireAotD/anilibrary-monitoring) service
 
 ---
 

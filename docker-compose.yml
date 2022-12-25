@@ -20,42 +20,6 @@ services:
     networks:
       - local
 
-  prometheus:
-    image: prom/prometheus:v2.40.0
-    container_name: prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-    volumes:
-      - ./build/prometheus:/etc/prometheus
-    ports:
-      - "9090:9090"
-    healthcheck:
-      test: wget --no-verbose --tries=1 --spider http://localhost:9090/-/healthy || exit 1
-      interval: 2s
-      timeout: 2s
-      retries: 5
-    networks:
-      - local
-
-  grafana:
-    image: grafana/grafana:9.3.1
-    depends_on:
-      prometheus:
-        condition: service_healthy
-    container_name: grafana
-    environment:
-      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER}
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
-      - GF_SECURITY_ALLOW_SING_UP=false
-    ports:
-      - "3000:3000"
-    volumes:
-      - grafana-data:/var/lib/grafana
-      - ./build/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
-      - ./build/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
-    networks:
-      - local
-
   jaeger:
     image: jaegertracing/all-in-one:latest
     container_name: jaeger
@@ -102,4 +66,3 @@ networks:
 
 volumes:
   redis-data:
-  grafana-data:
