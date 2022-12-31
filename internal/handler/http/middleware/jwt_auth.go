@@ -10,7 +10,7 @@ import (
 
 func JWTAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token, err := request.ParseFromRequest(r, request.BearerExtractor{}, func(token *jwt.Token) (interface{}, error) {
+		token, err := request.ParseFromRequest(r, request.BearerExtractor{}, func(token *jwt.Token) (any, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, jwt.ErrSignatureInvalid
 			}

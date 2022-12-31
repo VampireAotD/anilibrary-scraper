@@ -37,6 +37,7 @@ func TestJWTAuthMiddleware(t *testing.T) {
 		})
 
 		t.Run("Invalid signature", func(t *testing.T) {
+			require.NoError(t, os.Setenv("JWT_SECRET", testJWTSecret))
 			const invalidJWTSecret string = "random"
 
 			request := httptest.NewRequest(http.MethodPatch, testRequestURL, nil)
