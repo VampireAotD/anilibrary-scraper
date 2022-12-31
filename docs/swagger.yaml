@@ -1,5 +1,12 @@
 basePath: /api/v1
 definitions:
+  anime.ScrapeRequest:
+    properties:
+      url:
+        type: string
+    required:
+    - url
+    type: object
   entity.Anime:
     properties:
       episodes:
@@ -47,13 +54,18 @@ paths:
       - application/json
       description: Scrape anime data
       parameters:
+      - default: Bearer
+        description: Access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Url to scrape from
-        format: url
         in: body
         name: url
         required: true
         schema:
-          type: string
+          $ref: '#/definitions/anime.ScrapeRequest'
       produces:
       - application/json
       responses:
@@ -61,6 +73,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/entity.Anime'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
         "422":
           description: Unprocessable Entity
           schema:

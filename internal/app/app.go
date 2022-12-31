@@ -11,10 +11,10 @@ import (
 	"syscall"
 	"time"
 
-	"anilibrary-scraper/internal/app/providers"
 	"anilibrary-scraper/internal/config"
 	"anilibrary-scraper/internal/handler/http/router"
 	"anilibrary-scraper/internal/handler/http/server"
+	"anilibrary-scraper/internal/providers"
 	"anilibrary-scraper/pkg/logging"
 
 	"github.com/go-redis/redis/v9"

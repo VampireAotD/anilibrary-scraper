@@ -7,11 +7,11 @@
 package app
 
 import (
-	"anilibrary-scraper/internal/app/providers"
 	"anilibrary-scraper/internal/config"
 	redis2 "anilibrary-scraper/internal/domain/repository/redis"
 	scraper2 "anilibrary-scraper/internal/domain/service/scraper"
 	"anilibrary-scraper/internal/handler/http/v1/anime"
+	"anilibrary-scraper/internal/providers"
 	"anilibrary-scraper/internal/scraper"
 	"github.com/go-redis/redis/v9"
 )

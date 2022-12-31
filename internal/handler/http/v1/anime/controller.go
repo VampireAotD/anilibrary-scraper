@@ -28,9 +28,11 @@ func NewController(service service.ScraperService) Controller {
 //	@Tags			anime
 //	@Accept			json
 //	@Produce		json
-//	@Param			url	body		string	true	"Url to scrape from"	Format(url)
-//	@Success		200	{object}	entity.Anime
-//	@Failure		422	{object}	response.Error
+//	@Param			Authorization	header		string			true	"Access token"	default(Bearer)
+//	@Param			url				body		ScrapeRequest	true	"Url to scrape from"
+//	@Success		200				{object}	entity.Anime
+//	@Failure		401				string		Unauthorized
+//	@Failure		422				{object}	response.Error
 //	@Router			/anime/parse [post]
 func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 	logger := middleware.MustGetLogger(r.Context())

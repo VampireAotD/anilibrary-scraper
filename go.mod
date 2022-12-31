@@ -10,6 +10,7 @@ require (
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/go-playground/validator/v10 v10.11.0
 	github.com/go-redis/redis/v9 v9.0.0-beta.2
+	github.com/golang-jwt/jwt/v4 v4.4.3
 	github.com/golang/mock v1.6.0
 	github.com/google/wire v0.5.0
 	github.com/ilyakaznacheev/cleanenv v1.3.0
