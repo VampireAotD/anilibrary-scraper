@@ -7,7 +7,6 @@ import (
 
 	"anilibrary-scraper/internal/config"
 	"anilibrary-scraper/pkg/logging"
-
 	"github.com/go-redis/redis/v9"
 )
 

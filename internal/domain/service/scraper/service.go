@@ -9,7 +9,8 @@ import (
 	"anilibrary-scraper/internal/domain/service"
 	"anilibrary-scraper/internal/metrics"
 	"anilibrary-scraper/internal/scraper"
-	"go.opentelemetry.io/otel/trace"
+
+	"go.opentelemetry.io/otel"
 )
 
 var _ service.ScraperService = (*Service)(nil)
@@ -27,8 +28,10 @@ func NewScraperService(repository repository.AnimeRepository, scraper scraper.Co
 }
 
 func (s Service) Process(ctx context.Context, url string) (*entity.Anime, error) {
-	ctx, span := trace.SpanFromContext(ctx).TracerProvider().Tracer("ScraperService").Start(ctx, "Process")
+	ctx, span := otel.Tracer("ScraperService").Start(ctx, "Process")
 	defer span.End()
+
+	span.AddEvent("Searching for scraped data in cache")
 
 	anime, _ := s.repository.FindByURL(ctx, url)
 	if anime != nil {
@@ -36,11 +39,15 @@ func (s Service) Process(ctx context.Context, url string) (*entity.Anime, error)
 		return anime, nil
 	}
 
+	span.AddEvent("Scraping data from url")
+
 	anime, err := s.scraper.Scrape(ctx, url)
 	if err != nil {
 		span.RecordError(err)
 		return nil, fmt.Errorf("while scraping: %w", err)
 	}
+
+	span.AddEvent("Creating cache")
 
 	_ = s.repository.Create(ctx, url, anime)
 

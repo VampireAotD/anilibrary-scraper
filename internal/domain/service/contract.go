@@ -6,7 +6,7 @@ import (
 	"anilibrary-scraper/internal/domain/entity"
 )
 
-//go:generate mockgen -source=contract.go -destination=./service_mocks.go -package=service
+//go:generate mockgen -source=contract.go -destination=./mocks.go -package=service
 
 type (
 	ScraperService interface {

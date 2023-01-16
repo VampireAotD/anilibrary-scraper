@@ -29,13 +29,20 @@
                 "summary": "Scrape anime data",
                 "parameters": [
                     {
-                        "format": "url",
+                        "type": "string",
+                        "default": "Bearer",
+                        "description": "Access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "Url to scrape from",
                         "name": "url",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/anime.ScrapeRequest"
                         }
                     }
                 ],
@@ -44,6 +51,12 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/entity.Anime"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
                         }
                     },
                     "422": {
@@ -57,6 +70,17 @@
         }
     },
     "definitions": {
+        "anime.ScrapeRequest": {
+            "type": "object",
+            "required": [
+                "url"
+            ],
+            "properties": {
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "entity.Anime": {
             "type": "object",
             "properties": {

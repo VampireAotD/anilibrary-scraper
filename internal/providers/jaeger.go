@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"anilibrary-scraper/pkg/logging"
-
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/propagation"
