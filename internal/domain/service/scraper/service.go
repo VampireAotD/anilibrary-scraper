@@ -9,6 +9,7 @@ import (
 	"anilibrary-scraper/internal/domain/service"
 	"anilibrary-scraper/internal/metrics"
 	"anilibrary-scraper/internal/scraper"
+
 	"go.opentelemetry.io/otel"
 )
 
@@ -30,17 +31,23 @@ func (s Service) Process(ctx context.Context, url string) (*entity.Anime, error)
 	ctx, span := otel.Tracer("ScraperService").Start(ctx, "Process")
 	defer span.End()
 
+	span.AddEvent("Searching for scraped data in cache")
+
 	anime, _ := s.repository.FindByURL(ctx, url)
 	if anime != nil {
 		metrics.IncrCacheHitCounter()
 		return anime, nil
 	}
 
+	span.AddEvent("Scraping data from url")
+
 	anime, err := s.scraper.Scrape(ctx, url)
 	if err != nil {
 		span.RecordError(err)
 		return nil, fmt.Errorf("while scraping: %w", err)
 	}
+
+	span.AddEvent("Creating cache")
 
 	_ = s.repository.Create(ctx, url, anime)
 
