@@ -25,6 +25,10 @@ all : clean build run
 up:
 	docker-compose up --build
 
+.PHONY: filebeat
+filebeat:
+	docker-compose --profile filebeat up
+
 .PHONY: down
 down:
 	docker-compose down

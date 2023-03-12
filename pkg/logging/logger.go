@@ -3,11 +3,10 @@ package logging
 import (
 	"io"
 
+	"go.elastic.co/ecszap"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
-
-const timeEncoderLayout string = "02/01/2006 15:04:05"
 
 type Contract interface {
 	Debug(msg string, fields ...Field)
@@ -27,17 +26,13 @@ func NewLogger(console io.Writer, files ...io.Writer) *Logger {
 	pe := zap.NewProductionEncoderConfig()
 
 	// file
-	pe.TimeKey = "time"
-	pe.EncodeTime = zapcore.TimeEncoderOfLayout(timeEncoderLayout)
 	pe.CallerKey = "file"
 	pe.EncodeLevel = func(level zapcore.Level, encoder zapcore.PrimitiveArrayEncoder) {
 		encoder.AppendString(level.CapitalString())
 	}
-	pe.MessageKey = "log"
-	fileEncoder := zapcore.NewJSONEncoder(pe)
+	fileEncoder := zapcore.NewJSONEncoder(ecszap.ECSCompatibleEncoderConfig(pe))
 
 	// console
-	pe.EncodeTime = zapcore.TimeEncoderOfLayout(timeEncoderLayout)
 	pe.EncodeLevel = func(level zapcore.Level, encoder zapcore.PrimitiveArrayEncoder) {
 		encoder.AppendString("|")
 		encoder.AppendString(level.CapitalString())
@@ -48,7 +43,7 @@ func NewLogger(console io.Writer, files ...io.Writer) *Logger {
 		encoder.AppendString(s)
 		encoder.AppendString("|")
 	}
-	consoleEncoder := zapcore.NewConsoleEncoder(pe)
+	consoleEncoder := zapcore.NewConsoleEncoder(ecszap.ECSCompatibleEncoderConfig(pe))
 
 	cores := make([]zapcore.Core, len(files)+1)
 
@@ -59,14 +54,15 @@ func NewLogger(console io.Writer, files ...io.Writer) *Logger {
 	)
 
 	for i := range files {
-		cores[i+1] = zapcore.NewCore(fileEncoder,
+		cores[i+1] = zapcore.NewCore(
+			fileEncoder,
 			zapcore.AddSync(files[i]),
 			zap.DebugLevel,
 		)
 	}
 
 	return &Logger{base: zap.New(
-		zapcore.NewTee(cores...),
+		ecszap.WrapCore(zapcore.NewTee(cores...)),
 		zap.AddCaller(),
 		zap.AddCallerSkip(1),
 	)}

@@ -36,6 +36,22 @@ services:
     networks:
       - local
 
+  filebeat:
+    image: elastic/filebeat:${FILEBEAT_VERSION}
+    container_name: anilibrary-scraper-filebeat
+    profiles:
+      - filebeat
+    command:
+      - -e
+      - --strict.perms=false
+    env_file:
+      - .env
+    volumes:
+      - ./build/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - ./storage/logs:/logs
+    networks:
+      - shared
+
   app:
     depends_on:
       redis:
