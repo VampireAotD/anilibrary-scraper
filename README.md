@@ -14,6 +14,7 @@ Copy `.env.example` to `.env` and fill the values.
 ---
 
 ## Build
+
 Compile into binary:
 
 ```shell
@@ -24,6 +25,7 @@ With docker:
 
 ```shell
 make up # docker-compose up --build
+make filebeat # same as up, but with filebeat container
 ```
 
 ### Ports
@@ -37,6 +39,12 @@ make up # docker-compose up --build
 ## Monitoring
 
 Prometheus' metrics are sent to [monitoring](https://github.com/VampireAotD/anilibrary-monitoring) service
+
+---
+
+## Logs
+
+Logs are written to file and can be sent to [elk](https://github.com/VampireAotD/anilibrary-elk) service
 
 ---
 
