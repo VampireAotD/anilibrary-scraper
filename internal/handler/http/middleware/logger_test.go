@@ -61,10 +61,10 @@ func TestLogger(t *testing.T) {
 		router.ServeHTTP(httptest.NewRecorder(), req)
 
 		expected := struct {
-			Log string `json:"log"`
+			Message string `json:"message"`
 		}{}
 
 		require.NoError(t, json.NewDecoder(&buff).Decode(&expected))
-		require.Equal(t, testLog, expected.Log)
+		require.Equal(t, testLog, expected.Message)
 	})
 }
