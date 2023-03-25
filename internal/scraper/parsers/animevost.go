@@ -74,7 +74,7 @@ func (a AnimeVost) Genres(document *goquery.Document) []string {
 	return nil
 }
 
-func (a AnimeVost) VoiceActing(document *goquery.Document) []string {
+func (a AnimeVost) VoiceActing(_ *goquery.Document) []string {
 	return []string{"AnimeVost"}
 }
 
