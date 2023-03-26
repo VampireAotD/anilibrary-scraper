@@ -7,7 +7,7 @@ import (
 
 	"anilibrary-scraper/internal/domain/entity"
 	"anilibrary-scraper/internal/domain/repository"
-	"github.com/go-redis/redis/v9"
+	"github.com/redis/go-redis/v9"
 	"go.opentelemetry.io/otel"
 )
 

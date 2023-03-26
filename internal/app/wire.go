@@ -8,8 +8,8 @@ import (
 	"anilibrary-scraper/internal/handler/http/v1/anime"
 	"anilibrary-scraper/internal/providers"
 
-	"github.com/go-redis/redis/v9"
 	"github.com/google/wire"
+	"github.com/redis/go-redis/v9"
 )
 
 // Handlers
@@ -21,12 +21,19 @@ func WireAnimeController(client *redis.Client) anime.Controller {
 
 // App
 
-func WireApp() (*App, func(), error) {
+func WireDependencies(cfg config.Config) (Dependencies, func(), error) {
 	panic(wire.Build(
 		providers.NewLoggerProvider,
-		config.New,
-		wire.FieldsOf(new(config.Config), "Redis"),
+		wire.FieldsOf(&cfg, "Redis"),
 		providers.NewRedisProvider,
+		SetupDependencies,
+	))
+}
+
+func WireApp() (*App, func(), error) {
+	panic(wire.Build(
+		config.New,
+		WireDependencies,
 		New,
 	))
 }

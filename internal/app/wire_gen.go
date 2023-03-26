@@ -13,7 +13,8 @@ import (
 	"anilibrary-scraper/internal/handler/http/v1/anime"
 	"anilibrary-scraper/internal/providers"
 	"anilibrary-scraper/internal/scraper"
-	"github.com/go-redis/redis/v9"
+
+	"github.com/redis/go-redis/v9"
 )
 
 // Injectors from wire.go:
@@ -26,25 +27,35 @@ func WireAnimeController(client *redis.Client) anime.Controller {
 	return controller
 }
 
-func WireApp() (*App, func(), error) {
+func WireDependencies(cfg config.Config) (Dependencies, func(), error) {
 	contract, cleanup, err := providers.NewLoggerProvider()
 	if err != nil {
-		return nil, nil, err
+		return Dependencies{}, nil, err
 	}
-	configConfig, err := config.New()
-	if err != nil {
-		cleanup()
-		return nil, nil, err
-	}
-	configRedis := configConfig.Redis
+	configRedis := cfg.Redis
 	client, cleanup2, err := providers.NewRedisProvider(configRedis, contract)
 	if err != nil {
 		cleanup()
+		return Dependencies{}, nil, err
+	}
+	dependencies := SetupDependencies(contract, client)
+	return dependencies, func() {
+		cleanup2()
+		cleanup()
+	}, nil
+}
+
+func WireApp() (*App, func(), error) {
+	configConfig, err := config.New()
+	if err != nil {
 		return nil, nil, err
 	}
-	app := New(contract, configConfig, client)
+	dependencies, cleanup, err := WireDependencies(configConfig)
+	if err != nil {
+		return nil, nil, err
+	}
+	app := New(configConfig, dependencies)
 	return app, func() {
-		cleanup2()
 		cleanup()
 	}, nil
 }

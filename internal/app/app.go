@@ -16,38 +16,38 @@ import (
 	"anilibrary-scraper/internal/handler/http/server"
 	"anilibrary-scraper/internal/providers"
 	"anilibrary-scraper/pkg/logging"
-
-	"github.com/go-redis/redis/v9"
 )
 
 type App struct {
-	connection *redis.Client
-	logger     logging.Contract
-	config     config.Config
+	dependencies Dependencies
+	config       config.Config
 }
 
-func New(logger logging.Contract, config config.Config, connection *redis.Client) *App {
+func New(config config.Config, dependencies Dependencies) *App {
 	return &App{
-		logger:     logger,
-		config:     config,
-		connection: connection,
+		dependencies: dependencies,
+		config:       config,
 	}
+}
+
+func (app *App) abort(info string, err error) {
+	log.Fatalln(info, err)
 }
 
 func Bootstrap() (*App, func()) {
 	app, closers, err := WireApp()
 	if err != nil {
-		app.stopOnError("boostrap app", err)
+		app.abort("boostrap app", err)
 	}
 
 	jaegerCloser, err := providers.NewJaegerTracerProvider(
 		app.config.Jaeger.TraceEndpoint,
 		app.config.App.Name,
 		string(app.config.App.Env),
-		app.logger,
+		app.dependencies.logger,
 	)
 	if err != nil {
-		app.stopOnError("tracer", err)
+		app.abort("tracer", err)
 	}
 
 	cleanup := func() {
@@ -58,10 +58,6 @@ func Bootstrap() (*App, func()) {
 	return app, cleanup
 }
 
-func (app *App) stopOnError(info string, err error) {
-	log.Fatalln(info, err)
-}
-
 func (app *App) Run() {
 	address := fmt.Sprintf("%s:%d", app.config.HTTP.Addr, app.config.HTTP.Port)
 	httpServer := server.NewHTTPServer(
@@ -70,8 +66,8 @@ func (app *App) Run() {
 			&router.Config{
 				URL:             address,
 				EnableProfiling: app.config.App.Env == config.Local,
-				Logger:          app.logger.Named("api/http"),
-				Handler:         WireAnimeController(app.connection),
+				Logger:          app.dependencies.logger.Named("api/http"),
+				Handler:         WireAnimeController(app.dependencies.redisConnection),
 			},
 		),
 	)
@@ -88,22 +84,22 @@ func (app *App) Run() {
 	go func() {
 		defer stop()
 
-		app.logger.Info("Starting server at", logging.String("addr", httpServer.Addr))
+		app.dependencies.logger.Info("Starting server at", logging.String("addr", httpServer.Addr))
 
 		err := httpServer.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			app.logger.Error("while closing server", logging.Error(err))
+			app.dependencies.logger.Error("while closing server", logging.Error(err))
 		}
 	}()
 
 	<-ctx.Done()
 
-	app.logger.Info("Shutting down server")
+	app.dependencies.logger.Info("Shutting down server")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	if err := httpServer.Shutdown(ctx); err != nil {
-		app.logger.Error("error while shutting down server", logging.Error(err))
+		app.dependencies.logger.Error("error while shutting down server", logging.Error(err))
 	}
 }
