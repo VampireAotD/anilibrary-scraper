@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -30,15 +29,26 @@ func New(config config.Config, dependencies Dependencies) *App {
 	}
 }
 
-func (app *App) abort(info string, err error) {
-	log.Fatalln(info, err)
-}
-
-func Bootstrap() (*App, func()) {
-	app, closers, err := WireApp()
+// Bootstrap method creates new App, setting up all dependencies and initializes traces
+func Bootstrap() (*App, func(), error) {
+	cfg, err := config.New()
 	if err != nil {
-		app.abort("boostrap app", err)
+		return nil, nil, fmt.Errorf("config: %w", err)
 	}
+
+	logger, loggerCloser, err := providers.NewLoggerProvider()
+	if err != nil {
+		return nil, nil, fmt.Errorf("logger: %w", err)
+	}
+
+	redisConnection, redisCloser, err := providers.NewRedisProvider(cfg.Redis, logger)
+	if err != nil {
+		loggerCloser()
+		return nil, nil, fmt.Errorf("redis: %w", err)
+	}
+
+	dependencies := SetupDependencies(logger, redisConnection)
+	app := New(cfg, dependencies)
 
 	jaegerCloser, err := providers.NewJaegerTracerProvider(
 		app.config.Jaeger.TraceEndpoint,
@@ -47,15 +57,16 @@ func Bootstrap() (*App, func()) {
 		app.dependencies.logger,
 	)
 	if err != nil {
-		app.abort("tracer", err)
+		redisCloser()
+		loggerCloser()
+		return nil, nil, fmt.Errorf("jaeger: %w", err)
 	}
 
-	cleanup := func() {
+	return app, func() {
 		jaegerCloser()
-		closers()
-	}
-
-	return app, cleanup
+		redisCloser()
+		loggerCloser()
+	}, nil
 }
 
 func (app *App) Run() {
@@ -64,10 +75,9 @@ func (app *App) Run() {
 		address,
 		router.NewRouter(
 			&router.Config{
-				URL:             address,
 				EnableProfiling: app.config.App.Env == config.Local,
 				Logger:          app.dependencies.logger.Named("api/http"),
-				Handler:         WireAnimeController(app.dependencies.redisConnection),
+				RedisConnection: app.dependencies.redisConnection,
 			},
 		),
 	)

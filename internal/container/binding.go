@@ -1,12 +1,13 @@
-package providers
+package container
 
 import (
 	"anilibrary-scraper/internal/domain/repository"
 	"anilibrary-scraper/internal/domain/repository/redis"
 	"anilibrary-scraper/internal/domain/service"
 	scraperService "anilibrary-scraper/internal/domain/service/scraper"
-	"anilibrary-scraper/internal/handler/http/v1/anime"
+	"anilibrary-scraper/internal/handler/http/api/v1/anime"
 	"anilibrary-scraper/internal/scraper"
+
 	"github.com/google/wire"
 )
 
