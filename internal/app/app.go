@@ -15,17 +15,20 @@ import (
 	"anilibrary-scraper/internal/handler/http/server"
 	"anilibrary-scraper/internal/providers"
 	"anilibrary-scraper/pkg/logging"
+	"github.com/redis/go-redis/v9"
 )
 
 type App struct {
-	dependencies Dependencies
-	config       config.Config
+	logger          logging.Contract
+	redisConnection *redis.Client
+	config          config.Config
 }
 
-func New(config config.Config, dependencies Dependencies) *App {
+func New(logger logging.Contract, redisConnection *redis.Client, config config.Config) *App {
 	return &App{
-		dependencies: dependencies,
-		config:       config,
+		logger:          logger,
+		redisConnection: redisConnection,
+		config:          config,
 	}
 }
 
@@ -47,14 +50,13 @@ func Bootstrap() (*App, func(), error) {
 		return nil, nil, fmt.Errorf("redis: %w", err)
 	}
 
-	dependencies := SetupDependencies(logger, redisConnection)
-	app := New(cfg, dependencies)
+	app := New(logger, redisConnection, cfg)
 
 	jaegerCloser, err := providers.NewJaegerTracerProvider(
 		app.config.Jaeger.TraceEndpoint,
 		app.config.App.Name,
 		string(app.config.App.Env),
-		app.dependencies.logger,
+		app.logger,
 	)
 	if err != nil {
 		redisCloser()
@@ -76,8 +78,8 @@ func (app *App) Run() {
 		router.NewRouter(
 			&router.Config{
 				EnableProfiling: app.config.App.Env == config.Local,
-				Logger:          app.dependencies.logger.Named("api/http"),
-				RedisConnection: app.dependencies.redisConnection,
+				Logger:          app.logger.Named("api/http"),
+				RedisConnection: app.redisConnection,
 			},
 		),
 	)
@@ -94,22 +96,22 @@ func (app *App) Run() {
 	go func() {
 		defer stop()
 
-		app.dependencies.logger.Info("Starting server at", logging.String("addr", httpServer.Addr))
+		app.logger.Info("Starting server at", logging.String("addr", httpServer.Addr))
 
 		err := httpServer.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			app.dependencies.logger.Error("while closing server", logging.Error(err))
+			app.logger.Error("while closing server", logging.Error(err))
 		}
 	}()
 
 	<-ctx.Done()
 
-	app.dependencies.logger.Info("Shutting down server")
+	app.logger.Info("Shutting down server")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	if err := httpServer.Shutdown(ctx); err != nil {
-		app.dependencies.logger.Error("error while shutting down server", logging.Error(err))
+		app.logger.Error("error while shutting down server", logging.Error(err))
 	}
 }
