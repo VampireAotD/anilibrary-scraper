@@ -7,27 +7,28 @@ import (
 	"net/http"
 	"strings"
 	"sync"
-	"time"
 
 	"anilibrary-scraper/internal/domain/entity"
 	"anilibrary-scraper/internal/metrics"
 	"anilibrary-scraper/internal/scraper/client"
 	"anilibrary-scraper/internal/scraper/parsers"
 	"anilibrary-scraper/internal/scraper/parsers/model"
+
+	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 )
 
 // Scraper is a basically a factory of all parsers that can resolve parser for current url
 // and scrape all data concurrently
 type Scraper struct {
-	client client.ChromeDp
+	client client.TLSClient
 	wg     *sync.WaitGroup
 	anime  *model.Anime
 }
 
 func New() Scraper {
 	return Scraper{
-		client: client.NewChromeDp(),
+		client: client.NewTLSClient(10),
 		wg:     new(sync.WaitGroup),
 		anime:  new(model.Anime),
 	}
@@ -63,24 +64,25 @@ func (s Scraper) Scrape(ctx context.Context, url string) (*entity.Anime, error) 
 		return nil, ErrUnsupportedScraper
 	}
 
-	document, err := s.client.FetchDocument(60*time.Second, url)
+	document, err := s.client.FetchDocument(url)
 	if err != nil {
-		return nil, fmt.Errorf("scraper: %w", err)
+		return nil, err
 	}
 
 	s.wg.Add(8)
 
 	go s.parse(func(anime *model.Anime) {
-		responseBody, err := s.client.FetchResponseBody(60*time.Second, parser.Image(document))
+		response, err := s.client.FetchResponseBody(parser.Image(document))
 		if err != nil {
+			span.SetStatus(codes.Error, err.Error())
 			span.RecordError(err)
 			return
 		}
 
 		anime.Image = fmt.Sprintf(
 			"data:%s;base64,%s",
-			http.DetectContentType(responseBody),
-			base64.StdEncoding.EncodeToString(responseBody),
+			http.DetectContentType(response),
+			base64.StdEncoding.EncodeToString(response),
 		)
 	})
 
@@ -113,6 +115,10 @@ func (s Scraper) Scrape(ctx context.Context, url string) (*entity.Anime, error) 
 	})
 
 	s.wg.Wait()
+
+	if !s.anime.IsValid() {
+		return nil, model.ErrInvalidParsedData
+	}
 
 	return s.anime.ToEntity(), nil
 }

@@ -18,7 +18,7 @@ WORKDIR /build/cmd/app
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags '-w -s -extldflags "-static"' -o=scraper
 
 ## final stage
-FROM chromedp/headless-shell:latest
+FROM alpine:latest
 
 COPY --from=builder /usr/share/zoneinfo/ /usr/share/zoneinfo/
 COPY --from=builder /etc/passwd /etc/passwd

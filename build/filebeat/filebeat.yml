@@ -11,3 +11,5 @@ filebeat.inputs:
 
 output.logstash:
   hosts: ${FILEBEAT_OUTPUT}
+  username: ${FILEBEAT_USER}
+  password: ${FILEBEAT_PASSWORD}

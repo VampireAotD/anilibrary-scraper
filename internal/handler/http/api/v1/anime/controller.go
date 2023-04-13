@@ -9,6 +9,8 @@ import (
 	"anilibrary-scraper/internal/metrics"
 	"anilibrary-scraper/pkg/logging"
 	"anilibrary-scraper/pkg/response"
+
+	"go.opentelemetry.io/otel/codes"
 )
 
 type Controller struct {
@@ -48,6 +50,7 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(&request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
 		span.RecordError(err)
 		logger.Error("while decoding incoming request", logging.Error(err))
 
@@ -59,6 +62,7 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 
 	if err := request.Validate(); err != nil {
 		metrics.IncrHTTPErrorsCounter()
+		span.SetStatus(codes.Error, err.Error())
 		span.RecordError(err)
 		logger.Error("while decoding incoming url", logging.Error(err))
 
@@ -73,6 +77,7 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 	entity, err := c.service.Process(ctx, request.URL)
 	if err != nil {
 		metrics.IncrHTTPErrorsCounter()
+		span.SetStatus(codes.Error, err.Error())
 		span.RecordError(err)
 		logger.Error("while scraping", logging.Error(err))
 

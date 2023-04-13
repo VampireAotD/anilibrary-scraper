@@ -7,7 +7,8 @@ import (
 
 	"anilibrary-scraper/internal/config"
 	"anilibrary-scraper/pkg/logging"
-	"github.com/go-redis/redis/v9"
+	"github.com/redis/go-redis/extra/redisotel/v9"
+	"github.com/redis/go-redis/v9"
 )
 
 func NewRedisProvider(cfg config.Redis, logger logging.Contract) (*redis.Client, func(), error) {
@@ -34,6 +35,10 @@ func NewRedisProvider(cfg config.Redis, logger logging.Contract) (*redis.Client,
 
 	if err := client.Ping(ctx).Err(); err != nil {
 		return nil, nil, fmt.Errorf("ping : %w", err)
+	}
+
+	if err := redisotel.InstrumentTracing(client); err != nil {
+		return nil, nil, fmt.Errorf("redis tracing: %w", err)
 	}
 
 	closer := func() {

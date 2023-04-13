@@ -7,7 +7,8 @@ import (
 
 	"anilibrary-scraper/internal/domain/entity"
 	"anilibrary-scraper/internal/domain/repository"
-	"github.com/go-redis/redis/v9"
+
+	"github.com/redis/go-redis/v9"
 	"go.opentelemetry.io/otel"
 )
 
@@ -32,7 +33,7 @@ func (a AnimeRepository) FindByURL(ctx context.Context, url string) (*entity.Ani
 	res, err := a.client.Get(ctx, url).Bytes()
 	if err != nil {
 		span.RecordError(err)
-		return nil, fmt.Errorf("while converting from bytes: %w", err)
+		return nil, fmt.Errorf("while fetching from redis: %w", err)
 	}
 
 	var anime entity.Anime
