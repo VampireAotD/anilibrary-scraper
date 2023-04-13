@@ -17,7 +17,7 @@ import (
 //	@host		localhost:8080
 //	@BasePath	/api/v1
 func main() {
-	application, cleanup, err := app.Bootstrap()
+	application, cleanup, err := app.New()
 	if err != nil {
 		log.Fatalln("bootstrap app", err)
 	}

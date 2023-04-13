@@ -24,16 +24,9 @@ type App struct {
 	config          config.Config
 }
 
-func New(logger logging.Contract, redisConnection *redis.Client, config config.Config) *App {
-	return &App{
-		logger:          logger,
-		redisConnection: redisConnection,
-		config:          config,
-	}
-}
-
-// Bootstrap method creates new App, setting up all dependencies and initializes traces
-func Bootstrap() (*App, func(), error) {
+// New creates new App instance, setting up all dependencies and initializes traces, also returns cleanup function
+// with all closers and an error if any occurs
+func New() (*App, func(), error) {
 	cfg, err := config.New()
 	if err != nil {
 		return nil, nil, fmt.Errorf("config: %w", err)
@@ -50,13 +43,11 @@ func Bootstrap() (*App, func(), error) {
 		return nil, nil, fmt.Errorf("redis: %w", err)
 	}
 
-	app := New(logger, redisConnection, cfg)
-
 	jaegerCloser, err := providers.NewJaegerTracerProvider(
-		app.config.Jaeger.TraceEndpoint,
-		app.config.App.Name,
-		string(app.config.App.Env),
-		app.logger,
+		cfg.Jaeger.TraceEndpoint,
+		cfg.App.Name,
+		string(cfg.App.Env),
+		logger,
 	)
 	if err != nil {
 		redisCloser()
@@ -64,11 +55,17 @@ func Bootstrap() (*App, func(), error) {
 		return nil, nil, fmt.Errorf("jaeger: %w", err)
 	}
 
-	return app, func() {
+	cleanup := func() {
 		jaegerCloser()
 		redisCloser()
 		loggerCloser()
-	}, nil
+	}
+
+	return &App{
+		logger:          logger,
+		redisConnection: redisConnection,
+		config:          cfg,
+	}, cleanup, nil
 }
 
 func (app *App) Run() {
