@@ -2,8 +2,11 @@ package entity
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 )
+
+var ErrInvalidData = errors.New("entity was filled with incorrect data")
 
 type Status string
 
@@ -18,6 +21,14 @@ type Anime struct {
 	Rating      float32  `json:"rating"`
 }
 
+func (a *Anime) IsValid() error {
+	if a.Image == "" || a.Title == "" {
+		return ErrInvalidData
+	}
+
+	return nil
+}
+
 func (a *Anime) FromJSON(data []byte) (*Anime, error) {
 	err := json.Unmarshal(data, a)
 
@@ -27,7 +38,7 @@ func (a *Anime) FromJSON(data []byte) (*Anime, error) {
 func (a *Anime) ToJSON() ([]byte, error) {
 	bytes, err := json.Marshal(a)
 	if err != nil {
-		return nil, fmt.Errorf("marshaling to entity: %w", err)
+		return nil, fmt.Errorf("marshaling: %w", err)
 	}
 
 	return bytes, nil

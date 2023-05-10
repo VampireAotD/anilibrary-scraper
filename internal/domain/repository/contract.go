@@ -14,6 +14,11 @@ type (
 		FindByURL(ctx context.Context, url string) (*entity.Anime, error)
 
 		// Create method creates anime cache/record
-		Create(ctx context.Context, key string, entity *entity.Anime) error
+		Create(ctx context.Context, key string, anime *entity.Anime) error
+	}
+
+	EventRepository interface {
+		// Send method sends event data
+		Send(ctx context.Context, event *entity.Event) error
 	}
 )

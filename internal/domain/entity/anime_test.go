@@ -22,6 +22,21 @@ func TestAnime(t *testing.T) {
 		require.NotZero(t, decoded.Rating)
 	})
 
+	t.Run("IsValid", func(t *testing.T) {
+		t.Run("Empty entity", func(t *testing.T) {
+			anime := new(Anime)
+			require.ErrorIs(t, anime.IsValid(), ErrInvalidData)
+		})
+
+		t.Run("Partially filled", func(t *testing.T) {
+			anime := &Anime{
+				Title:  "random",
+				Rating: 9.1,
+			}
+			require.ErrorIs(t, anime.IsValid(), ErrInvalidData)
+		})
+	})
+
 	t.Run("ToJSON", func(t *testing.T) {
 		testCase := &Anime{
 			Image:       "",

@@ -15,12 +15,15 @@ import (
 	"anilibrary-scraper/internal/handler/http/server"
 	"anilibrary-scraper/internal/providers"
 	"anilibrary-scraper/pkg/logging"
+
 	"github.com/redis/go-redis/v9"
+	"github.com/segmentio/kafka-go"
 )
 
 type App struct {
 	logger          logging.Contract
 	redisConnection *redis.Client
+	kafkaConnection *kafka.Conn
 	config          config.Config
 }
 
@@ -55,7 +58,16 @@ func New() (*App, func(), error) {
 		return nil, nil, fmt.Errorf("jaeger: %w", err)
 	}
 
+	kafkaConnection, kafkaCleanup, err := providers.NewKafkaProvider(cfg.Kafka, logger)
+	if err != nil {
+		jaegerCloser()
+		redisCloser()
+		loggerCloser()
+		return nil, nil, fmt.Errorf("kafka: %w", err)
+	}
+
 	cleanup := func() {
+		kafkaCleanup()
 		jaegerCloser()
 		redisCloser()
 		loggerCloser()
@@ -64,6 +76,7 @@ func New() (*App, func(), error) {
 	return &App{
 		logger:          logger,
 		redisConnection: redisConnection,
+		kafkaConnection: kafkaConnection,
 		config:          cfg,
 	}, cleanup, nil
 }
@@ -73,11 +86,10 @@ func (app *App) Run() {
 	httpServer := server.NewHTTPServer(
 		address,
 		router.NewRouter(
-			&router.Config{
-				EnableProfiling: app.config.App.Env == config.Local,
-				Logger:          app.logger.Named("api/http"),
-				RedisConnection: app.redisConnection,
-			},
+			router.WithProfilingRoutes(app.config.App.Env == config.Local),
+			router.WithLogger(app.logger.Named("http")),
+			router.WithRedisConnection(app.redisConnection),
+			router.WithKafkaConnection(app.kafkaConnection),
 		),
 	)
 

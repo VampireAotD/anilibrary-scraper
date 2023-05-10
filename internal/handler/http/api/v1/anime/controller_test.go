@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"anilibrary-scraper/internal/domain/entity"
-	"anilibrary-scraper/internal/domain/service"
+	"anilibrary-scraper/internal/domain/usecase"
 	"anilibrary-scraper/internal/handler/http/middleware"
 	"anilibrary-scraper/internal/scraper"
 	"anilibrary-scraper/pkg/logging"
@@ -23,7 +23,7 @@ import (
 type AnimeControllerSuite struct {
 	suite.Suite
 
-	serviceMock *service.MockScraperServiceMockRecorder
+	useCaseMock *usecase.MockScraperUseCaseMockRecorder
 	controller  Controller
 }
 
@@ -35,10 +35,10 @@ func (suite *AnimeControllerSuite) SetupSuite() {
 	ctrl := gomock.NewController(suite.T())
 	defer ctrl.Finish()
 
-	serviceMock := service.NewMockScraperService(ctrl)
+	useCaseMock := usecase.NewMockScraperUseCase(ctrl)
 
-	suite.serviceMock = serviceMock.EXPECT()
-	suite.controller = NewController(serviceMock)
+	suite.useCaseMock = useCaseMock.EXPECT()
+	suite.controller = NewController(useCaseMock)
 }
 
 func (suite *AnimeControllerSuite) sendParseRequest(url string) *httptest.ResponseRecorder {
@@ -82,7 +82,7 @@ func (suite *AnimeControllerSuite) TestParse() {
 		}
 
 		for _, testCase := range testCases {
-			suite.serviceMock.Process(gomock.Any(), testCase.url).Return(nil, testCase.err)
+			suite.useCaseMock.Scrape(gomock.Any(), testCase.url).Return(nil, testCase.err)
 
 			resp := suite.sendParseRequest(testCase.url)
 
@@ -109,7 +109,7 @@ func (suite *AnimeControllerSuite) TestParse() {
 			Rating:      9.5,
 		}
 
-		suite.serviceMock.Process(gomock.Any(), url).Return(expected, nil)
+		suite.useCaseMock.Scrape(gomock.Any(), url).Return(expected, nil)
 		resp := suite.sendParseRequest(url)
 
 		decoder := json.NewDecoder(resp.Body)

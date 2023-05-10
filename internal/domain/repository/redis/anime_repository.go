@@ -46,9 +46,13 @@ func (a AnimeRepository) FindByURL(ctx context.Context, url string) (*entity.Ani
 	return unmarshalled, nil
 }
 
-func (a AnimeRepository) Create(ctx context.Context, key string, entity *entity.Anime) error {
+func (a AnimeRepository) Create(ctx context.Context, key string, anime *entity.Anime) error {
+	if err := anime.IsValid(); err != nil {
+		return fmt.Errorf("while caching: %w", err)
+	}
+
 	expire, _ := time.ParseDuration(sevenDaysInHours)
-	data, err := entity.ToJSON()
+	data, err := anime.ToJSON()
 	if err != nil {
 		return fmt.Errorf("while converting to json: %w", err)
 	}

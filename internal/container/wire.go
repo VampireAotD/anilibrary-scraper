@@ -9,12 +9,13 @@ import (
 
 	"github.com/google/wire"
 	"github.com/redis/go-redis/v9"
+	"github.com/segmentio/kafka-go"
 )
 
-func MakeAnimeController(client *redis.Client) anime.Controller {
+func MakeAnimeController(client *redis.Client, kafka *kafka.Conn) anime.Controller {
 	panic(wire.Build(HTTPAnimeHandlerSet))
 }
 
-func MakeHealthcheckController(client *redis.Client) healthcheck.Controller {
+func MakeHealthcheckController(client *redis.Client, kafka *kafka.Conn) healthcheck.Controller {
 	panic(wire.Build(healthcheck.NewController))
 }

@@ -7,25 +7,32 @@
 package container
 
 import (
+	kafka2 "anilibrary-scraper/internal/domain/repository/kafka"
 	redis2 "anilibrary-scraper/internal/domain/repository/redis"
+	"anilibrary-scraper/internal/domain/service/event"
 	scraper2 "anilibrary-scraper/internal/domain/service/scraper"
+	scraper3 "anilibrary-scraper/internal/domain/usecase/scraper"
 	"anilibrary-scraper/internal/handler/http/api/v1/anime"
 	"anilibrary-scraper/internal/handler/http/monitoring/healthcheck"
 	"anilibrary-scraper/internal/scraper"
 	"github.com/redis/go-redis/v9"
+	"github.com/segmentio/kafka-go"
 )
 
 // Injectors from wire.go:
 
-func MakeAnimeController(client *redis.Client) anime.Controller {
+func MakeAnimeController(client *redis.Client, kafka3 *kafka.Conn) anime.Controller {
 	animeRepository := redis2.NewAnimeRepository(client)
 	scraperScraper := scraper.New()
 	service := scraper2.NewScraperService(animeRepository, scraperScraper)
-	controller := anime.NewController(service)
+	eventRepository := kafka2.NewEventRepository(kafka3)
+	eventService := event.NewService(eventRepository)
+	useCase := scraper3.NewUseCase(service, eventService)
+	controller := anime.NewController(useCase)
 	return controller
 }
 
-func MakeHealthcheckController(client *redis.Client) healthcheck.Controller {
-	controller := healthcheck.NewController(client)
+func MakeHealthcheckController(client *redis.Client, kafka3 *kafka.Conn) healthcheck.Controller {
+	controller := healthcheck.NewController(client, kafka3)
 	return controller
 }

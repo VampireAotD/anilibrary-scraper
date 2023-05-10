@@ -1,12 +1,8 @@
 package model
 
 import (
-	"errors"
-
 	"anilibrary-scraper/internal/domain/entity"
 )
-
-var ErrInvalidParsedData = errors.New("invalid parsed data")
 
 const (
 	Ongoing  Status = "Онгоинг"
@@ -25,10 +21,6 @@ type Anime struct {
 	VoiceActing []string
 	Synonyms    []string
 	Rating      float32
-}
-
-func (a *Anime) IsValid() bool {
-	return a.Image != "" && a.Title != ""
 }
 
 func (a *Anime) ToEntity() *entity.Anime {

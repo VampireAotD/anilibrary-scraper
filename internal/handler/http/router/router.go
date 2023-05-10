@@ -12,40 +12,76 @@ import (
 	chiMiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/redis/go-redis/v9"
+	"github.com/segmentio/kafka-go"
 	swagger "github.com/swaggo/http-swagger"
 )
 
-type Config struct {
-	Logger          logging.Contract
-	RedisConnection *redis.Client
-	EnableProfiling bool
+type config struct {
+	logger          logging.Contract
+	redisConnection *redis.Client
+	kafkaConnection *kafka.Conn
+	enableProfiling bool
 }
 
-func NewRouter(config *Config) http.Handler {
+type Option func(cfg *config)
+
+func WithLogger(logger logging.Contract) Option {
+	return func(cfg *config) {
+		cfg.logger = logger
+	}
+}
+
+func WithRedisConnection(connection *redis.Client) Option {
+	return func(cfg *config) {
+		cfg.redisConnection = connection
+	}
+}
+
+func WithKafkaConnection(connection *kafka.Conn) Option {
+	return func(cfg *config) {
+		cfg.kafkaConnection = connection
+	}
+}
+
+func WithProfilingRoutes(enable bool) Option {
+	return func(cfg *config) {
+		cfg.enableProfiling = enable
+	}
+}
+
+func NewRouter(options ...Option) http.Handler {
+	cfg := &config{
+		enableProfiling: false,
+	}
+
+	for i := range options {
+		options[i](cfg)
+	}
+
 	router := chi.NewRouter()
 
 	router.Use(
 		chiMiddleware.Recoverer,
 		middleware.Tracer,
-		middleware.Logger(config.Logger),
+		middleware.Logger(cfg.logger),
 	)
 
 	router.Handle("/metrics", promhttp.Handler())
 
-	if config.EnableProfiling {
+	if cfg.enableProfiling {
 		router.Mount("/debug", chiMiddleware.Profiler())
 	}
 
 	router.Get("/swagger/*", swagger.Handler())
 
-	router.Get("/healthcheck", container.MakeHealthcheckController(config.RedisConnection).Healthcheck)
+	router.Get("/healthcheck", container.MakeHealthcheckController(cfg.redisConnection, cfg.kafkaConnection).Healthcheck)
 
 	// API routes
 	router.Route("/api/v1", func(r chi.Router) {
 		r.Use(middleware.ResponseMetrics, middleware.JWTAuth)
 
 		r.Route("/anime", func(r chi.Router) {
-			r.Post("/parse", container.MakeAnimeController(config.RedisConnection).Parse)
+			r.Post("/parse", container.MakeAnimeController(cfg.redisConnection, cfg.kafkaConnection).Parse)
 		})
 	})
 

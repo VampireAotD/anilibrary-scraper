@@ -37,6 +37,10 @@ down:
 test:
 	go test -v ./... -race -cover -count=1
 
+.PHONY: integration-test
+integration-test:
+	go test -v ./... -tags=integration -race -cover -count=1
+
 .PHONY: lint
 lint:
 	golangci-lint run
@@ -56,3 +60,11 @@ swag:
 .PHONY: swag-fmt
 swag-fmt:
 	swag fmt
+
+.PHONY: clickhouse-migrate
+clickhouse-migrate:
+	cd ./migrations/clickhouse && goose clickhouse "tcp://localhost:9000" up
+
+.PHONY: clickhouse-migrate-rollback
+clickhouse-migrate-rollback:
+	cd ./migrations/clickhouse && goose clickhouse "tcp://localhost:9000" reset

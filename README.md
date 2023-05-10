@@ -1,5 +1,7 @@
 # Anilibrary-scraper
 
+:warning: **This is an experimental branch and does not considered stable**
+
 Microservice for scraping anime data
 
 [![tests](https://github.com/VampireAotD/anilibrary-scraper/actions/workflows/test.yml/badge.svg)](https://github.com/VampireAotD/anilibrary-scraper/actions/workflows/test.yml)

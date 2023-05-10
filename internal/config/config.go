@@ -16,6 +16,7 @@ type Config struct {
 	App    App
 	HTTP   HTTP
 	Jaeger Jaeger
+	Kafka  Kafka
 	Redis  Redis
 }
 
@@ -50,4 +51,10 @@ type Redis struct {
 
 type Jaeger struct {
 	TraceEndpoint string `env:"JAEGER_TRACE_ENDPOINT" env-required:""`
+}
+
+type Kafka struct {
+	Address   string `env:"KAFKA_ADDRESS" env-required:""`
+	Topic     string `env:"KAFKA_TOPIC" env-default:"scraper_topic"`
+	Partition int    `env:"KAFKA_PARTITION" env-default:"0"`
 }

@@ -116,9 +116,11 @@ func (s Scraper) Scrape(ctx context.Context, url string) (*entity.Anime, error) 
 
 	s.wg.Wait()
 
-	if !s.anime.IsValid() {
-		return nil, model.ErrInvalidParsedData
+	anime := s.anime.ToEntity()
+
+	if err := anime.IsValid(); err != nil {
+		return nil, err
 	}
 
-	return s.anime.ToEntity(), nil
+	return anime, nil
 }

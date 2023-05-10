@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"anilibrary-scraper/internal/domain/service"
+	"anilibrary-scraper/internal/domain/usecase"
 	"anilibrary-scraper/internal/handler/http/middleware"
 	"anilibrary-scraper/internal/metrics"
 	"anilibrary-scraper/pkg/logging"
@@ -14,12 +14,12 @@ import (
 )
 
 type Controller struct {
-	service service.ScraperService
+	usecase usecase.ScraperUseCase
 }
 
-func NewController(service service.ScraperService) Controller {
+func NewController(usecase usecase.ScraperUseCase) Controller {
 	return Controller{
-		service: service,
+		usecase: usecase,
 	}
 }
 
@@ -74,7 +74,7 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 
 	span.AddEvent("Scraping data")
 
-	entity, err := c.service.Process(ctx, request.URL)
+	entity, err := c.usecase.Scrape(ctx, request.URL)
 	if err != nil {
 		metrics.IncrHTTPErrorsCounter()
 		span.SetStatus(codes.Error, err.Error())

@@ -49,3 +49,40 @@ func (mr *MockScraperServiceMockRecorder) Process(ctx, url interface{}) *gomock.
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Process", reflect.TypeOf((*MockScraperService)(nil).Process), ctx, url)
 }
+
+// MockEventService is a mock of EventService interface.
+type MockEventService struct {
+	ctrl     *gomock.Controller
+	recorder *MockEventServiceMockRecorder
+}
+
+// MockEventServiceMockRecorder is the mock recorder for MockEventService.
+type MockEventServiceMockRecorder struct {
+	mock *MockEventService
+}
+
+// NewMockEventService creates a new mock instance.
+func NewMockEventService(ctrl *gomock.Controller) *MockEventService {
+	mock := &MockEventService{ctrl: ctrl}
+	mock.recorder = &MockEventServiceMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockEventService) EXPECT() *MockEventServiceMockRecorder {
+	return m.recorder
+}
+
+// Send mocks base method.
+func (m *MockEventService) Send(ctx context.Context, url string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Send", ctx, url)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Send indicates an expected call of Send.
+func (mr *MockEventServiceMockRecorder) Send(ctx, url interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Send", reflect.TypeOf((*MockEventService)(nil).Send), ctx, url)
+}

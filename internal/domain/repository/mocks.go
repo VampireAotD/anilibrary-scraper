@@ -36,17 +36,17 @@ func (m *MockAnimeRepository) EXPECT() *MockAnimeRepositoryMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockAnimeRepository) Create(ctx context.Context, key string, entity *entity.Anime) error {
+func (m *MockAnimeRepository) Create(ctx context.Context, key string, anime *entity.Anime) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", ctx, key, entity)
+	ret := m.ctrl.Call(m, "Create", ctx, key, anime)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockAnimeRepositoryMockRecorder) Create(ctx, key, entity interface{}) *gomock.Call {
+func (mr *MockAnimeRepositoryMockRecorder) Create(ctx, key, anime interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockAnimeRepository)(nil).Create), ctx, key, entity)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockAnimeRepository)(nil).Create), ctx, key, anime)
 }
 
 // FindByURL mocks base method.
@@ -62,4 +62,41 @@ func (m *MockAnimeRepository) FindByURL(ctx context.Context, url string) (*entit
 func (mr *MockAnimeRepositoryMockRecorder) FindByURL(ctx, url interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByURL", reflect.TypeOf((*MockAnimeRepository)(nil).FindByURL), ctx, url)
+}
+
+// MockEventRepository is a mock of EventRepository interface.
+type MockEventRepository struct {
+	ctrl     *gomock.Controller
+	recorder *MockEventRepositoryMockRecorder
+}
+
+// MockEventRepositoryMockRecorder is the mock recorder for MockEventRepository.
+type MockEventRepositoryMockRecorder struct {
+	mock *MockEventRepository
+}
+
+// NewMockEventRepository creates a new mock instance.
+func NewMockEventRepository(ctrl *gomock.Controller) *MockEventRepository {
+	mock := &MockEventRepository{ctrl: ctrl}
+	mock.recorder = &MockEventRepositoryMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockEventRepository) EXPECT() *MockEventRepositoryMockRecorder {
+	return m.recorder
+}
+
+// Send mocks base method.
+func (m *MockEventRepository) Send(ctx context.Context, event *entity.Event) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Send", ctx, event)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Send indicates an expected call of Send.
+func (mr *MockEventRepositoryMockRecorder) Send(ctx, event interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Send", reflect.TypeOf((*MockEventRepository)(nil).Send), ctx, event)
 }
