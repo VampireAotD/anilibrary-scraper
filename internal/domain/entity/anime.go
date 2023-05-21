@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-var ErrInvalidData = errors.New("entity was filled with incorrect data")
+var ErrNotEnoughData = errors.New("entity wasn't filled with required data")
 
 type Status string
 
@@ -21,9 +21,9 @@ type Anime struct {
 	Rating      float32  `json:"rating"`
 }
 
-func (a *Anime) IsValid() error {
+func (a *Anime) HasRequiredData() error {
 	if a.Image == "" || a.Title == "" {
-		return ErrInvalidData
+		return ErrNotEnoughData
 	}
 
 	return nil

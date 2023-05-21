@@ -23,32 +23,6 @@ type config struct {
 	enableProfiling bool
 }
 
-type Option func(cfg *config)
-
-func WithLogger(logger logging.Contract) Option {
-	return func(cfg *config) {
-		cfg.logger = logger
-	}
-}
-
-func WithRedisConnection(connection *redis.Client) Option {
-	return func(cfg *config) {
-		cfg.redisConnection = connection
-	}
-}
-
-func WithKafkaConnection(connection *kafka.Conn) Option {
-	return func(cfg *config) {
-		cfg.kafkaConnection = connection
-	}
-}
-
-func WithProfilingRoutes(enable bool) Option {
-	return func(cfg *config) {
-		cfg.enableProfiling = enable
-	}
-}
-
 func NewRouter(options ...Option) http.Handler {
 	cfg := &config{
 		enableProfiling: false,

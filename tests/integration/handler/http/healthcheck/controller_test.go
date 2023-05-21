@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"anilibrary-scraper/internal/handler/http/monitoring/healthcheck"
+
 	"github.com/alicebob/miniredis/v2"
 	"github.com/redis/go-redis/v9"
 	"github.com/segmentio/kafka-go"
@@ -22,7 +24,7 @@ type HealthcheckControllerSuite struct {
 
 	redisServer    *miniredis.Miniredis
 	kafkaContainer testcontainers.Container
-	controller     Controller
+	controller     healthcheck.Controller
 }
 
 func TestHealthcheckControllerSuite(t *testing.T) {
@@ -79,7 +81,7 @@ func (suite *HealthcheckControllerSuite) SetupSuite() {
 	kafkaConnection, err := kafka.DialLeader(context.Background(), "tcp", kafkaIP+":9095", "test-topic", 0)
 	suite.Require().NoError(err)
 
-	suite.controller = NewController(redisClient, kafkaConnection)
+	suite.controller = healthcheck.NewController(redisClient, kafkaConnection)
 }
 
 func (suite *HealthcheckControllerSuite) SetupTest() {

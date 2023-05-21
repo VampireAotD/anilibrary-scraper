@@ -118,7 +118,7 @@ func (s Scraper) Scrape(ctx context.Context, url string) (*entity.Anime, error) 
 
 	anime := s.anime.ToEntity()
 
-	if err := anime.IsValid(); err != nil {
+	if err := anime.HasRequiredData(); err != nil {
 		return nil, err
 	}
 

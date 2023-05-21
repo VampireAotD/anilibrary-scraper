@@ -64,7 +64,7 @@ func (suite *AnimeRepositorySuite) TestCreate() {
 	t.Run("Invalid cases", func(t *testing.T) {
 		t.Run("Incorrect data", func(t *testing.T) {
 			err := suite.animeRepository.Create(context.Background(), testURL, new(entity.Anime))
-			require.ErrorIs(err, entity.ErrInvalidData)
+			require.ErrorIs(err, entity.ErrNotEnoughData)
 		})
 	})
 

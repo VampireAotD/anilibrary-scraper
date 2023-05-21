@@ -9,7 +9,7 @@ import (
 	"anilibrary-scraper/internal/domain/repository"
 
 	"github.com/redis/go-redis/v9"
-	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const sevenDaysInHours string = "168h"
@@ -27,7 +27,7 @@ func NewAnimeRepository(client *redis.Client) AnimeRepository {
 }
 
 func (a AnimeRepository) FindByURL(ctx context.Context, url string) (*entity.Anime, error) {
-	_, span := otel.Tracer("AnimeRepository").Start(ctx, "FindByURL")
+	_, span := trace.SpanFromContext(ctx).TracerProvider().Tracer("AnimeRepository").Start(ctx, "FindByURL")
 	defer span.End()
 
 	res, err := a.client.Get(ctx, url).Bytes()
@@ -47,13 +47,18 @@ func (a AnimeRepository) FindByURL(ctx context.Context, url string) (*entity.Ani
 }
 
 func (a AnimeRepository) Create(ctx context.Context, key string, anime *entity.Anime) error {
-	if err := anime.IsValid(); err != nil {
+	_, span := trace.SpanFromContext(ctx).TracerProvider().Tracer("AnimeRepository").Start(ctx, "Create")
+	defer span.End()
+
+	if err := anime.HasRequiredData(); err != nil {
+		span.RecordError(err)
 		return fmt.Errorf("while caching: %w", err)
 	}
 
 	expire, _ := time.ParseDuration(sevenDaysInHours)
 	data, err := anime.ToJSON()
 	if err != nil {
+		span.RecordError(err)
 		return fmt.Errorf("while converting to json: %w", err)
 	}
 

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"anilibrary-scraper/internal/domain/entity"
+	kafka2 "anilibrary-scraper/internal/domain/repository/kafka"
 
 	"github.com/golang/mock/gomock"
 	"github.com/segmentio/kafka-go"
@@ -20,7 +21,7 @@ type EventRepositorySuite struct {
 	suite.Suite
 
 	kafkaContainer  testcontainers.Container
-	eventRepository EventRepository
+	eventRepository kafka2.EventRepository
 }
 
 func TestEventRepositorySuite(t *testing.T) {
@@ -64,7 +65,7 @@ func (suite *EventRepositorySuite) SetupSuite() {
 	suite.Require().NoError(err)
 
 	suite.kafkaContainer = kafkaContainer
-	suite.eventRepository = NewEventRepository(conn)
+	suite.eventRepository = kafka2.NewEventRepository(conn)
 }
 
 func (suite *EventRepositorySuite) TearDownSuite() {
