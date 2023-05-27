@@ -20,4 +20,4 @@ jobs:
         run: go test -v ./... -race -count=1
 
       - name: Run integration tests
-        run: go test -v ./tests/... -tags=integration -race -count=1
+        run: go test -v ./test/... -tags=integration -race -count=1

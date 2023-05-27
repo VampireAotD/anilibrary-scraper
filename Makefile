@@ -39,7 +39,7 @@ test:
 
 .PHONY: integration-test
 integration-test:
-	go test -v ./tests/... -tags=integration -race -cover -count=1
+	go test -v ./test/... -tags=integration -race -cover -count=1
 
 .PHONY: lint
 lint:

@@ -55,6 +55,9 @@ services:
   clickhouse:
     image: clickhouse/clickhouse-server
     container_name: anilibrary-scraper-clickhouse
+    environment:
+      - CLICKHOUSE_USER=${CLICKHOUSE_USER}
+      - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD}
     ports:
       - "8123:8123"
       - "9000:9000"
@@ -73,7 +76,11 @@ services:
       - local
 
   zookeeper:
-    image: zookeeper
+    image: bitnami/zookeeper
+    environment:
+      - ZOO_ENABLE_AUTH=yes
+      - ZOO_SERVER_USER=${ZOOKEEPER_SERVER_USER}
+      - ZOO_SERVER_PASSWORD=${ZOOKEEPER_SERVER_PASSWORD}
     ports:
       - "2181:2181"
     networks:

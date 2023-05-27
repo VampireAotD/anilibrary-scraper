@@ -37,12 +37,14 @@ func NewController(usecase usecase.ScraperUseCase) Controller {
 //	@Failure		422				{object}	response.Error
 //	@Router			/anime/parse [post]
 func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
-	logger := middleware.MustGetLogger(r.Context())
-	tracer := middleware.MustGetTracer(r.Context())
+	var (
+		logger       = middleware.MustGetLogger(r.Context())
+		tracer       = middleware.MustGetTracer(r.Context())
+		jsonResponse = response.New(w)
+	)
+
 	ctx, span := tracer.Start(r.Context(), "Parse")
 	defer span.End()
-
-	resp := response.New(w)
 
 	span.AddEvent("Decoding request")
 
@@ -54,7 +56,7 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 		span.RecordError(err)
 		logger.Error("while decoding incoming request", logging.Error(err))
 
-		_ = resp.ErrorJSON(http.StatusUnprocessableEntity, err)
+		_ = jsonResponse.ErrorJSON(http.StatusUnprocessableEntity, err)
 		return
 	}
 
@@ -66,7 +68,7 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 		span.RecordError(err)
 		logger.Error("while decoding incoming url", logging.Error(err))
 
-		_ = resp.ErrorJSON(http.StatusUnprocessableEntity, err)
+		_ = jsonResponse.ErrorJSON(http.StatusUnprocessableEntity, err)
 		return
 	}
 
@@ -81,12 +83,12 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 		span.RecordError(err)
 		logger.Error("while scraping", logging.Error(err))
 
-		_ = resp.ErrorJSON(http.StatusUnprocessableEntity, err)
+		_ = jsonResponse.ErrorJSON(http.StatusUnprocessableEntity, err)
 		return
 	}
 
 	span.AddEvent("Finished scraping")
 
 	metrics.IncrHTTPSuccessCounter()
-	_ = resp.JSON(http.StatusOK, entity)
+	_ = jsonResponse.JSON(http.StatusOK, entity)
 }

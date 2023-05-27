@@ -8,6 +8,7 @@ import (
 	"anilibrary-scraper/internal/domain/entity"
 	"anilibrary-scraper/internal/domain/repository"
 	"anilibrary-scraper/internal/domain/service"
+
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
 )
@@ -34,11 +35,14 @@ func (suite *EventServiceSuite) SetupSuite() {
 }
 
 func (suite *EventServiceSuite) TestSend() {
-	t := suite.T()
-	require := suite.Require()
+	var (
+		t       = suite.T()
+		require = suite.Require()
+	)
 
 	t.Run("Send message", func(t *testing.T) {
 		const testURL string = "https://google.com/"
+
 		suite.repositoryMock.Send(gomock.Any(), &entity.Event{
 			Date: time.Now().Unix(),
 			URL:  testURL,

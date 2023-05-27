@@ -9,6 +9,7 @@ import (
 	"anilibrary-scraper/internal/domain/repository"
 	scraperService "anilibrary-scraper/internal/domain/service/scraper"
 	"anilibrary-scraper/internal/scraper"
+
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
 )
@@ -29,8 +30,10 @@ func (suite *ScraperServiceSuite) SetupSuite() {
 	ctrl := gomock.NewController(suite.T())
 	defer ctrl.Finish()
 
-	repositoryMock := repository.NewMockAnimeRepository(ctrl)
-	scraperMock := scraper.NewMockContract(ctrl)
+	var (
+		repositoryMock = repository.NewMockAnimeRepository(ctrl)
+		scraperMock    = scraper.NewMockContract(ctrl)
+	)
 
 	suite.repositoryMock = repositoryMock.EXPECT()
 	suite.scraperMock = scraperMock.EXPECT()
@@ -38,8 +41,10 @@ func (suite *ScraperServiceSuite) SetupSuite() {
 }
 
 func (suite *ScraperServiceSuite) TestProcess() {
-	t := suite.T()
-	require := suite.Require()
+	var (
+		t       = suite.T()
+		require = suite.Require()
+	)
 
 	t.Run("Errors", func(t *testing.T) {
 		testCases := []string{"", "https://google.com"}

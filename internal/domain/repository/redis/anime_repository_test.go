@@ -58,8 +58,10 @@ func (suite *AnimeRepositorySuite) TearDownSuite() {
 }
 
 func (suite *AnimeRepositorySuite) TestCreate() {
-	t := suite.T()
-	require := suite.Require()
+	var (
+		t       = suite.T()
+		require = suite.Require()
+	)
 
 	t.Run("Invalid cases", func(t *testing.T) {
 		t.Run("Incorrect data", func(t *testing.T) {
@@ -76,8 +78,10 @@ func (suite *AnimeRepositorySuite) TestCreate() {
 }
 
 func (suite *AnimeRepositorySuite) TestFindByURL() {
-	t := suite.T()
-	require := suite.Require()
+	var (
+		t       = suite.T()
+		require = suite.Require()
+	)
 
 	t.Run("Not found in cache", func(t *testing.T) {
 		anime, err := suite.animeRepository.FindByURL(context.Background(), testURL)

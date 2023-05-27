@@ -103,9 +103,11 @@ func (suite *HealthcheckControllerSuite) TearDownSuite() {
 }
 
 func (suite *HealthcheckControllerSuite) sendHealthcheckRequest() *httptest.ResponseRecorder {
-	handler := suite.controller.Healthcheck
-	recorder := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodGet, "/healthcheck", nil)
+	var (
+		handler  = suite.controller.Healthcheck
+		recorder = httptest.NewRecorder()
+		request  = httptest.NewRequest(http.MethodGet, "/healthcheck", nil)
+	)
 
 	handler(recorder, request)
 
@@ -113,8 +115,10 @@ func (suite *HealthcheckControllerSuite) sendHealthcheckRequest() *httptest.Resp
 }
 
 func (suite *HealthcheckControllerSuite) TestHealthcheck() {
-	t := suite.T()
-	require := suite.Require()
+	var (
+		t       = suite.T()
+		require = suite.Require()
+	)
 
 	t.Run("Redis", func(t *testing.T) {
 		t.Run("Redis up", func(t *testing.T) {
