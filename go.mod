@@ -9,6 +9,7 @@ require (
 	github.com/bogdanfinn/tls-client v1.3.8
 	github.com/corpix/uarand v0.2.0
 	github.com/go-chi/chi/v5 v5.0.8
+	github.com/go-chi/render v1.0.2
 	github.com/go-playground/validator/v10 v10.12.0
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/golang/mock v1.6.0
@@ -36,6 +37,7 @@ require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/Microsoft/go-winio v0.5.2 // indirect
+	github.com/ajg/form v1.5.1 // indirect
 	github.com/alicebob/gopher-json v0.0.0-20230218143504-906a9b012302 // indirect
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect

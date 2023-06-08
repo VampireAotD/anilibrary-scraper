@@ -8,8 +8,8 @@ import (
 	"anilibrary-scraper/internal/handler/http/middleware"
 	"anilibrary-scraper/internal/metrics"
 	"anilibrary-scraper/pkg/logging"
-	"anilibrary-scraper/pkg/response"
 
+	"github.com/go-chi/render"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -38,9 +38,8 @@ func NewController(usecase usecase.ScraperUseCase) Controller {
 //	@Router			/anime/parse [post]
 func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 	var (
-		logger       = middleware.MustGetLogger(r.Context())
-		tracer       = middleware.MustGetTracer(r.Context())
-		jsonResponse = response.New(w)
+		logger = middleware.MustGetLogger(r.Context())
+		tracer = middleware.MustGetTracer(r.Context())
 	)
 
 	ctx, span := tracer.Start(r.Context(), "Parse")
@@ -56,7 +55,8 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 		span.RecordError(err)
 		logger.Error("while decoding incoming request", logging.Error(err))
 
-		_ = jsonResponse.ErrorJSON(http.StatusUnprocessableEntity, err)
+		render.Status(r, http.StatusUnprocessableEntity)
+		render.JSON(w, r, NewErrorResponse(err))
 		return
 	}
 
@@ -68,7 +68,8 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 		span.RecordError(err)
 		logger.Error("while decoding incoming url", logging.Error(err))
 
-		_ = jsonResponse.ErrorJSON(http.StatusUnprocessableEntity, err)
+		render.Status(r, http.StatusUnprocessableEntity)
+		render.JSON(w, r, NewErrorResponse(err))
 		return
 	}
 
@@ -83,12 +84,13 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 		span.RecordError(err)
 		logger.Error("while scraping", logging.Error(err))
 
-		_ = jsonResponse.ErrorJSON(http.StatusUnprocessableEntity, err)
+		render.Status(r, http.StatusUnprocessableEntity)
+		render.JSON(w, r, NewErrorResponse(err))
 		return
 	}
 
 	span.AddEvent("Finished scraping")
 
 	metrics.IncrHTTPSuccessCounter()
-	_ = jsonResponse.JSON(http.StatusOK, entity)
+	render.JSON(w, r, entity)
 }

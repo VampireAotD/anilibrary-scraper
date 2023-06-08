@@ -15,7 +15,7 @@ import (
 	"anilibrary-scraper/internal/handler/http/middleware"
 	"anilibrary-scraper/internal/scraper"
 	"anilibrary-scraper/pkg/logging"
-	"anilibrary-scraper/pkg/response"
+
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
 )
@@ -89,7 +89,7 @@ func (suite *AnimeControllerSuite) TestParse() {
 			decoder := json.NewDecoder(resp.Body)
 			decoder.DisallowUnknownFields()
 
-			var err response.Error
+			var err ErrorResponse
 			require.NoError(decoder.Decode(&err))
 			require.Equal(testCase.statusCode, resp.Code)
 			require.Equal(err.Message, testCase.err.Error())
