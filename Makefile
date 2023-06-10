@@ -21,9 +21,21 @@ clean:
 .PHONY: all
 all : clean build run
 
+.PHONY: install-dependencies
+install-dependencies:
+	go install github.com/pressly/goose/v3/cmd/goose@latest;
+	go install github.com/golang/mock/mockgen@v1.6.0;
+	go install github.com/swaggo/swag/cmd/swag@latest;
+
 .PHONY: up
 up:
 	docker-compose up --build
+
+.PHONY: install
+install:
+	@cp .env.example .env
+	@make install-dependencies
+	@make up
 
 .PHONY: filebeat
 filebeat:

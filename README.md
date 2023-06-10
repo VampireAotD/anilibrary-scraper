@@ -1,4 +1,4 @@
-# Anilibrary-scraper
+# Anilibrary Scraper
 
 :warning: **This is an experimental branch and does not considered stable**
 
@@ -11,11 +11,14 @@ Microservice for scraping anime data
 
 ## Config
 
-Copy `.env.example` to `.env` and fill the values.
+Firstly, you need to fill up environmental variables with your values, for that you can either :
+
+- Manually copy `.env.example` with all filled variables to `.env` and start project using `make up`.
+- Fill required variables in `.env.example` and use `make install`
 
 ---
 
-## Build
+## Deployment
 
 Compile into binary:
 
@@ -23,18 +26,27 @@ Compile into binary:
 make all
 ```
 
-With docker:
+Using docker:
 
 ```shell
 make up # docker-compose up --build
 make filebeat # same as up, but with filebeat container
 ```
 
-### Ports
+If you are deploying this project for the first time, better use:
 
-* `8080` - **HTTP**
-* `6379` - **Redis**
-* `16686` - **Jaeger UI**
+```shell
+make install # will copy .env.example to .env and deploy app using docker
+```
+
+| Service     | Port  |
+|-------------|-------|
+| Application | 8080  |
+| Redis       | 6379  |
+| Jaeger UI   | 16686 |
+| Clickhouse  | 9000  |
+| ZooKeeper   | 2181  |
+| Kafka       | 9092  |
 
 ---
 
