@@ -20,22 +20,6 @@ services:
     networks:
       - local
 
-  jaeger:
-    image: jaegertracing/all-in-one:latest
-    container_name: jaeger
-    ports:
-      - "5778:5778"
-      - "16686:16686"
-      - "14268:14268"
-      - "14269:14269"
-    healthcheck:
-      test: wget --no-verbose --tries=1 --spider http://localhost:14269 || exit 1
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    networks:
-      - local
-
   filebeat:
     image: elastic/filebeat:${FILEBEAT_VERSION}
     container_name: anilibrary-scraper-filebeat
@@ -60,7 +44,7 @@ services:
       - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD}
     ports:
       - "8123:8123"
-      - "9000:9000"
+      - "9005:9000"
     healthcheck:
       test: wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1
       interval: 5s
@@ -113,8 +97,6 @@ services:
   app:
     depends_on:
       redis:
-        condition: service_healthy
-      jaeger:
         condition: service_healthy
       clickhouse:
         condition: service_healthy
