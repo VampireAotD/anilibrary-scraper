@@ -24,7 +24,7 @@ all : clean build run
 .PHONY: install-dependencies
 install-dependencies:
 	go install github.com/pressly/goose/v3/cmd/goose@latest;
-	go install github.com/golang/mock/mockgen@v1.6.0;
+	go install go.uber.org/mock/mockgen@latest;
 	go install github.com/swaggo/swag/cmd/swag@latest;
 
 .PHONY: up

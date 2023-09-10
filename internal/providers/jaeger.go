@@ -7,19 +7,17 @@ import (
 
 	"anilibrary-scraper/pkg/logging"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/jaeger"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.12.0"
 )
 
-func NewJaegerTracerProvider(endpoint, serviceName, environment string, logger logging.Contract) (func(), error) {
-	exporter, err := jaeger.New(
-		jaeger.WithCollectorEndpoint(
-			jaeger.WithEndpoint(endpoint),
-		),
-	)
+func NewJaegerTracerProvider(serviceName, environment string, logger logging.Contract) (func(), error) {
+	client := otlptracehttp.NewClient()
+	exporter, err := otlptrace.New(context.Background(), client)
 	if err != nil {
 		return nil, fmt.Errorf("jaeger exporter: %w", err)
 	}

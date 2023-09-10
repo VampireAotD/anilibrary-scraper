@@ -9,7 +9,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	gomock "github.com/golang/mock/gomock"
+	gomock "go.uber.org/mock/gomock"
 )
 
 // MockScraperUseCase is a mock of ScraperUseCase interface.

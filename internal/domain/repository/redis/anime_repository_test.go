@@ -9,9 +9,9 @@ import (
 	"anilibrary-scraper/internal/domain/repository"
 
 	"github.com/alicebob/miniredis/v2"
-	"github.com/golang/mock/gomock"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/suite"
+	"go.uber.org/mock/gomock"
 )
 
 const testURL string = "https://animego.org/anime/naruto-uragannye-hroniki-103"

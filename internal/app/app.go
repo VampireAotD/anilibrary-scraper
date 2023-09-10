@@ -47,7 +47,6 @@ func New() (*App, func(), error) {
 	}
 
 	jaegerCloser, err := providers.NewJaegerTracerProvider(
-		cfg.Jaeger.TraceEndpoint,
 		cfg.App.Name,
 		string(cfg.App.Env),
 		logger,

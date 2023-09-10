@@ -10,11 +10,11 @@ import (
 	"anilibrary-scraper/internal/domain/entity"
 	kafka2 "anilibrary-scraper/internal/domain/repository/kafka"
 
-	"github.com/golang/mock/gomock"
 	"github.com/segmentio/kafka-go"
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
+	"go.uber.org/mock/gomock"
 )
 
 type EventRepositorySuite struct {

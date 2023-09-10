@@ -13,11 +13,10 @@ const (
 )
 
 type Config struct {
-	App    App
-	HTTP   HTTP
-	Jaeger Jaeger
-	Kafka  Kafka
-	Redis  Redis
+	App   App
+	HTTP  HTTP
+	Kafka Kafka
+	Redis Redis
 }
 
 func New() (Config, error) {
@@ -47,10 +46,6 @@ type Redis struct {
 	PoolTimeout time.Duration `env:"REDIS_POOL_TIMEOUT" env-default:"5s"`
 	PoolSize    int           `env:"REDIS_POOL_SIZE" env-default:"-1"`
 	IdleSize    int           `env:"REDIS_IDLE_SIZE" env-default:"-1"`
-}
-
-type Jaeger struct {
-	TraceEndpoint string `env:"JAEGER_TRACE_ENDPOINT" env-required:""`
 }
 
 type Kafka struct {

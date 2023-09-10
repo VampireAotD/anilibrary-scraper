@@ -10,8 +10,8 @@ import (
 	scraperService "anilibrary-scraper/internal/domain/service/scraper"
 	"anilibrary-scraper/internal/scraper"
 
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
+	"go.uber.org/mock/gomock"
 )
 
 type ScraperServiceSuite struct {

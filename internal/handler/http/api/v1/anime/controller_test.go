@@ -16,8 +16,8 @@ import (
 	"anilibrary-scraper/internal/scraper"
 	"anilibrary-scraper/pkg/logging"
 
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
+	"go.uber.org/mock/gomock"
 )
 
 type AnimeControllerSuite struct {
