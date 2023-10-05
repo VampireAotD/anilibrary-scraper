@@ -1,5 +1,10 @@
 basePath: /api/v1
 definitions:
+  anime.ErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
   anime.ScrapeRequest:
     properties:
       url:
@@ -31,11 +36,6 @@ definitions:
         items:
           type: string
         type: array
-    type: object
-  response.Error:
-    properties:
-      message:
-        type: string
     type: object
 host: localhost:8080
 info:
@@ -80,7 +80,7 @@ paths:
         "422":
           description: Unprocessable Entity
           schema:
-            $ref: '#/definitions/response.Error'
+            $ref: '#/definitions/anime.ErrorResponse'
       summary: Scrape anime data
       tags:
       - anime

@@ -34,7 +34,7 @@ func NewController(usecase usecase.ScraperUseCase) Controller {
 //	@Param			url				body		ScrapeRequest	true	"Url to scrape from"
 //	@Success		200				{object}	entity.Anime
 //	@Failure		401				string		Unauthorized
-//	@Failure		422				{object}	response.Error
+//	@Failure		422				{object}	ErrorResponse
 //	@Router			/anime/parse [post]
 func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 	var (

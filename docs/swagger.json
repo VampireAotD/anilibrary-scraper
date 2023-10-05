@@ -62,7 +62,7 @@
                     "422": {
                         "description": "Unprocessable Entity",
                         "schema": {
-                            "$ref": "#/definitions/response.Error"
+                            "$ref": "#/definitions/anime.ErrorResponse"
                         }
                     }
                 }
@@ -70,6 +70,14 @@
         }
     },
     "definitions": {
+        "anime.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "anime.ScrapeRequest": {
             "type": "object",
             "required": [
@@ -116,14 +124,6 @@
                     "items": {
                         "type": "string"
                     }
-                }
-            }
-        },
-        "response.Error": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
                 }
             }
         }

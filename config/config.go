@@ -4,19 +4,17 @@ import (
 	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
-)
-
-type Env string
-
-const (
-	Local Env = "local"
+	"go.uber.org/fx"
 )
 
 type Config struct {
-	App   App
-	HTTP  HTTP
-	Kafka Kafka
-	Redis Redis
+	fx.Out
+
+	App    App
+	Tracer Tracer
+	HTTP   HTTP
+	Kafka  Kafka
+	Redis  Redis
 }
 
 func New() (Config, error) {
@@ -36,7 +34,7 @@ type HTTP struct {
 }
 
 type App struct {
-	Env  Env    `env:"APP_ENV" env-default:"production"`
+	Env  string `env:"APP_ENV" env-default:"local"`
 	Name string `env:"APP_NAME" env-default:"anilibrary-scraper"`
 }
 
@@ -52,4 +50,9 @@ type Kafka struct {
 	Address   string `env:"KAFKA_ADDRESS" env-required:""`
 	Topic     string `env:"KAFKA_TOPIC" env-default:"scraper_topic"`
 	Partition int    `env:"KAFKA_PARTITION" env-default:"0"`
+}
+
+type Tracer struct {
+	Env         string `env:"APP_ENV" env-default:"local"`
+	ServiceName string `env:"APP_NAME" env-default:"anilibrary-scraper"`
 }

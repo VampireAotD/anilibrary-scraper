@@ -4,60 +4,68 @@ import (
 	"net/http"
 
 	_ "anilibrary-scraper/docs" // generated swagger docs
-	"anilibrary-scraper/internal/container"
 	"anilibrary-scraper/internal/handler/http/middleware"
 	"anilibrary-scraper/pkg/logging"
 
 	"github.com/go-chi/chi/v5"
 	chiMiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/redis/go-redis/v9"
-	"github.com/segmentio/kafka-go"
 	swagger "github.com/swaggo/http-swagger"
 )
 
-type config struct {
-	logger          logging.Contract
-	redisConnection *redis.Client
-	kafkaConnection *kafka.Conn
-	enableProfiling bool
+type Router struct {
+	engine   chi.Router
+	handlers Handlers
 }
 
-func NewRouter(options ...Option) http.Handler {
-	cfg := &config{
-		enableProfiling: false,
-	}
-
-	for i := range options {
-		options[i](cfg)
-	}
-
+func New(handlers Handlers) *Router {
 	router := chi.NewRouter()
 
 	router.Use(
 		chiMiddleware.Recoverer,
 		middleware.Tracer,
-		middleware.Logger(cfg.logger),
 	)
 
-	router.Handle("/metrics", promhttp.Handler())
-
-	if cfg.enableProfiling {
-		router.Mount("/debug", chiMiddleware.Profiler())
+	return &Router{
+		engine:   router,
+		handlers: handlers,
 	}
+}
 
-	router.Get("/swagger/*", swagger.Handler())
+func (r *Router) WithMetrics() *Router {
+	r.engine.Handle("/metrics", promhttp.Handler())
 
-	router.Get("/healthcheck", container.MakeHealthcheckController(cfg.redisConnection, cfg.kafkaConnection).Healthcheck)
+	return r
+}
 
-	// API routes
-	router.Route("/api/v1", func(r chi.Router) {
-		r.Use(middleware.ResponseMetrics, middleware.JWTAuth)
+func (r *Router) WithProfiling() *Router {
+	r.engine.Mount("/debug", chiMiddleware.Profiler())
 
-		r.Route("/anime", func(r chi.Router) {
-			r.Post("/parse", container.MakeAnimeController(cfg.redisConnection, cfg.kafkaConnection).Parse)
+	return r
+}
+
+func (r *Router) WithSwagger() *Router {
+	r.engine.Get("/swagger/*", swagger.Handler())
+
+	return r
+}
+
+func (r *Router) WithLogger(logger logging.Contract) *Router {
+	r.engine.Use(middleware.Logger(logger.Named("http")))
+
+	return r
+}
+
+func (r *Router) Routes() http.Handler {
+	r.engine.Get("/healthcheck", r.handlers.healthcheck.Healthcheck)
+
+	r.engine.Route("/api/v1", func(router chi.Router) {
+		router.Use(middleware.ResponseMetrics, middleware.JWTAuth)
+
+		router.Route("/anime", func(router chi.Router) {
+			router.Post("/parse", r.handlers.anime.Parse)
 		})
 	})
 
-	return router
+	return r.engine
 }

@@ -3,9 +3,10 @@ package providers
 import (
 	"context"
 	"fmt"
-	"time"
 
+	"anilibrary-scraper/config"
 	"anilibrary-scraper/pkg/logging"
+
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
@@ -13,21 +14,22 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.12.0"
+	"go.uber.org/fx"
 )
 
-func NewJaegerTracerProvider(serviceName, environment string, logger logging.Contract) (func(), error) {
+func NewTraceProvider(lifecycle fx.Lifecycle, cfg config.Tracer, logger logging.Contract) error {
 	client := otlptracehttp.NewClient()
 	exporter, err := otlptrace.New(context.Background(), client)
 	if err != nil {
-		return nil, fmt.Errorf("jaeger exporter: %w", err)
+		return fmt.Errorf("trace exporter: %w", err)
 	}
 
 	provider := sdktrace.NewTracerProvider(
 		sdktrace.WithBatcher(exporter),
 		sdktrace.WithResource(resource.NewWithAttributes(
 			semconv.SchemaURL,
-			semconv.ServiceNameKey.String(serviceName),
-			semconv.DeploymentEnvironmentKey.String(environment),
+			semconv.ServiceNameKey.String(cfg.ServiceName),
+			semconv.DeploymentEnvironmentKey.String(cfg.Env),
 		)),
 	)
 
@@ -37,16 +39,13 @@ func NewJaegerTracerProvider(serviceName, environment string, logger logging.Con
 		propagation.Baggage{},
 	))
 
-	closer := func() {
-		logger.Info("closing jaeger")
+	lifecycle.Append(fx.Hook{
+		OnStop: func(ctx context.Context) error {
+			logger.Info("Closing tracer")
 
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
+			return provider.Shutdown(ctx)
+		},
+	})
 
-		if err := provider.Shutdown(ctx); err != nil {
-			logger.Error("jaeger provider", logging.Error(err))
-		}
-	}
-
-	return closer, nil
+	return nil
 }

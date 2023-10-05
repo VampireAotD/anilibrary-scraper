@@ -12,7 +12,6 @@ require (
 	github.com/go-chi/render v1.0.3
 	github.com/go-playground/validator/v10 v10.15.3
 	github.com/golang-jwt/jwt/v4 v4.5.0
-	github.com/google/wire v0.5.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/prometheus/client_golang v1.16.0
 	github.com/redis/go-redis/extra/redisotel/v9 v9.0.5
@@ -28,6 +27,7 @@ require (
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.17.0
 	go.opentelemetry.io/otel/sdk v1.17.0
 	go.opentelemetry.io/otel/trace v1.17.0
+	go.uber.org/fx v1.20.0
 	go.uber.org/mock v0.2.0
 	go.uber.org/zap v1.25.0
 	golang.org/x/text v0.13.0
@@ -95,6 +95,7 @@ require (
 	github.com/yuin/gopher-lua v1.1.0 // indirect
 	go.opentelemetry.io/otel/metric v1.17.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.0.0 // indirect
+	go.uber.org/dig v1.17.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.13.0 // indirect
 	golang.org/x/exp v0.0.0-20230510235704-dd950f8aeaea // indirect

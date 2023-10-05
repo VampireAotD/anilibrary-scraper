@@ -1,8 +1,18 @@
 package server
 
 import (
+	"context"
+	"errors"
+	"net"
 	"net/http"
+	"strconv"
 	"time"
+
+	"anilibrary-scraper/config"
+	"anilibrary-scraper/internal/handler/http/router"
+	"anilibrary-scraper/pkg/logging"
+
+	"go.uber.org/fx"
 )
 
 const (
@@ -11,12 +21,46 @@ const (
 	defaultIdleTimeout  = 15 * time.Second
 )
 
-func NewHTTPServer(address string, router http.Handler) *http.Server {
-	return &http.Server{
+type Server struct {
+	router *router.Router
+	logger logging.Contract
+	cfg    config.HTTP
+}
+
+func New(router *router.Router, logger logging.Contract, cfg config.HTTP) Server {
+	return Server{
+		router: router,
+		logger: logger,
+		cfg:    cfg,
+	}
+}
+
+func (s Server) Start(lifecycle fx.Lifecycle) {
+	address := net.JoinHostPort(s.cfg.Addr, strconv.Itoa(s.cfg.Port))
+
+	server := &http.Server{
 		Addr:         address,
-		Handler:      router,
+		Handler:      s.router.WithLogger(s.logger).WithSwagger().WithMetrics().Routes(), // TODO resolve profiling issue
 		ReadTimeout:  defaultReadTimeout,
 		WriteTimeout: defaultWriteTimeout,
 		IdleTimeout:  defaultIdleTimeout,
 	}
+
+	lifecycle.Append(fx.Hook{
+		OnStart: func(ctx context.Context) error {
+			s.logger.Info("HTTP server started at", logging.String("addr", address))
+
+			go func() {
+				err := server.ListenAndServe()
+				if err != nil && !errors.Is(err, http.ErrServerClosed) {
+					s.logger.Error("HTTP server", logging.Error(err))
+				}
+			}()
+
+			return nil
+		},
+		OnStop: func(ctx context.Context) error {
+			return server.Shutdown(ctx)
+		},
+	})
 }
