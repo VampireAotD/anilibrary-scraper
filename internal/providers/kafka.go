@@ -2,6 +2,7 @@ package providers
 
 import (
 	"context"
+	"fmt"
 
 	"anilibrary-scraper/config"
 	"anilibrary-scraper/pkg/logging"
@@ -10,15 +11,17 @@ import (
 	"go.uber.org/fx"
 )
 
-func NewKafkaProvider(lifecycle fx.Lifecycle, cfg config.Kafka, logger logging.Contract) (*kafka.Conn, error) {
+func NewKafkaProvider(lifecycle fx.Lifecycle, cfg config.Kafka) (*kafka.Conn, error) {
 	conn, err := kafka.DialLeader(context.Background(), "tcp", cfg.Address, cfg.Topic, cfg.Partition)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("connecting to kafka: %w", err)
 	}
+
+	logging.Get().Info("Connected to Kafka")
 
 	lifecycle.Append(fx.Hook{
 		OnStop: func(ctx context.Context) error {
-			logger.Info("Closing kafka connection")
+			logging.Get().Info("Closing Kafka connection")
 
 			return conn.Close()
 		},

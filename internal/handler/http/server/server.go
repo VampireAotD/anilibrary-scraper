@@ -13,6 +13,7 @@ import (
 	"anilibrary-scraper/pkg/logging"
 
 	"go.uber.org/fx"
+	"go.uber.org/zap"
 )
 
 const (
@@ -23,14 +24,12 @@ const (
 
 type Server struct {
 	router *router.Router
-	logger logging.Contract
 	cfg    config.HTTP
 }
 
-func New(router *router.Router, logger logging.Contract, cfg config.HTTP) Server {
+func New(router *router.Router, cfg config.HTTP) Server {
 	return Server{
 		router: router,
-		logger: logger,
 		cfg:    cfg,
 	}
 }
@@ -40,7 +39,7 @@ func (s Server) Start(lifecycle fx.Lifecycle) {
 
 	server := &http.Server{
 		Addr:         address,
-		Handler:      s.router.WithLogger(s.logger).WithSwagger().WithMetrics().Routes(), // TODO resolve profiling issue
+		Handler:      s.router.WithLogger(logging.Get()).WithSwagger().WithMetrics().Routes(), // TODO resolve profiling issue
 		ReadTimeout:  defaultReadTimeout,
 		WriteTimeout: defaultWriteTimeout,
 		IdleTimeout:  defaultIdleTimeout,
@@ -48,12 +47,12 @@ func (s Server) Start(lifecycle fx.Lifecycle) {
 
 	lifecycle.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			s.logger.Info("HTTP server started at", logging.String("addr", address))
+			logging.Get().Info("HTTP server started at", zap.String("addr", address))
 
 			go func() {
 				err := server.ListenAndServe()
 				if err != nil && !errors.Is(err, http.ErrServerClosed) {
-					s.logger.Error("HTTP server", logging.Error(err))
+					logging.Get().Error("HTTP server", zap.Error(err))
 				}
 			}()
 

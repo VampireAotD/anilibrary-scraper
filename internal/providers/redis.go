@@ -13,7 +13,7 @@ import (
 	"go.uber.org/fx"
 )
 
-func NewRedisProvider(lifecycle fx.Lifecycle, cfg config.Redis, logger logging.Contract) (*redis.Client, error) {
+func NewRedisProvider(lifecycle fx.Lifecycle, cfg config.Redis) (*redis.Client, error) {
 	if cfg.PoolSize <= 0 {
 		cfg.PoolSize = 10 * runtime.GOMAXPROCS(0)
 	}
@@ -42,10 +42,12 @@ func NewRedisProvider(lifecycle fx.Lifecycle, cfg config.Redis, logger logging.C
 				return fmt.Errorf("redis tracing: %w", err)
 			}
 
+			logging.Get().Info("Connected to Redis")
+
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
-			logger.Info("Closing redis connection")
+			logging.Get().Info("Closing Redis connection")
 
 			return client.Close()
 		},

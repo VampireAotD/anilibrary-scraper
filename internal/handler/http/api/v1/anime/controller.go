@@ -7,10 +7,10 @@ import (
 	"anilibrary-scraper/internal/domain/usecase"
 	"anilibrary-scraper/internal/handler/http/middleware"
 	"anilibrary-scraper/internal/metrics"
-	"anilibrary-scraper/pkg/logging"
 
 	"github.com/go-chi/render"
 	"go.opentelemetry.io/otel/codes"
+	"go.uber.org/zap"
 )
 
 type Controller struct {
@@ -53,7 +53,7 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 	if err := decoder.Decode(&request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		span.RecordError(err)
-		logger.Error("while decoding incoming request", logging.Error(err))
+		logger.Error("while decoding incoming request", zap.Error(err))
 
 		render.Status(r, http.StatusUnprocessableEntity)
 		render.JSON(w, r, NewErrorResponse(err))
@@ -66,14 +66,14 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 		metrics.IncrHTTPErrorsCounter()
 		span.SetStatus(codes.Error, err.Error())
 		span.RecordError(err)
-		logger.Error("while decoding incoming url", logging.Error(err))
+		logger.Error("while decoding incoming url", zap.Error(err))
 
 		render.Status(r, http.StatusUnprocessableEntity)
 		render.JSON(w, r, NewErrorResponse(err))
 		return
 	}
 
-	logger.Info("Scraping", logging.String("url", request.URL))
+	logger.Info("Scraping", zap.String("url", request.URL))
 
 	span.AddEvent("Scraping data")
 
@@ -82,7 +82,7 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 		metrics.IncrHTTPErrorsCounter()
 		span.SetStatus(codes.Error, err.Error())
 		span.RecordError(err)
-		logger.Error("while scraping", logging.Error(err))
+		logger.Error("while scraping", zap.Error(err))
 
 		render.Status(r, http.StatusUnprocessableEntity)
 		render.JSON(w, r, NewErrorResponse(err))

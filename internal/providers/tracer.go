@@ -17,7 +17,7 @@ import (
 	"go.uber.org/fx"
 )
 
-func NewTraceProvider(lifecycle fx.Lifecycle, cfg config.Tracer, logger logging.Contract) error {
+func NewTraceProvider(lifecycle fx.Lifecycle, cfg config.Tracer) error {
 	client := otlptracehttp.NewClient()
 	exporter, err := otlptrace.New(context.Background(), client)
 	if err != nil {
@@ -39,9 +39,11 @@ func NewTraceProvider(lifecycle fx.Lifecycle, cfg config.Tracer, logger logging.
 		propagation.Baggage{},
 	))
 
+	logging.Get().Info("Configured trace provider")
+
 	lifecycle.Append(fx.Hook{
 		OnStop: func(ctx context.Context) error {
-			logger.Info("Closing tracer")
+			logging.Get().Info("Closing tracer")
 
 			return provider.Shutdown(ctx)
 		},

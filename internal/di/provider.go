@@ -9,7 +9,6 @@ import (
 var ProviderModule = fx.Module(
 	"providers",
 	fx.Provide(
-		providers.NewLoggerProvider,
 		providers.NewRedisProvider,
 		providers.NewKafkaProvider,
 	),
@@ -18,6 +17,7 @@ var ProviderModule = fx.Module(
 	// and if no part of application needs it as dependency, fx won't provide it to anything, so it needs to be invoked
 	// once the app is started
 	fx.Invoke(
+		providers.NewLoggerProvider,
 		providers.NewTraceProvider,
 	),
 )

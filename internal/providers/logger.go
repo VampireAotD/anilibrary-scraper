@@ -10,15 +10,25 @@ import (
 	"go.uber.org/fx"
 )
 
-const DefaultLoggerFileLocation string = "../../storage/logs/app.log"
+const defaultLoggerFileLocation string = "../../storage/logs/app.log"
 
-func NewLoggerProvider(lifecycle fx.Lifecycle) (logging.Contract, error) {
-	file, err := createLogFile()
+func createLogFile() (*os.File, error) {
+	file, err := os.OpenFile(defaultLoggerFileLocation, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0666)
+
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("creating log file %w", err)
 	}
 
-	logger := logging.NewLogger(os.Stdout, file)
+	return file, nil
+}
+
+func NewLoggerProvider(lifecycle fx.Lifecycle) error {
+	file, err := createLogFile()
+	if err != nil {
+		return fmt.Errorf("creating log file: %w", err)
+	}
+
+	logger := logging.New(logging.WithLogFiles(file), logging.ECSCompatible())
 
 	logger.Info("Initialized logger")
 
@@ -31,15 +41,5 @@ func NewLoggerProvider(lifecycle fx.Lifecycle) (logging.Contract, error) {
 		},
 	})
 
-	return logger, nil
-}
-
-func createLogFile() (*os.File, error) {
-	file, err := os.OpenFile(DefaultLoggerFileLocation, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0666)
-
-	if err != nil {
-		return nil, fmt.Errorf("creating log file %w", err)
-	}
-
-	return file, nil
+	return nil
 }

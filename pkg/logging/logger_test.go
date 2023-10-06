@@ -9,46 +9,27 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCreateLogger(t *testing.T) {
-	logger := NewLogger(io.Discard)
-	require.NotNil(t, logger)
-}
+func TestLogger(t *testing.T) {
+	t.Run("Get logger", func(t *testing.T) {
+		require.NotNil(t, Get())
+	})
 
-func TestMethods(t *testing.T) {
-	var buf bytes.Buffer
-	logger := NewLogger(io.Discard, &buf)
+	t.Run("ECS support", func(t *testing.T) {
+		var buff bytes.Buffer
+		defer buff.Reset()
 
-	testCases := []struct {
-		Name string
-		Func func(msg string, fields ...Field)
-	}{
-		{
-			Name: "Debug",
-			Func: logger.Debug,
-		},
-		{
-			Name: "Info",
-			Func: logger.Info,
-		},
-		{
-			Name: "Warn",
-			Func: logger.Warn,
-		},
-		{
-			Name: "Error",
-			Func: logger.Error,
-		},
-	}
+		logger := New(WithOutput(io.Discard), WithLogFiles(&buff), ECSCompatible())
 
-	for _, testCase := range testCases {
-		buf.Reset()
+		testLog := struct {
+			Message    string `json:"message"`
+			ECSVersion string `json:"ecs.version"`
+		}{}
 
-		t.Run(testCase.Name, func(t *testing.T) {
-			defer buf.Reset()
+		const log string = "test"
+		logger.Info(log)
 
-			testCase.Func("test")
-			require.NoError(t, logger.Sync())
-			require.NoError(t, json.NewDecoder(&buf).Decode(&struct{}{}))
-		})
-	}
+		require.NoError(t, json.NewDecoder(&buff).Decode(&testLog))
+		require.Equal(t, log, testLog.Message)
+		require.NotZero(t, testLog.ECSVersion)
+	})
 }

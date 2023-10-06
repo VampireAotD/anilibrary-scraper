@@ -10,28 +10,29 @@ import (
 	"testing"
 
 	"anilibrary-scraper/pkg/logging"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/require"
 )
 
 func TestLogger(t *testing.T) {
 	var buff bytes.Buffer
-	log := logging.NewLogger(io.Discard, &buff)
+	logger := logging.New(logging.WithOutput(io.Discard), logging.WithLogFiles(&buff))
 
 	t.Run("WithLogger", func(t *testing.T) {
-		ctx := WithLogger(context.Background(), log)
+		ctx := WithLogger(context.Background(), logger)
 		require.NotNil(t, ctx)
 	})
 
 	t.Run("GetLogger", func(t *testing.T) {
-		ctx := WithLogger(context.Background(), log)
+		ctx := WithLogger(context.Background(), logger)
 		loggerFromCtx := GetLogger(ctx)
 		require.NotNil(t, loggerFromCtx)
 	})
 
 	t.Run("MustGetLogger", func(t *testing.T) {
 		t.Run("NoError", func(t *testing.T) {
-			ctx := WithLogger(context.Background(), log)
+			ctx := WithLogger(context.Background(), logger)
 			loggerFromCtx := MustGetLogger(ctx)
 			require.NotNil(t, loggerFromCtx)
 		})
@@ -51,7 +52,7 @@ func TestLogger(t *testing.T) {
 		const testLog string = "test"
 		router := chi.NewRouter()
 
-		router.Use(Logger(log))
+		router.Use(Logger(logger))
 		router.Get("/test", func(writer http.ResponseWriter, request *http.Request) {
 			loggerFromContext := MustGetLogger(request.Context())
 			loggerFromContext.Info(testLog)

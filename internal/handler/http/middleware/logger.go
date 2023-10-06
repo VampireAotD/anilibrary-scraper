@@ -5,33 +5,33 @@ import (
 	"errors"
 	"net/http"
 
-	"anilibrary-scraper/pkg/logging"
+	"go.uber.org/zap"
 )
 
 var ErrNoLogger = errors.New("logger not provided")
 
 type ctxLogger struct{}
 
-func Logger(log logging.Contract) func(http.Handler) http.Handler {
+func Logger(logger *zap.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-			withLogger := WithLogger(request.Context(), log)
+			withLogger := WithLogger(request.Context(), logger)
 			next.ServeHTTP(writer, request.WithContext(withLogger))
 		})
 	}
 }
 
-func WithLogger(ctx context.Context, contract logging.Contract) context.Context {
-	return context.WithValue(ctx, ctxLogger{}, contract)
+func WithLogger(ctx context.Context, logger *zap.Logger) context.Context {
+	return context.WithValue(ctx, ctxLogger{}, logger)
 }
 
-func GetLogger(ctx context.Context) logging.Contract {
-	logger, _ := ctx.Value(ctxLogger{}).(logging.Contract)
+func GetLogger(ctx context.Context) *zap.Logger {
+	logger, _ := ctx.Value(ctxLogger{}).(*zap.Logger)
 	return logger
 }
 
-func MustGetLogger(ctx context.Context) logging.Contract {
-	logger, _ := ctx.Value(ctxLogger{}).(logging.Contract)
+func MustGetLogger(ctx context.Context) *zap.Logger {
+	logger, _ := ctx.Value(ctxLogger{}).(*zap.Logger)
 	if logger == nil {
 		panic(ErrNoLogger)
 	}
