@@ -1,7 +1,6 @@
 package anime
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"anilibrary-scraper/internal/domain/usecase"
@@ -45,24 +44,10 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 	ctx, span := tracer.Start(r.Context(), "Parse")
 	defer span.End()
 
-	span.AddEvent("Decoding request")
+	span.AddEvent("Decoding and validating request")
 
 	var request ScrapeRequest
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(&request); err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		span.RecordError(err)
-		logger.Error("while decoding incoming request", zap.Error(err))
-
-		render.Status(r, http.StatusUnprocessableEntity)
-		render.JSON(w, r, NewErrorResponse(err))
-		return
-	}
-
-	span.AddEvent("Validating request")
-
-	if err := request.Validate(); err != nil {
+	if err := request.MapAndValidate(r.Body); err != nil {
 		metrics.IncrHTTPErrorsCounter()
 		span.SetStatus(codes.Error, err.Error())
 		span.RecordError(err)
@@ -74,7 +59,6 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logger.Info("Scraping", zap.String("url", request.URL))
-
 	span.AddEvent("Scraping data")
 
 	entity, err := c.usecase.Scrape(ctx, request.URL)
@@ -93,4 +77,5 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 
 	metrics.IncrHTTPSuccessCounter()
 	render.JSON(w, r, entity)
+	return
 }

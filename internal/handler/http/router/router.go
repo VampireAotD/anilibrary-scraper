@@ -5,12 +5,12 @@ import (
 
 	_ "anilibrary-scraper/docs" // generated swagger docs
 	"anilibrary-scraper/internal/handler/http/middleware"
+	"anilibrary-scraper/pkg/logging"
 
 	"github.com/go-chi/chi/v5"
 	chiMiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	swagger "github.com/swaggo/http-swagger"
-	"go.uber.org/zap"
 )
 
 type Router struct {
@@ -24,6 +24,7 @@ func New(handlers Handlers) *Router {
 	router.Use(
 		chiMiddleware.Recoverer,
 		middleware.Tracer,
+		middleware.Logger(logging.Get().Named("http")),
 	)
 
 	return &Router{
@@ -46,12 +47,6 @@ func (r *Router) WithProfiling() *Router {
 
 func (r *Router) WithSwagger() *Router {
 	r.engine.Get("/swagger/*", swagger.Handler())
-
-	return r
-}
-
-func (r *Router) WithLogger(logger *zap.Logger) *Router {
-	r.engine.Use(middleware.Logger(logger.Named("http")))
 
 	return r
 }

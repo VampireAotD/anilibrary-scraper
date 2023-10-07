@@ -39,7 +39,7 @@ func (s Server) Start(lifecycle fx.Lifecycle) {
 
 	server := &http.Server{
 		Addr:         address,
-		Handler:      s.router.WithLogger(logging.Get()).WithSwagger().WithMetrics().Routes(), // TODO resolve profiling issue
+		Handler:      s.router.WithMetrics().Routes(),
 		ReadTimeout:  defaultReadTimeout,
 		WriteTimeout: defaultWriteTimeout,
 		IdleTimeout:  defaultIdleTimeout,
