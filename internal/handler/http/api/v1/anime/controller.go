@@ -77,5 +77,4 @@ func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
 
 	metrics.IncrHTTPSuccessCounter()
 	render.JSON(w, r, entity)
-	return
 }

@@ -1,12 +1,12 @@
 package entity
 
 type Anime struct {
-	Image       string
-	Title       string
-	Status      string
-	Episodes    string
-	Genres      []string
-	VoiceActing []string
-	Synonyms    []string
-	Rating      float32
+	Image       string   `json:"image"`
+	Title       string   `json:"title"`
+	Status      string   `json:"status"`
+	Episodes    string   `json:"episodes"`
+	Genres      []string `json:"genres"`
+	VoiceActing []string `json:"voiceActing"`
+	Synonyms    []string `json:"synonyms"`
+	Rating      float32  `json:"rating"`
 }

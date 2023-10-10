@@ -14,6 +14,7 @@ import (
 	"anilibrary-scraper/internal/scraper/parsers"
 	"anilibrary-scraper/internal/scraper/parsers/model"
 
+	"github.com/PuerkitoBio/goquery"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -22,60 +23,51 @@ import (
 // and scrape all data concurrently
 type Scraper struct {
 	client client.TLSClient
-	wg     *sync.WaitGroup
-	anime  *model.Anime
+	parser parsers.Contract
 }
 
-func New() Scraper {
-	return Scraper{
+func New() *Scraper {
+	return &Scraper{
 		client: client.NewTLSClient(10),
-		wg:     new(sync.WaitGroup),
-		anime:  new(model.Anime),
 	}
 }
 
-type processor func(anime *model.Anime)
+func (s *Scraper) resolveParser(url string) error {
+	switch {
+	case strings.Contains(url, parsers.AnimeGoURL):
+		s.parser = parsers.NewAnimeGo()
+		return nil
+	case strings.Contains(url, parsers.AnimeVostURL):
+		s.parser = parsers.NewAnimeVost()
+		return nil
+	default:
+		return ErrUnsupportedScraper
+	}
+}
 
-func (s Scraper) recover() {
+func (s *Scraper) recover() {
 	if err := recover(); err != nil {
 		metrics.IncrPanicCounter()
 	}
 }
 
-func (s Scraper) parse(callback processor) {
-	defer s.recover()
-	defer s.wg.Done()
+func (s *Scraper) process(document *goquery.Document) *model.Anime {
+	var (
+		wg    sync.WaitGroup
+		anime = new(model.Anime)
+	)
 
-	callback(s.anime)
-}
-
-func (s Scraper) Scrape(ctx context.Context, url string) (*entity.Anime, error) {
-	_, span := trace.SpanFromContext(ctx).TracerProvider().Tracer("Scraper").Start(ctx, "Scrape")
-	defer span.End()
-
-	var parser parsers.Contract
-
-	switch {
-	case strings.Contains(url, parsers.AnimeGoURL):
-		parser = parsers.NewAnimeGo()
-	case strings.Contains(url, parsers.AnimeVostURL):
-		parser = parsers.NewAnimeVost()
-	default:
-		return nil, ErrUnsupportedScraper
+	parse := func(processor func()) {
+		defer s.recover()
+		defer wg.Done()
+		processor()
 	}
 
-	document, err := s.client.FetchDocument(url)
-	if err != nil {
-		return nil, err
-	}
+	wg.Add(8)
 
-	s.wg.Add(8)
-
-	go s.parse(func(anime *model.Anime) {
-		response, err := s.client.FetchResponseBody(parser.Image(document))
+	go parse(func() {
+		response, err := s.client.FetchResponseBody(s.parser.Image(document))
 		if err != nil {
-			span.SetStatus(codes.Error, err.Error())
-			span.RecordError(err)
 			return
 		}
 
@@ -86,39 +78,60 @@ func (s Scraper) Scrape(ctx context.Context, url string) (*entity.Anime, error) 
 		)
 	})
 
-	go s.parse(func(anime *model.Anime) {
-		anime.Title = parser.Title(document)
+	go parse(func() {
+		anime.Title = s.parser.Title(document)
 	})
 
-	go s.parse(func(anime *model.Anime) {
-		anime.Status = parser.Status(document)
+	go parse(func() {
+		anime.Status = s.parser.Status(document)
 	})
 
-	go s.parse(func(anime *model.Anime) {
-		anime.Rating = parser.Rating(document)
+	go parse(func() {
+		anime.Rating = s.parser.Rating(document)
 	})
 
-	go s.parse(func(anime *model.Anime) {
-		anime.Episodes = parser.Episodes(document)
+	go parse(func() {
+		anime.Episodes = s.parser.Episodes(document)
 	})
 
-	go s.parse(func(anime *model.Anime) {
-		anime.Genres = parser.Genres(document)
+	go parse(func() {
+		anime.Genres = s.parser.Genres(document)
 	})
 
-	go s.parse(func(anime *model.Anime) {
-		anime.VoiceActing = parser.VoiceActing(document)
+	go parse(func() {
+		anime.VoiceActing = s.parser.VoiceActing(document)
 	})
 
-	go s.parse(func(anime *model.Anime) {
-		anime.Synonyms = parser.Synonyms(document)
+	go parse(func() {
+		anime.Synonyms = s.parser.Synonyms(document)
 	})
 
-	s.wg.Wait()
+	wg.Wait()
 
-	if err := s.anime.Validate(); err != nil {
+	return anime
+}
+
+func (s *Scraper) Scrape(ctx context.Context, url string) (*entity.Anime, error) {
+	_, span := trace.SpanFromContext(ctx).TracerProvider().Tracer("Scraper").Start(ctx, "Scrape")
+	defer span.End()
+
+	if err := s.resolveParser(url); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 
-	return s.anime.MapToDomainEntity(), nil
+	document, err := s.client.FetchDocument(url)
+	if err != nil {
+		return nil, err
+	}
+
+	anime := s.process(document)
+	if err = anime.Validate(); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+
+	return anime.MapToDomainEntity(), nil
 }
