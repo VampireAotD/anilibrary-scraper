@@ -51,7 +51,7 @@ func (suite *ScraperServiceSuite) TestProcess() {
 
 		for _, testCase := range testCases {
 			suite.repositoryMock.FindByURL(gomock.Any(), gomock.Any()).Return(nil, nil)
-			suite.repositoryMock.Create(gomock.Any(), testCase, gomock.Any()).Return(nil)
+			suite.repositoryMock.Create(gomock.Any(), gomock.Any()).Return(nil)
 
 			suite.scraperMock.Scrape(gomock.Any(), testCase).Return(nil, scraper.ErrUnsupportedScraper)
 
@@ -126,7 +126,7 @@ func (suite *ScraperServiceSuite) TestProcess() {
 					t.Parallel()
 
 					suite.repositoryMock.FindByURL(gomock.Any(), gomock.Any()).Return(nil, nil)
-					suite.repositoryMock.Create(gomock.Any(), testCase.url, gomock.Any()).Return(nil)
+					suite.repositoryMock.Create(gomock.Any(), gomock.Any()).Return(nil)
 
 					suite.scraperMock.Scrape(gomock.Any(), testCase.url).Return(testCase.expected, nil)
 

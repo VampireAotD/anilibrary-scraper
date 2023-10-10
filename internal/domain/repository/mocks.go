@@ -6,6 +6,7 @@ package repository
 
 import (
 	entity "anilibrary-scraper/internal/domain/entity"
+	models "anilibrary-scraper/internal/domain/repository/models"
 	context "context"
 	reflect "reflect"
 
@@ -36,17 +37,17 @@ func (m *MockAnimeRepository) EXPECT() *MockAnimeRepositoryMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockAnimeRepository) Create(ctx context.Context, key string, anime *entity.Anime) error {
+func (m *MockAnimeRepository) Create(ctx context.Context, anime models.Anime) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", ctx, key, anime)
+	ret := m.ctrl.Call(m, "Create", ctx, anime)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockAnimeRepositoryMockRecorder) Create(ctx, key, anime interface{}) *gomock.Call {
+func (mr *MockAnimeRepositoryMockRecorder) Create(ctx, anime interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockAnimeRepository)(nil).Create), ctx, key, anime)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockAnimeRepository)(nil).Create), ctx, anime)
 }
 
 // FindByURL mocks base method.
@@ -88,7 +89,7 @@ func (m *MockEventRepository) EXPECT() *MockEventRepositoryMockRecorder {
 }
 
 // Send mocks base method.
-func (m *MockEventRepository) Send(ctx context.Context, event *entity.Event) error {
+func (m *MockEventRepository) Send(ctx context.Context, event models.Event) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Send", ctx, event)
 	ret0, _ := ret[0].(error)

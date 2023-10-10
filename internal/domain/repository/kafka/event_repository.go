@@ -2,10 +2,12 @@ package kafka
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
-	"anilibrary-scraper/internal/domain/entity"
 	"anilibrary-scraper/internal/domain/repository"
+	"anilibrary-scraper/internal/domain/repository/models"
+
 	"github.com/segmentio/kafka-go"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -22,11 +24,11 @@ func NewEventRepository(connection *kafka.Conn) EventRepository {
 	}
 }
 
-func (r EventRepository) Send(ctx context.Context, event *entity.Event) error {
+func (r EventRepository) Send(ctx context.Context, event models.Event) error {
 	_, span := trace.SpanFromContext(ctx).TracerProvider().Tracer("EventRepository").Start(ctx, "Send")
 	defer span.End()
 
-	bytes, err := event.ToJSON()
+	bytes, err := json.Marshal(event)
 	if err != nil {
 		span.RecordError(err)
 		return err

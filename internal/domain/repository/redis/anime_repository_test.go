@@ -5,8 +5,8 @@ import (
 	"encoding/base64"
 	"testing"
 
-	"anilibrary-scraper/internal/domain/entity"
 	"anilibrary-scraper/internal/domain/repository"
+	"anilibrary-scraper/internal/domain/repository/models"
 
 	"github.com/alicebob/miniredis/v2"
 	"github.com/redis/go-redis/v9"
@@ -16,22 +16,12 @@ import (
 
 const testURL string = "https://animego.org/anime/naruto-uragannye-hroniki-103"
 
-var expectedAnime = &entity.Anime{
-	Image:       base64.StdEncoding.EncodeToString([]byte("data:image/jpeg;base64,random")),
-	Title:       "Наруто: Ураганные хроники",
-	Status:      "Вышел",
-	Episodes:    "500",
-	Genres:      []string{"Боевые искусства", "Комедия", "Сёнэн", "Супер сила", "Экшен"},
-	VoiceActing: []string{"AniDUB", "AniLibria", "SHIZA Project", "2x2"},
-	Synonyms:    []string{"Naruto: Shippuden", "ナルト- 疾風伝", "Naruto Hurricane Chronicles"},
-	Rating:      9.5,
-}
-
 type AnimeRepositorySuite struct {
 	suite.Suite
 
 	redisServer     *miniredis.Miniredis
 	animeRepository repository.AnimeRepository
+	expectedAnime   models.Anime
 }
 
 func TestAnimeRepositorySuite(t *testing.T) {
@@ -43,10 +33,20 @@ func (suite *AnimeRepositorySuite) SetupSuite() {
 	defer ctrl.Finish()
 
 	suite.redisServer = miniredis.RunT(suite.T())
-
 	suite.animeRepository = NewAnimeRepository(redis.NewClient(&redis.Options{
 		Addr: suite.redisServer.Addr(),
 	}))
+	suite.expectedAnime = models.Anime{
+		URL:         testURL,
+		Image:       base64.StdEncoding.EncodeToString([]byte("random")),
+		Title:       "random",
+		Status:      "Вышел",
+		Episodes:    "120",
+		Genres:      nil,
+		VoiceActing: nil,
+		Synonyms:    nil,
+		Rating:      0,
+	}
 }
 
 func (suite *AnimeRepositorySuite) TearDownTest() {
@@ -55,26 +55,6 @@ func (suite *AnimeRepositorySuite) TearDownTest() {
 
 func (suite *AnimeRepositorySuite) TearDownSuite() {
 	suite.redisServer.Close()
-}
-
-func (suite *AnimeRepositorySuite) TestCreate() {
-	var (
-		t       = suite.T()
-		require = suite.Require()
-	)
-
-	t.Run("Invalid cases", func(t *testing.T) {
-		t.Run("Incorrect data", func(t *testing.T) {
-			err := suite.animeRepository.Create(context.Background(), testURL, new(entity.Anime))
-			require.ErrorIs(err, entity.ErrNotEnoughData)
-		})
-	})
-
-	t.Run("Correct data", func(t *testing.T) {
-		err := suite.animeRepository.Create(context.Background(), testURL, expectedAnime)
-		require.NoError(err)
-	})
-
 }
 
 func (suite *AnimeRepositorySuite) TestFindByURL() {
@@ -86,16 +66,46 @@ func (suite *AnimeRepositorySuite) TestFindByURL() {
 	t.Run("Not found in cache", func(t *testing.T) {
 		anime, err := suite.animeRepository.FindByURL(context.Background(), testURL)
 		require.Error(err)
-		require.Nil(anime)
+		require.Zero(anime)
 	})
 
 	t.Run("Found in cache", func(t *testing.T) {
-		err := suite.animeRepository.Create(context.Background(), testURL, expectedAnime)
+		err := suite.animeRepository.Create(context.Background(), suite.expectedAnime)
 		require.NoError(err)
 
 		anime, err := suite.animeRepository.FindByURL(context.Background(), testURL)
 		require.NoError(err)
-		require.NotNil(anime)
-		require.Equal(expectedAnime, anime)
+		require.NotZero(anime)
+		require.Equal(suite.expectedAnime.MapToDomainEntity(), anime)
+	})
+}
+
+func (suite *AnimeRepositorySuite) TestCreate() {
+	var (
+		t       = suite.T()
+		require = suite.Require()
+	)
+
+	t.Run("Invalid cases", func(t *testing.T) {
+		t.Run("Missing image", func(t *testing.T) {
+			err := suite.animeRepository.Create(context.Background(), models.Anime{
+				URL:   testURL,
+				Title: "random",
+			})
+			require.ErrorIs(err, models.ErrInvalidData)
+		})
+
+		t.Run("Missing title", func(t *testing.T) {
+			err := suite.animeRepository.Create(context.Background(), models.Anime{
+				URL:   testURL,
+				Image: base64.StdEncoding.EncodeToString([]byte("random")),
+			})
+			require.ErrorIs(err, models.ErrInvalidData)
+		})
+	})
+
+	t.Run("Correct data", func(t *testing.T) {
+		err := suite.animeRepository.Create(context.Background(), suite.expectedAnime)
+		require.NoError(err)
 	})
 }

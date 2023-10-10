@@ -6,6 +6,7 @@ import (
 
 	"anilibrary-scraper/internal/domain/entity"
 	"anilibrary-scraper/internal/domain/repository"
+	"anilibrary-scraper/internal/domain/repository/models"
 	"anilibrary-scraper/internal/domain/service"
 	"anilibrary-scraper/internal/metrics"
 	"anilibrary-scraper/internal/scraper"
@@ -52,7 +53,17 @@ func (s Service) Process(ctx context.Context, url string) (*entity.Anime, error)
 
 	span.AddEvent("Creating cache")
 
-	_ = s.repository.Create(ctx, url, anime)
+	_ = s.repository.Create(ctx, models.Anime{
+		URL:         url,
+		Image:       anime.Image,
+		Title:       anime.Title,
+		Status:      anime.Status,
+		Episodes:    anime.Episodes,
+		Genres:      anime.Genres,
+		VoiceActing: anime.VoiceActing,
+		Synonyms:    anime.Synonyms,
+		Rating:      anime.Rating,
+	})
 
 	return anime, nil
 }

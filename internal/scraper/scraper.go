@@ -116,11 +116,9 @@ func (s Scraper) Scrape(ctx context.Context, url string) (*entity.Anime, error) 
 
 	s.wg.Wait()
 
-	anime := s.anime.ToEntity()
-
-	if err := anime.HasRequiredData(); err != nil {
+	if err := s.anime.Validate(); err != nil {
 		return nil, err
 	}
 
-	return anime, nil
+	return s.anime.MapToDomainEntity(), nil
 }

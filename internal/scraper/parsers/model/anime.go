@@ -1,16 +1,12 @@
 package model
 
 import (
+	"errors"
+
 	"anilibrary-scraper/internal/domain/entity"
 )
 
-const (
-	Ongoing  Status = "Онгоинг"
-	Announce Status = "Анонс"
-	Ready    Status = "Вышел"
-)
-
-type Status entity.Status
+var ErrNotEnoughData = errors.New("entity wasn't filled with required data")
 
 type Anime struct {
 	Image       string
@@ -23,11 +19,19 @@ type Anime struct {
 	Rating      float32
 }
 
-func (a *Anime) ToEntity() *entity.Anime {
+func (a Anime) Validate() error {
+	if a.Image == "" || a.Title == "" {
+		return ErrNotEnoughData
+	}
+
+	return nil
+}
+
+func (a Anime) MapToDomainEntity() *entity.Anime {
 	return &entity.Anime{
 		Image:       a.Image,
 		Title:       a.Title,
-		Status:      entity.Status(a.Status),
+		Status:      string(a.Status),
 		Episodes:    a.Episodes,
 		Genres:      a.Genres,
 		VoiceActing: a.VoiceActing,

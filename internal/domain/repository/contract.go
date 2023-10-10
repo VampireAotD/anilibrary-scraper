@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"anilibrary-scraper/internal/domain/entity"
+	"anilibrary-scraper/internal/domain/repository/models"
 )
 
 //go:generate mockgen -source=contract.go -destination=./mocks.go -package=repository
@@ -14,11 +15,11 @@ type (
 		FindByURL(ctx context.Context, url string) (*entity.Anime, error)
 
 		// Create method creates anime cache/record
-		Create(ctx context.Context, key string, anime *entity.Anime) error
+		Create(ctx context.Context, anime models.Anime) error
 	}
 
 	EventRepository interface {
 		// Send method sends event data
-		Send(ctx context.Context, event *entity.Event) error
+		Send(ctx context.Context, event models.Event) error
 	}
 )

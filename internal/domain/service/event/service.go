@@ -4,9 +4,10 @@ import (
 	"context"
 	"time"
 
-	"anilibrary-scraper/internal/domain/entity"
 	"anilibrary-scraper/internal/domain/repository"
+	"anilibrary-scraper/internal/domain/repository/models"
 	"anilibrary-scraper/internal/domain/service"
+
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -28,7 +29,7 @@ func (s Service) Send(ctx context.Context, url string) error {
 
 	span.AddEvent("Sending event to Clickhouse")
 
-	return s.kafkaRepository.Send(ctx, &entity.Event{
+	return s.kafkaRepository.Send(ctx, models.Event{
 		URL:  url,
 		Date: time.Now().Unix(),
 	})

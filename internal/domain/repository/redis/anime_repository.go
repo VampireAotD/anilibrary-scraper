@@ -2,11 +2,13 @@ package redis
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
 	"anilibrary-scraper/internal/domain/entity"
 	"anilibrary-scraper/internal/domain/repository"
+	"anilibrary-scraper/internal/domain/repository/models"
 
 	"github.com/redis/go-redis/v9"
 	"go.opentelemetry.io/otel/trace"
@@ -30,37 +32,36 @@ func (a AnimeRepository) FindByURL(ctx context.Context, url string) (*entity.Ani
 	_, span := trace.SpanFromContext(ctx).TracerProvider().Tracer("AnimeRepository").Start(ctx, "FindByURL")
 	defer span.End()
 
-	res, err := a.client.Get(ctx, url).Bytes()
+	bytes, err := a.client.Get(ctx, url).Bytes()
 	if err != nil {
 		span.RecordError(err)
 		return nil, fmt.Errorf("while fetching from redis: %w", err)
 	}
 
-	var anime entity.Anime
-	unmarshalled, err := anime.FromJSON(res)
-	if err != nil {
+	var model models.Anime
+	if err = json.Unmarshal(bytes, &model); err != nil {
 		span.RecordError(err)
 		return nil, fmt.Errorf("while converting from bytes: %w", err)
 	}
 
-	return unmarshalled, nil
+	return model.MapToDomainEntity(), nil
 }
 
-func (a AnimeRepository) Create(ctx context.Context, key string, anime *entity.Anime) error {
+func (a AnimeRepository) Create(ctx context.Context, anime models.Anime) error {
 	_, span := trace.SpanFromContext(ctx).TracerProvider().Tracer("AnimeRepository").Start(ctx, "Create")
 	defer span.End()
 
-	if err := anime.HasRequiredData(); err != nil {
+	if err := anime.Validate(); err != nil {
 		span.RecordError(err)
 		return fmt.Errorf("while caching: %w", err)
 	}
 
 	expire, _ := time.ParseDuration(sevenDaysInHours)
-	data, err := anime.ToJSON()
+	data, err := json.Marshal(anime)
 	if err != nil {
 		span.RecordError(err)
 		return fmt.Errorf("while converting to json: %w", err)
 	}
 
-	return a.client.Set(ctx, key, data, expire).Err()
+	return a.client.Set(ctx, anime.URL, data, expire).Err()
 }
