@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"anilibrary-scraper/internal/domain/entity"
-	"anilibrary-scraper/internal/domain/service"
-	"anilibrary-scraper/internal/domain/usecase"
+	"anilibrary-scraper/internal/entity"
+	"anilibrary-scraper/internal/service"
+	"anilibrary-scraper/internal/usecase"
 )
 
 var _ usecase.ScraperUseCase = (*UseCase)(nil)

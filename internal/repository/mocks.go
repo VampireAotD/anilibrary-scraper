@@ -5,12 +5,13 @@
 package repository
 
 import (
-	entity "anilibrary-scraper/internal/domain/entity"
-	models "anilibrary-scraper/internal/domain/repository/models"
-	context "context"
-	reflect "reflect"
+	"anilibrary-scraper/internal/entity"
+	models2 "anilibrary-scraper/internal/repository/models"
 
-	gomock "go.uber.org/mock/gomock"
+	"context"
+	"reflect"
+
+	"go.uber.org/mock/gomock"
 )
 
 // MockAnimeRepository is a mock of AnimeRepository interface.
@@ -37,7 +38,7 @@ func (m *MockAnimeRepository) EXPECT() *MockAnimeRepositoryMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockAnimeRepository) Create(ctx context.Context, anime models.Anime) error {
+func (m *MockAnimeRepository) Create(ctx context.Context, anime models2.Anime) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", ctx, anime)
 	ret0, _ := ret[0].(error)
@@ -89,7 +90,7 @@ func (m *MockEventRepository) EXPECT() *MockEventRepositoryMockRecorder {
 }
 
 // Send mocks base method.
-func (m *MockEventRepository) Send(ctx context.Context, event models.Event) error {
+func (m *MockEventRepository) Send(ctx context.Context, event models2.Event) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Send", ctx, event)
 	ret0, _ := ret[0].(error)

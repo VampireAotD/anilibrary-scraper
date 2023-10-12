@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"anilibrary-scraper/internal/domain/entity"
-	"anilibrary-scraper/internal/domain/repository"
-	"anilibrary-scraper/internal/domain/repository/models"
-	"anilibrary-scraper/internal/domain/service"
+	"anilibrary-scraper/internal/entity"
 	"anilibrary-scraper/internal/metrics"
+	"anilibrary-scraper/internal/repository"
+	"anilibrary-scraper/internal/repository/models"
 	"anilibrary-scraper/internal/scraper"
+	"anilibrary-scraper/internal/service"
 
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"

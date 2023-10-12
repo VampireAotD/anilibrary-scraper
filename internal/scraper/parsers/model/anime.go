@@ -3,7 +3,7 @@ package model
 import (
 	"errors"
 
-	"anilibrary-scraper/internal/domain/entity"
+	"anilibrary-scraper/internal/entity"
 )
 
 var ErrNotEnoughData = errors.New("entity wasn't filled with required data")

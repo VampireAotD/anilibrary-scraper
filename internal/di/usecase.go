@@ -1,8 +1,9 @@
 package di
 
 import (
-	"anilibrary-scraper/internal/domain/usecase"
-	"anilibrary-scraper/internal/domain/usecase/scraper"
+	"anilibrary-scraper/internal/usecase"
+	"anilibrary-scraper/internal/usecase/scraper"
+
 	"go.uber.org/fx"
 )
 

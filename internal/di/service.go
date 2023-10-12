@@ -1,10 +1,11 @@
 package di
 
 import (
-	"anilibrary-scraper/internal/domain/service"
-	"anilibrary-scraper/internal/domain/service/event"
-	"anilibrary-scraper/internal/domain/service/scraper"
 	scraperInstance "anilibrary-scraper/internal/scraper"
+	"anilibrary-scraper/internal/service"
+	"anilibrary-scraper/internal/service/event"
+	"anilibrary-scraper/internal/service/scraper"
+
 	"go.uber.org/fx"
 )
 

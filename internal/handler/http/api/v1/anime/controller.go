@@ -3,9 +3,9 @@ package anime
 import (
 	"net/http"
 
-	"anilibrary-scraper/internal/domain/usecase"
 	"anilibrary-scraper/internal/handler/http/middleware"
 	"anilibrary-scraper/internal/metrics"
+	"anilibrary-scraper/internal/usecase"
 
 	"github.com/go-chi/render"
 	"go.opentelemetry.io/otel/codes"

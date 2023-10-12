@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"anilibrary-scraper/internal/domain/repository"
-	"anilibrary-scraper/internal/domain/repository/models"
+	"anilibrary-scraper/internal/repository"
+	"anilibrary-scraper/internal/repository/models"
 
 	"github.com/segmentio/kafka-go"
 	"go.opentelemetry.io/otel/trace"

@@ -3,7 +3,7 @@ package usecase
 import (
 	"context"
 
-	"anilibrary-scraper/internal/domain/entity"
+	"anilibrary-scraper/internal/entity"
 )
 
 //go:generate mockgen -source=contract.go -destination=./mocks.go -package=usecase

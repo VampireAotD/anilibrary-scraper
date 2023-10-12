@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	kafka2 "anilibrary-scraper/internal/domain/repository/kafka"
-	"anilibrary-scraper/internal/domain/repository/models"
+	kafka2 "anilibrary-scraper/internal/repository/kafka"
+	"anilibrary-scraper/internal/repository/models"
 
 	"github.com/segmentio/kafka-go"
 	"github.com/stretchr/testify/suite"

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"anilibrary-scraper/internal/domain/entity"
+	"anilibrary-scraper/internal/entity"
 	"anilibrary-scraper/internal/metrics"
 	"anilibrary-scraper/internal/scraper/client"
 	"anilibrary-scraper/internal/scraper/parsers"

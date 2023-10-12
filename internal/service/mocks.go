@@ -5,11 +5,12 @@
 package service
 
 import (
-	entity "anilibrary-scraper/internal/domain/entity"
-	context "context"
-	reflect "reflect"
+	"anilibrary-scraper/internal/entity"
 
-	gomock "go.uber.org/mock/gomock"
+	"context"
+	"reflect"
+
+	"go.uber.org/mock/gomock"
 )
 
 // MockScraperService is a mock of ScraperService interface.

@@ -3,7 +3,7 @@ package models
 import (
 	"errors"
 
-	"anilibrary-scraper/internal/domain/entity"
+	"anilibrary-scraper/internal/entity"
 )
 
 var ErrInvalidData = errors.New("model doesn't have required data")

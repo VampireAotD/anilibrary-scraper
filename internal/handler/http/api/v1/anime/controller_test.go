@@ -10,10 +10,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"anilibrary-scraper/internal/domain/entity"
-	"anilibrary-scraper/internal/domain/usecase"
+	"anilibrary-scraper/internal/entity"
 	"anilibrary-scraper/internal/handler/http/middleware"
 	"anilibrary-scraper/internal/scraper"
+	"anilibrary-scraper/internal/usecase"
 	"anilibrary-scraper/pkg/logging"
 
 	"github.com/stretchr/testify/suite"

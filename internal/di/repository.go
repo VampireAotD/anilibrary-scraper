@@ -1,9 +1,10 @@
 package di
 
 import (
-	"anilibrary-scraper/internal/domain/repository"
-	"anilibrary-scraper/internal/domain/repository/kafka"
-	"anilibrary-scraper/internal/domain/repository/redis"
+	"anilibrary-scraper/internal/repository"
+	"anilibrary-scraper/internal/repository/kafka"
+	"anilibrary-scraper/internal/repository/redis"
+
 	"go.uber.org/fx"
 )
 

@@ -5,10 +5,10 @@ import (
 	"encoding/base64"
 	"testing"
 
-	"anilibrary-scraper/internal/domain/entity"
-	"anilibrary-scraper/internal/domain/repository"
-	scraperService "anilibrary-scraper/internal/domain/service/scraper"
+	"anilibrary-scraper/internal/entity"
+	"anilibrary-scraper/internal/repository"
 	"anilibrary-scraper/internal/scraper"
+	scraperService "anilibrary-scraper/internal/service/scraper"
 
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/mock/gomock"

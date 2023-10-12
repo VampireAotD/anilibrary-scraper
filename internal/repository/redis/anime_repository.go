@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"time"
 
-	"anilibrary-scraper/internal/domain/entity"
-	"anilibrary-scraper/internal/domain/repository"
-	"anilibrary-scraper/internal/domain/repository/models"
+	"anilibrary-scraper/internal/entity"
+	"anilibrary-scraper/internal/repository"
+	"anilibrary-scraper/internal/repository/models"
 
 	"github.com/redis/go-redis/v9"
 	"go.opentelemetry.io/otel/trace"

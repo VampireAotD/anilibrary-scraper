@@ -5,8 +5,8 @@ import (
 	"encoding/base64"
 	"testing"
 
-	"anilibrary-scraper/internal/domain/repository"
-	"anilibrary-scraper/internal/domain/repository/models"
+	"anilibrary-scraper/internal/repository"
+	"anilibrary-scraper/internal/repository/models"
 
 	"github.com/alicebob/miniredis/v2"
 	"github.com/redis/go-redis/v9"

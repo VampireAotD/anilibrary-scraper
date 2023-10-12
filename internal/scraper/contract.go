@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"anilibrary-scraper/internal/domain/entity"
+	"anilibrary-scraper/internal/entity"
 )
 
 var ErrUnsupportedScraper = errors.New("unsupported scraper")

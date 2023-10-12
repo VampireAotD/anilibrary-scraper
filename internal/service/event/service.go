@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"anilibrary-scraper/internal/domain/repository"
-	"anilibrary-scraper/internal/domain/repository/models"
-	"anilibrary-scraper/internal/domain/service"
+	"anilibrary-scraper/internal/repository"
+	"anilibrary-scraper/internal/repository/models"
+	"anilibrary-scraper/internal/service"
 
 	"go.opentelemetry.io/otel/trace"
 )
