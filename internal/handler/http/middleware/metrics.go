@@ -5,13 +5,12 @@ import (
 	"time"
 
 	"anilibrary-scraper/internal/metrics"
+
 	"github.com/go-chi/chi/v5"
-	"github.com/prometheus/client_golang/prometheus"
 )
 
 func ResponseMetrics(next http.Handler) http.Handler {
 	metrics.IncrHTTPRequestsCounter()
-	prometheus.MustRegister(metrics.ResponseHistogram)
 
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		start := time.Now()
@@ -19,18 +18,7 @@ func ResponseMetrics(next http.Handler) http.Handler {
 		next.ServeHTTP(writer, request)
 
 		duration := time.Since(start)
-		route := routePattern(request)
 
-		metrics.ResponseHistogram.WithLabelValues(route, request.Method).Observe(duration.Seconds())
+		metrics.RecordHTTPResponseTime(chi.RouteContext(request.Context()).RoutePattern(), request.Method, duration.Seconds())
 	})
-}
-
-func routePattern(r *http.Request) string {
-	ctx := chi.RouteContext(r.Context())
-
-	if pattern := ctx.RoutePattern(); pattern != "" {
-		return pattern
-	}
-
-	return ""
 }

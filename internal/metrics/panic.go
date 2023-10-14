@@ -6,12 +6,10 @@ import (
 )
 
 var (
-	panicCounter = promauto.NewCounter(
-		prometheus.CounterOpts{
-			Name: "panics_counter",
-			Help: "Counter of app panics",
-		},
-	)
+	panicCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "panics_counter",
+		Help: "Counter of app panics",
+	})
 )
 
 func IncrPanicCounter() {
