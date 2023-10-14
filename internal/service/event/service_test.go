@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"anilibrary-scraper/internal/repository"
-	"anilibrary-scraper/internal/repository/models"
+	"anilibrary-scraper/internal/repository/model"
 	"anilibrary-scraper/internal/service"
 
 	"github.com/stretchr/testify/suite"
@@ -43,7 +43,7 @@ func (suite *EventServiceSuite) TestSend() {
 	t.Run("Send message", func(t *testing.T) {
 		const testURL string = "https://google.com/"
 
-		suite.repositoryMock.Send(gomock.Any(), models.Event{
+		suite.repositoryMock.Send(gomock.Any(), model.Event{
 			URL:  testURL,
 			Date: time.Now().Unix(),
 		}).Return(nil)

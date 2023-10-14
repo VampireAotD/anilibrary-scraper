@@ -6,7 +6,7 @@ package repository
 
 import (
 	"anilibrary-scraper/internal/entity"
-	models2 "anilibrary-scraper/internal/repository/models"
+	models2 "anilibrary-scraper/internal/repository/model"
 
 	"context"
 	"reflect"

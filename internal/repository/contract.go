@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"anilibrary-scraper/internal/entity"
-	models2 "anilibrary-scraper/internal/repository/models"
+	models2 "anilibrary-scraper/internal/repository/model"
 )
 
 //go:generate mockgen -source=contract.go -destination=./mocks.go -package=repository

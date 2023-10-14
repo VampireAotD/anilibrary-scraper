@@ -8,7 +8,7 @@ import (
 
 	"anilibrary-scraper/internal/entity"
 	"anilibrary-scraper/internal/repository"
-	"anilibrary-scraper/internal/repository/models"
+	"anilibrary-scraper/internal/repository/model"
 
 	"github.com/redis/go-redis/v9"
 	"go.opentelemetry.io/otel/trace"
@@ -38,7 +38,7 @@ func (a AnimeRepository) FindByURL(ctx context.Context, url string) (*entity.Ani
 		return nil, fmt.Errorf("while fetching from redis: %w", err)
 	}
 
-	var model models.Anime
+	var model model.Anime
 	if err = json.Unmarshal(bytes, &model); err != nil {
 		span.RecordError(err)
 		return nil, fmt.Errorf("while converting from bytes: %w", err)
@@ -47,7 +47,7 @@ func (a AnimeRepository) FindByURL(ctx context.Context, url string) (*entity.Ani
 	return model.MapToDomainEntity(), nil
 }
 
-func (a AnimeRepository) Create(ctx context.Context, anime models.Anime) error {
+func (a AnimeRepository) Create(ctx context.Context, anime model.Anime) error {
 	_, span := trace.SpanFromContext(ctx).TracerProvider().Tracer("AnimeRepository").Start(ctx, "Create")
 	defer span.End()
 

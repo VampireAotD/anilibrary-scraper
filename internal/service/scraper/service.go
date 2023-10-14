@@ -7,7 +7,7 @@ import (
 	"anilibrary-scraper/internal/entity"
 	"anilibrary-scraper/internal/metrics"
 	"anilibrary-scraper/internal/repository"
-	"anilibrary-scraper/internal/repository/models"
+	"anilibrary-scraper/internal/repository/model"
 	"anilibrary-scraper/internal/scraper"
 	"anilibrary-scraper/internal/service"
 
@@ -53,7 +53,7 @@ func (s Service) Process(ctx context.Context, url string) (*entity.Anime, error)
 
 	span.AddEvent("Creating cache")
 
-	_ = s.repository.Create(ctx, models.Anime{
+	_ = s.repository.Create(ctx, model.Anime{
 		URL:         url,
 		Image:       anime.Image,
 		Title:       anime.Title,

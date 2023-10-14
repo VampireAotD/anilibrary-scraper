@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"anilibrary-scraper/internal/repository"
-	"anilibrary-scraper/internal/repository/models"
+	"anilibrary-scraper/internal/repository/model"
 
 	"github.com/segmentio/kafka-go"
 	"go.opentelemetry.io/otel/trace"
@@ -24,7 +24,7 @@ func NewEventRepository(connection *kafka.Conn) EventRepository {
 	}
 }
 
-func (r EventRepository) Send(ctx context.Context, event models.Event) error {
+func (r EventRepository) Send(ctx context.Context, event model.Event) error {
 	_, span := trace.SpanFromContext(ctx).TracerProvider().Tracer("EventRepository").Start(ctx, "Send")
 	defer span.End()
 

@@ -1,4 +1,4 @@
-package models
+package model
 
 type Event struct {
 	URL  string `json:"url"`

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	kafka2 "anilibrary-scraper/internal/repository/kafka"
-	"anilibrary-scraper/internal/repository/models"
+	"anilibrary-scraper/internal/repository/model"
 
 	"github.com/segmentio/kafka-go"
 	"github.com/stretchr/testify/suite"
@@ -77,7 +77,7 @@ func (suite *EventRepositorySuite) TearDownSuite() {
 func (suite *EventRepositorySuite) TestSend() {
 	const testURL string = "https://google.com/"
 
-	err := suite.eventRepository.Send(context.Background(), models.Event{
+	err := suite.eventRepository.Send(context.Background(), model.Event{
 		URL:  testURL,
 		Date: time.Now().Unix(),
 	})

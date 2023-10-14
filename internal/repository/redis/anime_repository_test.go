@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"anilibrary-scraper/internal/repository"
-	"anilibrary-scraper/internal/repository/models"
+	"anilibrary-scraper/internal/repository/model"
 
 	"github.com/alicebob/miniredis/v2"
 	"github.com/redis/go-redis/v9"
@@ -21,7 +21,7 @@ type AnimeRepositorySuite struct {
 
 	redisServer     *miniredis.Miniredis
 	animeRepository repository.AnimeRepository
-	expectedAnime   models.Anime
+	expectedAnime   model.Anime
 }
 
 func TestAnimeRepositorySuite(t *testing.T) {
@@ -36,7 +36,7 @@ func (suite *AnimeRepositorySuite) SetupSuite() {
 	suite.animeRepository = NewAnimeRepository(redis.NewClient(&redis.Options{
 		Addr: suite.redisServer.Addr(),
 	}))
-	suite.expectedAnime = models.Anime{
+	suite.expectedAnime = model.Anime{
 		URL:         testURL,
 		Image:       base64.StdEncoding.EncodeToString([]byte("random")),
 		Title:       "random",
@@ -88,19 +88,19 @@ func (suite *AnimeRepositorySuite) TestCreate() {
 
 	t.Run("Invalid cases", func(t *testing.T) {
 		t.Run("Missing image", func(t *testing.T) {
-			err := suite.animeRepository.Create(context.Background(), models.Anime{
+			err := suite.animeRepository.Create(context.Background(), model.Anime{
 				URL:   testURL,
 				Title: "random",
 			})
-			require.ErrorIs(err, models.ErrInvalidData)
+			require.ErrorIs(err, model.ErrInvalidData)
 		})
 
 		t.Run("Missing title", func(t *testing.T) {
-			err := suite.animeRepository.Create(context.Background(), models.Anime{
+			err := suite.animeRepository.Create(context.Background(), model.Anime{
 				URL:   testURL,
 				Image: base64.StdEncoding.EncodeToString([]byte("random")),
 			})
-			require.ErrorIs(err, models.ErrInvalidData)
+			require.ErrorIs(err, model.ErrInvalidData)
 		})
 	})
 

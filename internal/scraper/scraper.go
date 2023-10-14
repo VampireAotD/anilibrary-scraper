@@ -23,35 +23,32 @@ import (
 // and scrape all data concurrently
 type Scraper struct {
 	client client.TLSClient
-	parser parsers.Contract
 }
 
-func New() *Scraper {
-	return &Scraper{
+func New() Scraper {
+	return Scraper{
 		client: client.NewTLSClient(10),
 	}
 }
 
-func (s *Scraper) resolveParser(url string) error {
+func (s Scraper) resolveParser(url string) (parsers.Contract, error) {
 	switch {
 	case strings.Contains(url, parsers.AnimeGoURL):
-		s.parser = parsers.NewAnimeGo()
-		return nil
+		return parsers.NewAnimeGo(), nil
 	case strings.Contains(url, parsers.AnimeVostURL):
-		s.parser = parsers.NewAnimeVost()
-		return nil
+		return parsers.NewAnimeVost(), nil
 	default:
-		return ErrUnsupportedScraper
+		return nil, ErrUnsupportedScraper
 	}
 }
 
-func (s *Scraper) recover() {
+func (s Scraper) recover() {
 	if err := recover(); err != nil {
 		metrics.IncrPanicCounter()
 	}
 }
 
-func (s *Scraper) process(document *goquery.Document) *model.Anime {
+func (s Scraper) process(parser parsers.Contract, document *goquery.Document) *model.Anime {
 	var (
 		wg    sync.WaitGroup
 		anime = new(model.Anime)
@@ -66,7 +63,7 @@ func (s *Scraper) process(document *goquery.Document) *model.Anime {
 	wg.Add(8)
 
 	go parse(func() {
-		response, err := s.client.FetchResponseBody(s.parser.Image(document))
+		response, err := s.client.FetchResponseBody(parser.Image(document))
 		if err != nil {
 			return
 		}
@@ -79,31 +76,31 @@ func (s *Scraper) process(document *goquery.Document) *model.Anime {
 	})
 
 	go parse(func() {
-		anime.Title = s.parser.Title(document)
+		anime.Title = parser.Title(document)
 	})
 
 	go parse(func() {
-		anime.Status = s.parser.Status(document)
+		anime.Status = parser.Status(document)
 	})
 
 	go parse(func() {
-		anime.Rating = s.parser.Rating(document)
+		anime.Rating = parser.Rating(document)
 	})
 
 	go parse(func() {
-		anime.Episodes = s.parser.Episodes(document)
+		anime.Episodes = parser.Episodes(document)
 	})
 
 	go parse(func() {
-		anime.Genres = s.parser.Genres(document)
+		anime.Genres = parser.Genres(document)
 	})
 
 	go parse(func() {
-		anime.VoiceActing = s.parser.VoiceActing(document)
+		anime.VoiceActing = parser.VoiceActing(document)
 	})
 
 	go parse(func() {
-		anime.Synonyms = s.parser.Synonyms(document)
+		anime.Synonyms = parser.Synonyms(document)
 	})
 
 	wg.Wait()
@@ -111,11 +108,12 @@ func (s *Scraper) process(document *goquery.Document) *model.Anime {
 	return anime
 }
 
-func (s *Scraper) Scrape(ctx context.Context, url string) (*entity.Anime, error) {
+func (s Scraper) Scrape(ctx context.Context, url string) (*entity.Anime, error) {
 	_, span := trace.SpanFromContext(ctx).TracerProvider().Tracer("Scraper").Start(ctx, "Scrape")
 	defer span.End()
 
-	if err := s.resolveParser(url); err != nil {
+	parser, err := s.resolveParser(url)
+	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
@@ -126,7 +124,7 @@ func (s *Scraper) Scrape(ctx context.Context, url string) (*entity.Anime, error)
 		return nil, err
 	}
 
-	anime := s.process(document)
+	anime := s.process(parser, document)
 	if err = anime.Validate(); err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
