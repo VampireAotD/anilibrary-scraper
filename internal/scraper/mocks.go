@@ -5,12 +5,11 @@
 package scraper
 
 import (
-	"anilibrary-scraper/internal/entity"
+	entity "anilibrary-scraper/internal/entity"
+	context "context"
+	reflect "reflect"
 
-	"context"
-	"reflect"
-
-	"go.uber.org/mock/gomock"
+	gomock "go.uber.org/mock/gomock"
 )
 
 // MockContract is a mock of Contract interface.

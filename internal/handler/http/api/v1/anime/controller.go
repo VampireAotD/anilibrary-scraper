@@ -1,14 +1,13 @@
 package anime
 
 import (
-	"net/http"
-
-	"anilibrary-scraper/internal/handler/http/middleware"
 	"anilibrary-scraper/internal/metrics"
 	"anilibrary-scraper/internal/usecase"
+	"anilibrary-scraper/pkg/logging"
 
-	"github.com/go-chi/render"
+	"github.com/gofiber/fiber/v2"
 	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 )
 
@@ -35,46 +34,36 @@ func NewController(usecase usecase.ScraperUseCase) Controller {
 //	@Failure		401				string		Unauthorized
 //	@Failure		422				{object}	ErrorResponse
 //	@Router			/anime/parse [post]
-func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
-	var (
-		logger = middleware.MustGetLogger(r.Context())
-		tracer = middleware.MustGetTracer(r.Context())
-	)
-
-	ctx, span := tracer.Start(r.Context(), "Parse")
+func (c Controller) Parse(ctx *fiber.Ctx) error {
+	span := trace.SpanFromContext(ctx.UserContext())
 	defer span.End()
 
 	span.AddEvent("Decoding and validating request")
 
 	var request ScrapeRequest
-	if err := request.MapAndValidate(r.Body); err != nil {
+	if err := request.MapAndValidate(ctx); err != nil {
 		metrics.IncrHTTPErrorsCounter()
 		span.SetStatus(codes.Error, err.Error())
 		span.RecordError(err)
-		logger.Error("while decoding incoming url", zap.Error(err))
 
-		render.Status(r, http.StatusUnprocessableEntity)
-		render.JSON(w, r, NewErrorResponse(err))
-		return
+		return ctx.Status(fiber.StatusUnprocessableEntity).JSON(NewErrorResponse(err))
 	}
 
-	logger.Info("Scraping", zap.String("url", request.URL))
+	logging.Get().Info("Scraping", zap.String("url", request.URL))
 	span.AddEvent("Scraping data")
 
-	entity, err := c.usecase.Scrape(ctx, request.URL)
+	entity, err := c.usecase.Scrape(ctx.UserContext(), request.URL)
 	if err != nil {
 		metrics.IncrHTTPErrorsCounter()
 		span.SetStatus(codes.Error, err.Error())
 		span.RecordError(err)
-		logger.Error("while scraping", zap.Error(err))
+		logging.Get().Error("while scraping", zap.Error(err))
 
-		render.Status(r, http.StatusUnprocessableEntity)
-		render.JSON(w, r, NewErrorResponse(err))
-		return
+		return ctx.Status(fiber.StatusUnprocessableEntity).JSON(NewErrorResponse(err))
 	}
 
 	span.AddEvent("Finished scraping")
 
 	metrics.IncrHTTPSuccessCounter()
-	render.JSON(w, r, entity)
+	return ctx.JSON(entity)
 }

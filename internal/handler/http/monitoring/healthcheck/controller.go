@@ -1,9 +1,7 @@
 package healthcheck
 
 import (
-	"context"
-	"net/http"
-
+	"github.com/gofiber/fiber/v2"
 	"github.com/redis/go-redis/v9"
 	"github.com/segmentio/kafka-go"
 )
@@ -20,18 +18,14 @@ func NewController(redisConnection *redis.Client, kafkaConnection *kafka.Conn) C
 	}
 }
 
-func (c Controller) Healthcheck(w http.ResponseWriter, _ *http.Request) {
-	if err := c.redisConnection.Ping(context.Background()).Err(); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+func (c Controller) Healthcheck(ctx *fiber.Ctx) error {
+	if err := c.redisConnection.Ping(ctx.UserContext()).Err(); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 
 	if _, err := c.kafkaConnection.ReadPartitions(); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 
-	w.WriteHeader(http.StatusOK)
+	return ctx.SendStatus(fiber.StatusOK)
 }

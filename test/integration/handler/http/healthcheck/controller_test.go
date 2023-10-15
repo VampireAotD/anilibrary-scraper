@@ -12,6 +12,7 @@ import (
 	"anilibrary-scraper/internal/handler/http/monitoring/healthcheck"
 
 	"github.com/alicebob/miniredis/v2"
+	"github.com/gofiber/fiber/v2"
 	"github.com/redis/go-redis/v9"
 	"github.com/segmentio/kafka-go"
 	"github.com/stretchr/testify/suite"
@@ -19,12 +20,15 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
+const endpoint string = "/healthcheck"
+
 type HealthcheckControllerSuite struct {
 	suite.Suite
 
 	redisServer    *miniredis.Miniredis
 	kafkaContainer testcontainers.Container
 	controller     healthcheck.Controller
+	router         *fiber.App
 }
 
 func TestHealthcheckControllerSuite(t *testing.T) {
@@ -69,6 +73,7 @@ func (suite *HealthcheckControllerSuite) initKafka() {
 func (suite *HealthcheckControllerSuite) SetupSuite() {
 	suite.initRedis()
 	suite.initKafka()
+	suite.router = fiber.New()
 
 	// Setup Redis client
 	redisClient := redis.NewClient(&redis.Options{
@@ -83,6 +88,7 @@ func (suite *HealthcheckControllerSuite) SetupSuite() {
 	suite.Require().NoError(err)
 
 	suite.controller = healthcheck.NewController(redisClient, kafkaConnection)
+	suite.router.Get(endpoint, suite.controller.Healthcheck)
 }
 
 func (suite *HealthcheckControllerSuite) SetupTest() {
@@ -103,16 +109,13 @@ func (suite *HealthcheckControllerSuite) TearDownSuite() {
 	suite.redisServer.Close()
 }
 
-func (suite *HealthcheckControllerSuite) sendHealthcheckRequest() *httptest.ResponseRecorder {
-	var (
-		handler  = suite.controller.Healthcheck
-		recorder = httptest.NewRecorder()
-		request  = httptest.NewRequest(http.MethodGet, "/healthcheck", nil)
-	)
+func (suite *HealthcheckControllerSuite) sendHealthcheckRequest() *http.Response {
+	request := httptest.NewRequest(http.MethodGet, endpoint, nil)
 
-	handler(recorder, request)
+	response, err := suite.router.Test(request, -1)
+	suite.Require().NoError(err)
 
-	return recorder
+	return response
 }
 
 func (suite *HealthcheckControllerSuite) TestHealthcheck() {
@@ -124,14 +127,14 @@ func (suite *HealthcheckControllerSuite) TestHealthcheck() {
 	t.Run("Redis", func(t *testing.T) {
 		t.Run("Redis up", func(t *testing.T) {
 			response := suite.sendHealthcheckRequest()
-			require.Equal(http.StatusOK, response.Code)
+			require.Equal(http.StatusOK, response.StatusCode)
 		})
 
 		t.Run("Redis down", func(t *testing.T) {
 			suite.redisServer.Close()
 
 			response := suite.sendHealthcheckRequest()
-			require.Equal(http.StatusInternalServerError, response.Code)
+			require.Equal(http.StatusInternalServerError, response.StatusCode)
 
 			require.NoError(suite.redisServer.Start())
 		})
@@ -140,14 +143,14 @@ func (suite *HealthcheckControllerSuite) TestHealthcheck() {
 	t.Run("Kafka", func(t *testing.T) {
 		t.Run("Kafka up", func(t *testing.T) {
 			response := suite.sendHealthcheckRequest()
-			require.Equal(http.StatusOK, response.Code)
+			require.Equal(http.StatusOK, response.StatusCode)
 		})
 
 		t.Run("Kafka down", func(t *testing.T) {
 			require.NoError(suite.kafkaContainer.Stop(context.Background(), nil))
 
 			response := suite.sendHealthcheckRequest()
-			require.Equal(http.StatusInternalServerError, response.Code)
+			require.Equal(http.StatusInternalServerError, response.StatusCode)
 		})
 	})
 }

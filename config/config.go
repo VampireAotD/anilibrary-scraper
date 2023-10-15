@@ -29,8 +29,9 @@ func New() (Config, error) {
 }
 
 type HTTP struct {
-	Addr string `env:"HTTP_ADDR" env-default:"localhost"`
-	Port int    `env:"HTTP_PORT" env-required:""`
+	Addr           string `env:"HTTP_ADDR" env-default:"localhost"`
+	MainPort       int    `env:"HTTP_MAIN_PORT" env-required:""`
+	MonitoringPort int    `env:"HTTP_MONITORING_PORT" env-required:""`
 }
 
 type App struct {

@@ -5,26 +5,27 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"anilibrary-scraper/internal/entity"
-	"anilibrary-scraper/internal/handler/http/middleware"
 	"anilibrary-scraper/internal/scraper"
 	"anilibrary-scraper/internal/usecase"
-	"anilibrary-scraper/pkg/logging"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/mock/gomock"
 )
+
+const endpoint string = "/api/v1/anime/parse"
 
 type AnimeControllerSuite struct {
 	suite.Suite
 
 	useCaseMock *usecase.MockScraperUseCaseMockRecorder
 	controller  Controller
+	router      *fiber.App
 }
 
 func TestAnimeControllerSuite(t *testing.T) {
@@ -39,27 +40,30 @@ func (suite *AnimeControllerSuite) SetupSuite() {
 
 	suite.useCaseMock = useCaseMock.EXPECT()
 	suite.controller = NewController(useCaseMock)
+	suite.router = fiber.New()
+	suite.router.Post(endpoint, suite.controller.Parse)
 }
 
-func (suite *AnimeControllerSuite) sendParseRequest(url string) *httptest.ResponseRecorder {
-	handler := suite.controller.Parse
-	recorder := httptest.NewRecorder()
+func (suite *AnimeControllerSuite) sendRequest(url string) *http.Response {
 	request := httptest.NewRequest(
 		http.MethodPost,
-		"/api/v1/anime/parse",
+		endpoint,
 		bytes.NewBufferString(fmt.Sprintf(`{"url":"%s"}`, url)),
 	)
 
-	ctx := middleware.WithLogger(request.Context(), logging.New(logging.WithOutput(io.Discard)))
-	ctx = middleware.WithTracer(ctx)
-	handler(recorder, request.WithContext(ctx))
+	request.Header.Set("Content-Type", "application/json")
 
-	return recorder
+	response, err := suite.router.Test(request, -1)
+	suite.Require().NoError(err)
+
+	return response
 }
 
 func (suite *AnimeControllerSuite) TestParse() {
-	t := suite.T()
-	require := suite.Require()
+	var (
+		t       = suite.T()
+		require = suite.Require()
+	)
 
 	t.Run("Bad request", func(t *testing.T) {
 		testCases := []struct {
@@ -84,15 +88,16 @@ func (suite *AnimeControllerSuite) TestParse() {
 		for _, testCase := range testCases {
 			suite.useCaseMock.Scrape(gomock.Any(), testCase.url).Return(nil, testCase.err)
 
-			resp := suite.sendParseRequest(testCase.url)
+			response := suite.sendRequest(testCase.url)
 
-			decoder := json.NewDecoder(resp.Body)
+			decoder := json.NewDecoder(response.Body)
 			decoder.DisallowUnknownFields()
 
 			var err ErrorResponse
 			require.NoError(decoder.Decode(&err))
-			require.Equal(testCase.statusCode, resp.Code)
-			require.Equal(err.Message, testCase.err.Error())
+			require.Equal(testCase.statusCode, response.StatusCode)
+			require.Equal(testCase.err.Error(), err.Message)
+			require.NoError(response.Body.Close())
 		}
 	})
 
@@ -110,15 +115,18 @@ func (suite *AnimeControllerSuite) TestParse() {
 		}
 
 		suite.useCaseMock.Scrape(gomock.Any(), url).Return(expected, nil)
-		resp := suite.sendParseRequest(url)
+		response := suite.sendRequest(url)
+		defer func() {
+			require.NoError(response.Body.Close())
+		}()
 
-		decoder := json.NewDecoder(resp.Body)
+		decoder := json.NewDecoder(response.Body)
 		decoder.DisallowUnknownFields()
 
 		var anime *entity.Anime
 
 		require.NoError(decoder.Decode(&anime))
-		require.Equal(http.StatusOK, resp.Code)
+		require.Equal(http.StatusOK, response.StatusCode)
 		require.Equal(expected, anime)
 	})
 }

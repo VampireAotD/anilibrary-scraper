@@ -112,7 +112,8 @@ services:
     volumes:
       - ./storage:/storage
     ports:
-      - "8080:8080"
+      - ${HTTP_MAIN_PORT}:${HTTP_MAIN_PORT}
+      - ${HTTP_MONITORING_PORT}:${HTTP_MONITORING_PORT}
     networks:
       - local
       - shared

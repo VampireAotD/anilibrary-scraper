@@ -1,11 +1,10 @@
 package anime
 
 import (
-	"encoding/json"
 	"errors"
-	"io"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
 )
 
 var (
@@ -17,11 +16,8 @@ type ScrapeRequest struct {
 	URL string `json:"url" validate:"required,url"`
 }
 
-func (request *ScrapeRequest) MapAndValidate(content io.ReadCloser) error {
-	decoder := json.NewDecoder(content)
-	decoder.DisallowUnknownFields()
-
-	if err := decoder.Decode(request); err != nil {
+func (request *ScrapeRequest) MapAndValidate(c *fiber.Ctx) error {
+	if err := c.BodyParser(&request); err != nil {
 		return ErrUnableToDecodeRequest
 	}
 

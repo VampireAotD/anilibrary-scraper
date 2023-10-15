@@ -8,6 +8,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	http "github.com/bogdanfinn/fhttp"
 	tls_client "github.com/bogdanfinn/tls-client"
+	"github.com/bogdanfinn/tls-client/profiles"
 	"github.com/corpix/uarand"
 )
 
@@ -19,7 +20,7 @@ func NewTLSClient(timeout int) TLSClient {
 	jar := tls_client.NewCookieJar()
 	options := []tls_client.HttpClientOption{
 		tls_client.WithTimeoutSeconds(timeout),
-		tls_client.WithClientProfile(tls_client.Chrome_110),
+		tls_client.WithClientProfile(profiles.Chrome_117),
 		tls_client.WithCookieJar(jar),
 		tls_client.WithInsecureSkipVerify(),
 	}

@@ -5,12 +5,11 @@
 package usecase
 
 import (
-	"context"
-	"reflect"
+	entity "anilibrary-scraper/internal/entity"
+	context "context"
+	reflect "reflect"
 
-	"anilibrary-scraper/internal/entity"
-
-	"go.uber.org/mock/gomock"
+	gomock "go.uber.org/mock/gomock"
 )
 
 // MockScraperUseCase is a mock of ScraperUseCase interface.
