@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"anilibrary-scraper/config"
+	"anilibrary-scraper/internal/config"
 	"anilibrary-scraper/pkg/logging"
 
 	"github.com/segmentio/kafka-go"

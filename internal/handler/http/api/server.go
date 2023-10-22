@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"anilibrary-scraper/config"
+	"anilibrary-scraper/internal/config"
 	"anilibrary-scraper/pkg/logging"
 
 	"github.com/gofiber/fiber/v2"

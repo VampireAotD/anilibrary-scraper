@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"runtime"
 
-	"anilibrary-scraper/config"
+	"anilibrary-scraper/internal/config"
 	"anilibrary-scraper/pkg/logging"
 
 	"github.com/redis/go-redis/extra/redisotel/v9"

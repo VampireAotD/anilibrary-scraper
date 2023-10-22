@@ -1,7 +1,7 @@
 package main
 
 import (
-	"anilibrary-scraper/config"
+	"anilibrary-scraper/internal/config"
 	"anilibrary-scraper/internal/di"
 
 	"go.uber.org/fx"

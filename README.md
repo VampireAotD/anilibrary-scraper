@@ -1,7 +1,5 @@
 # Anilibrary Scraper
 
-:warning: **This is an experimental branch and does not considered stable**
-
 Microservice for scraping anime data
 
 [![tests](https://github.com/VampireAotD/anilibrary-scraper/actions/workflows/test.yml/badge.svg)](https://github.com/VampireAotD/anilibrary-scraper/actions/workflows/test.yml)
@@ -39,14 +37,13 @@ If you are deploying this project for the first time, better use:
 make install # will copy .env.example to .env and deploy app using docker
 ```
 
-| Service     | Port  |
-|-------------|-------|
-| Application | 8080  |
-| Redis       | 6379  |
-| Jaeger UI   | 16686 |
-| Clickhouse  | 9000  |
-| ZooKeeper   | 2181  |
-| Kafka       | 9092  |
+| Service     | Port |
+|-------------|------|
+| Application | 8080 |
+| Monitoring  | 8081 |
+| Redis       | 6379 |
+| Clickhouse  | 9005 |
+| Kafka       | 9092 |
 
 ---
 

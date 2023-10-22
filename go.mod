@@ -11,8 +11,8 @@ require (
 	github.com/corpix/uarand v0.2.0
 	github.com/go-playground/validator/v10 v10.15.5
 	github.com/gofiber/contrib/jwt v1.0.7
-	github.com/gofiber/contrib/otelfiber/v2 v2.0.0-20231013145809-1f0e27b565d6
-	github.com/gofiber/fiber/v2 v2.49.2
+	github.com/gofiber/contrib/otelfiber/v2 v2.0.0-20231019215117-5d9de764f301
+	github.com/gofiber/fiber/v2 v2.50.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/prometheus/client_golang v1.17.0
 	github.com/redis/go-redis/extra/redisotel/v9 v9.0.5
@@ -28,7 +28,7 @@ require (
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.19.0
 	go.opentelemetry.io/otel/sdk v1.19.0
 	go.opentelemetry.io/otel/trace v1.19.0
-	go.uber.org/fx v1.20.0
+	go.uber.org/fx v1.20.1
 	go.uber.org/mock v0.3.0
 	go.uber.org/zap v1.26.0
 	golang.org/x/text v0.13.0

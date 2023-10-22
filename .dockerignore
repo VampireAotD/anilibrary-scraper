@@ -1,7 +1,6 @@
 .idea
 .github
 build
-cmd/bin
 storage
 Dockerfile
 docker-compose.yml

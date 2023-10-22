@@ -59,30 +59,18 @@ services:
     networks:
       - local
 
-  zookeeper:
-    image: bitnami/zookeeper
-    environment:
-      - ZOO_ENABLE_AUTH=yes
-      - ZOO_SERVER_USER=${ZOOKEEPER_SERVER_USER}
-      - ZOO_SERVER_PASSWORD=${ZOOKEEPER_SERVER_PASSWORD}
-    ports:
-      - "2181:2181"
-    networks:
-      - local
-
   kafka:
-    depends_on:
-      - zookeeper
     image: bitnami/kafka
     environment:
-      - KAFKA_BROKER_ID=1
-      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
       - ALLOW_PLAINTEXT_LISTENER=yes
-      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT
-      - KAFKA_CFG_LISTENERS=CLIENT://:9092
+      - KAFKA_CFG_LISTENERS=CLIENT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,CONTROLLER:PLAINTEXT
       - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka:9092
-      - KAFKA_ENABLE_KRAFT=no
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
       - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=CLIENT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
       - KAFKA_NUM_PARTITIONS=2
     healthcheck:
       test: [ "CMD-SHELL", "kafka-broker-api-versions.sh --bootstrap-server localhost:9092" ]
