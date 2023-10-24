@@ -38,13 +38,13 @@ func (a AnimeRepository) FindByURL(ctx context.Context, url string) (*entity.Ani
 		return nil, fmt.Errorf("while fetching from redis: %w", err)
 	}
 
-	var model model.Anime
-	if err = json.Unmarshal(bytes, &model); err != nil {
+	var anime model.Anime
+	if err = json.Unmarshal(bytes, &anime); err != nil {
 		span.RecordError(err)
 		return nil, fmt.Errorf("while converting from bytes: %w", err)
 	}
 
-	return model.MapToDomainEntity(), nil
+	return anime.MapToDomainEntity(), nil
 }
 
 func (a AnimeRepository) Create(ctx context.Context, anime model.Anime) error {

@@ -11,6 +11,7 @@ type Config struct {
 	fx.Out
 
 	App    App
+	JWT    JWT
 	Tracer Tracer
 	HTTP   HTTP
 	Kafka  Kafka
@@ -56,4 +57,8 @@ type Kafka struct {
 type Tracer struct {
 	Env         string `env:"APP_ENV" env-default:"local"`
 	ServiceName string `env:"APP_NAME" env-default:"anilibrary-scraper"`
+}
+
+type JWT struct {
+	Secret []byte `env:"JWT_SECRET" env-required:""`
 }

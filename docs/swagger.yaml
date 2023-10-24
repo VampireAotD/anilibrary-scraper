@@ -12,7 +12,7 @@ definitions:
     required:
     - url
     type: object
-  entity.Anime:
+  anime.ScrapeResponse:
     properties:
       episodes:
         type: string
@@ -43,9 +43,9 @@ info:
   description: Microservice for scraping anime data
   license:
     name: Boost Software License, Version 1.0
-    url: https://www.boost.org/LICENSE_1_0.txt
+    url: https://github.com/VampireAotD/anilibrary-scraper/blob/main/LICENSE
   termsOfService: http://swagger.io/terms/
-  title: Anilibrary-scraper
+  title: Anilibrary Scraper
   version: "1.0"
 paths:
   /anime/parse:
@@ -72,7 +72,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/entity.Anime'
+            $ref: '#/definitions/anime.ScrapeResponse'
         "401":
           description: Unauthorized
           schema:

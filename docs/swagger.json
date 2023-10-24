@@ -2,12 +2,12 @@
     "swagger": "2.0",
     "info": {
         "description": "Microservice for scraping anime data",
-        "title": "Anilibrary-scraper",
+        "title": "Anilibrary Scraper",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {},
         "license": {
             "name": "Boost Software License, Version 1.0",
-            "url": "https://www.boost.org/LICENSE_1_0.txt"
+            "url": "https://github.com/VampireAotD/anilibrary-scraper/blob/main/LICENSE"
         },
         "version": "1.0"
     },
@@ -50,7 +50,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/entity.Anime"
+                            "$ref": "#/definitions/anime.ScrapeResponse"
                         }
                     },
                     "401": {
@@ -89,7 +89,7 @@
                 }
             }
         },
-        "entity.Anime": {
+        "anime.ScrapeResponse": {
             "type": "object",
             "properties": {
                 "episodes": {

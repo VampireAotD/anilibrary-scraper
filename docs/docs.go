@@ -13,7 +13,7 @@ const docTemplate = `{
         "contact": {},
         "license": {
             "name": "Boost Software License, Version 1.0",
-            "url": "https://www.boost.org/LICENSE_1_0.txt"
+            "url": "https://github.com/VampireAotD/anilibrary-scraper/blob/main/LICENSE"
         },
         "version": "{{.Version}}"
     },
@@ -56,7 +56,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/entity.Anime"
+                            "$ref": "#/definitions/anime.ScrapeResponse"
                         }
                     },
                     "401": {
@@ -95,7 +95,7 @@ const docTemplate = `{
                 }
             }
         },
-        "entity.Anime": {
+        "anime.ScrapeResponse": {
             "type": "object",
             "properties": {
                 "episodes": {
@@ -142,7 +142,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8080",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
-	Title:            "Anilibrary-scraper",
+	Title:            "Anilibrary Scraper",
 	Description:      "Microservice for scraping anime data",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

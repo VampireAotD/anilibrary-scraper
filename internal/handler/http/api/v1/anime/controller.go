@@ -30,7 +30,7 @@ func NewController(usecase usecase.ScraperUseCase) Controller {
 //	@Produce		json
 //	@Param			Authorization	header		string			true	"Access token"	default(Bearer)
 //	@Param			url				body		ScrapeRequest	true	"Url to scrape from"
-//	@Success		200				{object}	entity.Anime
+//	@Success		200				{object}	ScrapeResponse
 //	@Failure		401				string		Unauthorized
 //	@Failure		422				{object}	ErrorResponse
 //	@Router			/anime/parse [post]
@@ -65,5 +65,5 @@ func (c Controller) Parse(ctx *fiber.Ctx) error {
 	span.AddEvent("Finished scraping")
 
 	metrics.IncrHTTPSuccessCounter()
-	return ctx.JSON(entity)
+	return ctx.JSON(EntityToResponse(entity))
 }
