@@ -11,7 +11,7 @@ install-dependencies:
 
 .PHONY: up
 up:
-	docker-compose up --build
+	docker-compose -f docker/docker-compose.yml up --build
 
 .PHONY: install
 install:
@@ -21,11 +21,11 @@ install:
 
 .PHONY: filebeat
 filebeat:
-	docker-compose --profile filebeat up
+	docker-compose -f docker/docker-compose.yml --profile filebeat up
 
 .PHONY: down
 down:
-	docker-compose down
+	docker-compose -f docker/docker-compose.yml down
 
 .PHONY: test
 test:

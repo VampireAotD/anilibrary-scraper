@@ -29,10 +29,10 @@ services:
       - -e
       - --strict.perms=false
     env_file:
-      - .env
+      - ../.env
     volumes:
-      - ./build/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
-      - ./storage/logs:/logs
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - ../storage/logs:/logs
     networks:
       - shared
 
@@ -61,6 +61,7 @@ services:
 
   kafka:
     image: bitnami/kafka
+    container_name: anilibrary-scraper-kafka
     environment:
       - KAFKA_CFG_NODE_ID=0
       - KAFKA_CFG_PROCESS_ROLES=controller,broker
@@ -92,13 +93,14 @@ services:
         condition: service_healthy
     container_name: anilibrary-scraper
     build:
-      context: .
+      context: ..
+      dockerfile: docker/Dockerfile
       args:
         TIMEZONE: ${TIMEZONE:-Europe/Kiev}
     env_file:
-      - .env
+      - ../.env
     volumes:
-      - ./storage:/storage
+      - ../storage:/storage
     ports:
       - ${HTTP_MAIN_PORT}:${HTTP_MAIN_PORT}
       - ${HTTP_MONITORING_PORT}:${HTTP_MONITORING_PORT}
