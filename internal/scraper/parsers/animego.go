@@ -5,11 +5,11 @@ import (
 	"strconv"
 	"strings"
 
-	"anilibrary-scraper/internal/scraper/parsers/model"
+	"anilibrary-scraper/internal/scraper/model"
 	"github.com/PuerkitoBio/goquery"
 )
 
-var _ Contract = (*AnimeGo)(nil)
+var _ Parser = (*AnimeGo)(nil)
 
 type AnimeGo struct{}
 
@@ -81,7 +81,7 @@ func (a AnimeGo) Synonyms(document *goquery.Document) []string {
 	if synonymsList := document.Find(".synonyms ul li"); synonymsList.Length() != 0 {
 		synonyms := make([]string, 0, synonymsList.Length())
 
-		synonymsList.Each(func(i int, selection *goquery.Selection) {
+		synonymsList.Each(func(_ int, selection *goquery.Selection) {
 			synonyms = append(synonyms, selection.First().Text())
 		})
 

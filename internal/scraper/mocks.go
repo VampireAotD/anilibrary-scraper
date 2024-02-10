@@ -35,17 +35,17 @@ func (m *MockContract) EXPECT() *MockContractMockRecorder {
 	return m.recorder
 }
 
-// Scrape mocks base method.
-func (m *MockContract) Scrape(ctx context.Context, url string) (*entity.Anime, error) {
+// ScrapeAnime mocks base method.
+func (m *MockContract) ScrapeAnime(ctx context.Context, url string) (*entity.Anime, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Scrape", ctx, url)
+	ret := m.ctrl.Call(m, "ScrapeAnime", ctx, url)
 	ret0, _ := ret[0].(*entity.Anime)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// Scrape indicates an expected call of Scrape.
-func (mr *MockContractMockRecorder) Scrape(ctx, url interface{}) *gomock.Call {
+// ScrapeAnime indicates an expected call of ScrapeAnime.
+func (mr *MockContractMockRecorder) ScrapeAnime(ctx, url interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Scrape", reflect.TypeOf((*MockContract)(nil).Scrape), ctx, url)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScrapeAnime", reflect.TypeOf((*MockContract)(nil).ScrapeAnime), ctx, url)
 }

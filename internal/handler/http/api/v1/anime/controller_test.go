@@ -65,7 +65,7 @@ func (suite *AnimeControllerSuite) TestParse() {
 		require = suite.Require()
 	)
 
-	t.Run("Bad request", func(t *testing.T) {
+	t.Run("Bad request", func(_ *testing.T) {
 		testCases := []struct {
 			name, url  string
 			statusCode int
@@ -101,7 +101,7 @@ func (suite *AnimeControllerSuite) TestParse() {
 		}
 	})
 
-	t.Run("Supported urls", func(t *testing.T) {
+	t.Run("Supported urls", func(_ *testing.T) {
 		const url string = "https://animego.org/anime/naruto-uragannye-hroniki-103"
 		expected := &entity.Anime{
 			Image:       base64.StdEncoding.EncodeToString([]byte("data:image/jpeg;base64,random")),

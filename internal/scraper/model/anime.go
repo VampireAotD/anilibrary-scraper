@@ -6,7 +6,16 @@ import (
 	"anilibrary-scraper/internal/entity"
 )
 
-var ErrNotEnoughData = errors.New("entity wasn't filled with required data")
+type Status string
+
+const (
+	Ongoing Status = "Онгоинг"
+	Ready   Status = "Вышел"
+)
+
+var (
+	ErrNotEnoughData = errors.New("entity wasn't filled with required data")
+)
 
 type Anime struct {
 	Image       string

@@ -33,7 +33,7 @@ func NewLoggerProvider(lifecycle fx.Lifecycle) error {
 	logger.Info("Initialized logger")
 
 	lifecycle.Append(fx.Hook{
-		OnStop: func(ctx context.Context) error {
+		OnStop: func(_ context.Context) error {
 			logger.Info("Closing logger")
 
 			_ = logger.Sync()

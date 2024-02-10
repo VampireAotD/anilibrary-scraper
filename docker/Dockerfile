@@ -1,11 +1,11 @@
 ## modules stage
-FROM golang:1.21-alpine AS modules
+FROM golang:1.22-alpine AS modules
 ADD go.mod go.sum /modules/
 WORKDIR /modules
 RUN go mod download
 
 ## build stage
-FROM golang:1.21-alpine AS builder
+FROM golang:1.22-alpine AS builder
 RUN apk --no-cache add tzdata
 
 COPY --from=modules /go/pkg /go/pkg

@@ -110,6 +110,7 @@ services:
 
 networks:
   local:
+    name: local
     driver: bridge
   shared:
     name: anilibrary

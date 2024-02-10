@@ -40,7 +40,7 @@ func (suite *EventServiceSuite) TestSend() {
 		require = suite.Require()
 	)
 
-	t.Run("Send message", func(t *testing.T) {
+	t.Run("Send message", func(_ *testing.T) {
 		const testURL string = "https://google.com/"
 
 		suite.repositoryMock.Send(gomock.Any(), model.Event{

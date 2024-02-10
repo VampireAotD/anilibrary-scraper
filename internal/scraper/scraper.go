@@ -9,29 +9,37 @@ import (
 	"sync"
 
 	"anilibrary-scraper/internal/entity"
-	"anilibrary-scraper/internal/metrics"
-	"anilibrary-scraper/internal/scraper/client"
+	"anilibrary-scraper/internal/scraper/model"
 	"anilibrary-scraper/internal/scraper/parsers"
-	"anilibrary-scraper/internal/scraper/parsers/model"
 
 	"github.com/PuerkitoBio/goquery"
-	"go.opentelemetry.io/otel/codes"
-	"go.opentelemetry.io/otel/trace"
 )
 
-// Scraper is a basically a factory of all parsers that can resolve parser for current url
-// and scrape all data concurrently
 type Scraper struct {
-	client client.TLSClient
+	config Config
 }
 
 func New() Scraper {
 	return Scraper{
-		client: client.NewTLSClient(10),
+		config: NewDefaultConfig(),
 	}
 }
 
-func (s Scraper) resolveParser(url string) (parsers.Contract, error) {
+func (s Scraper) ScrapeAnime(ctx context.Context, url string) (*entity.Anime, error) {
+	parser, err := s.resolveParser(url)
+	if err != nil {
+		return nil, fmt.Errorf("resolving parser %s: %w", url, err)
+	}
+
+	document, err := s.config.client.HTMLDocument(ctx, url)
+	if err != nil {
+		return nil, fmt.Errorf("scraping %s: %w", url, err)
+	}
+
+	return s.extractData(ctx, parser, document).MapToDomainEntity(), nil
+}
+
+func (s Scraper) resolveParser(url string) (parsers.Parser, error) {
 	switch {
 	case strings.Contains(url, parsers.AnimeGoURL):
 		return parsers.NewAnimeGo(), nil
@@ -42,28 +50,22 @@ func (s Scraper) resolveParser(url string) (parsers.Contract, error) {
 	}
 }
 
-func (s Scraper) recover() {
-	if err := recover(); err != nil {
-		metrics.IncrPanicCounter()
-	}
-}
-
-func (s Scraper) process(parser parsers.Contract, document *goquery.Document) *model.Anime {
+func (s Scraper) extractData(ctx context.Context, parser parsers.Parser, document *goquery.Document) model.Anime {
 	var (
+		anime model.Anime
 		wg    sync.WaitGroup
-		anime = new(model.Anime)
 	)
 
-	parse := func(processor func()) {
-		defer s.recover()
+	parseHTML := func(extractor func()) {
+		defer s.config.panicHandler()
 		defer wg.Done()
-		processor()
+		extractor()
 	}
 
 	wg.Add(8)
 
-	go parse(func() {
-		response, err := s.client.FetchResponseBody(parser.Image(document))
+	go parseHTML(func() {
+		response, err := s.config.client.Response(ctx, parser.Image(document))
 		if err != nil {
 			return
 		}
@@ -75,61 +77,35 @@ func (s Scraper) process(parser parsers.Contract, document *goquery.Document) *m
 		)
 	})
 
-	go parse(func() {
+	go parseHTML(func() {
 		anime.Title = parser.Title(document)
 	})
 
-	go parse(func() {
+	go parseHTML(func() {
 		anime.Status = parser.Status(document)
 	})
 
-	go parse(func() {
+	go parseHTML(func() {
 		anime.Rating = parser.Rating(document)
 	})
 
-	go parse(func() {
+	go parseHTML(func() {
 		anime.Episodes = parser.Episodes(document)
 	})
 
-	go parse(func() {
+	go parseHTML(func() {
 		anime.Genres = parser.Genres(document)
 	})
 
-	go parse(func() {
+	go parseHTML(func() {
 		anime.VoiceActing = parser.VoiceActing(document)
 	})
 
-	go parse(func() {
+	go parseHTML(func() {
 		anime.Synonyms = parser.Synonyms(document)
 	})
 
 	wg.Wait()
 
 	return anime
-}
-
-func (s Scraper) Scrape(ctx context.Context, url string) (*entity.Anime, error) {
-	_, span := trace.SpanFromContext(ctx).TracerProvider().Tracer("Scraper").Start(ctx, "Scrape")
-	defer span.End()
-
-	parser, err := s.resolveParser(url)
-	if err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-
-	document, err := s.client.FetchDocument(url)
-	if err != nil {
-		return nil, err
-	}
-
-	anime := s.process(parser, document)
-	if err = anime.Validate(); err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-
-	return anime.MapToDomainEntity(), nil
 }

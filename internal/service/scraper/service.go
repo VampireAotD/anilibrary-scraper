@@ -44,7 +44,7 @@ func (s Service) Process(ctx context.Context, url string) (*entity.Anime, error)
 
 	span.AddEvent("Scraping data from url")
 
-	anime, err := s.scraper.Scrape(ctx, url)
+	anime, err := s.scraper.ScrapeAnime(ctx, url)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())

@@ -34,7 +34,7 @@ func NewServer(cfg config.HTTP, lifecycle fx.Lifecycle) fiber.Router {
 	app.Use(recover.New())
 
 	lifecycle.Append(fx.Hook{
-		OnStart: func(ctx context.Context) error {
+		OnStart: func(_ context.Context) error {
 			addr := net.JoinHostPort(cfg.Addr, strconv.Itoa(cfg.MainPort))
 
 			logging.Get().Info("HTTP server started at", zap.String("addr", addr))

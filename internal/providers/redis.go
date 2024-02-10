@@ -46,7 +46,7 @@ func NewRedisProvider(lifecycle fx.Lifecycle, cfg config.Redis) (*redis.Client, 
 
 			return nil
 		},
-		OnStop: func(ctx context.Context) error {
+		OnStop: func(_ context.Context) error {
 			logging.Get().Info("Closing Redis connection")
 
 			return client.Close()

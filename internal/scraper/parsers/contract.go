@@ -1,7 +1,7 @@
 package parsers
 
 import (
-	"anilibrary-scraper/internal/scraper/parsers/model"
+	"anilibrary-scraper/internal/scraper/model"
 	"github.com/PuerkitoBio/goquery"
 )
 
@@ -17,7 +17,7 @@ const (
 	MinimalAnimeEpisodes string  = "0 / ?"
 )
 
-type Contract interface {
+type Parser interface {
 	// Title method scraping anime title and returns empty string if none found
 	Title(document *goquery.Document) string
 

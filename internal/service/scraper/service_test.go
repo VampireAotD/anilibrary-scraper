@@ -46,14 +46,14 @@ func (suite *ScraperServiceSuite) TestProcess() {
 		require = suite.Require()
 	)
 
-	t.Run("Errors", func(t *testing.T) {
+	t.Run("Errors", func(_ *testing.T) {
 		testCases := []string{"", "https://google.com"}
 
 		for _, testCase := range testCases {
 			suite.repositoryMock.FindByURL(gomock.Any(), gomock.Any()).Return(nil, nil)
 			suite.repositoryMock.Create(gomock.Any(), gomock.Any()).Return(nil)
 
-			suite.scraperMock.Scrape(gomock.Any(), testCase).Return(nil, scraper.ErrUnsupportedScraper)
+			suite.scraperMock.ScrapeAnime(gomock.Any(), testCase).Return(nil, scraper.ErrUnsupportedScraper)
 
 			result, err := suite.service.Process(context.Background(), testCase)
 
@@ -63,7 +63,7 @@ func (suite *ScraperServiceSuite) TestProcess() {
 	})
 
 	t.Run("Supported urls", func(t *testing.T) {
-		t.Run("Retrieve from cache", func(t *testing.T) {
+		t.Run("Retrieve from cache", func(_ *testing.T) {
 			const url string = "https://animego.org/anime/blich-tysyacheletnyaya-krovavaya-voyna-2129"
 			anime := &entity.Anime{
 				Title:    "Блич: Тысячелетняя кровавая война",
@@ -128,7 +128,7 @@ func (suite *ScraperServiceSuite) TestProcess() {
 					suite.repositoryMock.FindByURL(gomock.Any(), gomock.Any()).Return(nil, nil)
 					suite.repositoryMock.Create(gomock.Any(), gomock.Any()).Return(nil)
 
-					suite.scraperMock.Scrape(gomock.Any(), testCase.url).Return(testCase.expected, nil)
+					suite.scraperMock.ScrapeAnime(gomock.Any(), testCase.url).Return(testCase.expected, nil)
 
 					anime, err := suite.service.Process(context.Background(), testCase.url)
 

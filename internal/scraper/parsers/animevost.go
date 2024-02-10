@@ -4,13 +4,13 @@ import (
 	"strconv"
 	"strings"
 
-	"anilibrary-scraper/internal/scraper/parsers/model"
+	"anilibrary-scraper/internal/scraper/model"
 	"github.com/PuerkitoBio/goquery"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
 
-var _ Contract = (*AnimeVost)(nil)
+var _ Parser = (*AnimeVost)(nil)
 
 type AnimeVost struct{}
 

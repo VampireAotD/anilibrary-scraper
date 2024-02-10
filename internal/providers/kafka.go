@@ -20,7 +20,7 @@ func NewKafkaProvider(lifecycle fx.Lifecycle, cfg config.Kafka) (*kafka.Conn, er
 	logging.Get().Info("Connected to Kafka")
 
 	lifecycle.Append(fx.Hook{
-		OnStop: func(ctx context.Context) error {
+		OnStop: func(_ context.Context) error {
 			logging.Get().Info("Closing Kafka connection")
 
 			return conn.Close()

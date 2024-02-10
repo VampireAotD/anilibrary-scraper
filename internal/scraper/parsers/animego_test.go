@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"anilibrary-scraper/internal/scraper/parsers/model"
+	"anilibrary-scraper/internal/scraper/model"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/suite"
 )
@@ -12,7 +12,7 @@ import (
 type AnimeGoSuite struct {
 	suite.Suite
 
-	parser Contract
+	parser Parser
 }
 
 func TestAnimeGoSuite(t *testing.T) {

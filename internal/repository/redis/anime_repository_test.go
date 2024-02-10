@@ -63,13 +63,13 @@ func (suite *AnimeRepositorySuite) TestFindByURL() {
 		require = suite.Require()
 	)
 
-	t.Run("Not found in cache", func(t *testing.T) {
+	t.Run("Not found in cache", func(_ *testing.T) {
 		anime, err := suite.animeRepository.FindByURL(context.Background(), testURL)
 		require.Error(err)
 		require.Zero(anime)
 	})
 
-	t.Run("Found in cache", func(t *testing.T) {
+	t.Run("Found in cache", func(_ *testing.T) {
 		err := suite.animeRepository.Create(context.Background(), suite.expectedAnime)
 		require.NoError(err)
 
@@ -87,7 +87,7 @@ func (suite *AnimeRepositorySuite) TestCreate() {
 	)
 
 	t.Run("Invalid cases", func(t *testing.T) {
-		t.Run("Missing image", func(t *testing.T) {
+		t.Run("Missing image", func(_ *testing.T) {
 			err := suite.animeRepository.Create(context.Background(), model.Anime{
 				URL:   testURL,
 				Title: "random",
@@ -95,7 +95,7 @@ func (suite *AnimeRepositorySuite) TestCreate() {
 			require.ErrorIs(err, model.ErrInvalidData)
 		})
 
-		t.Run("Missing title", func(t *testing.T) {
+		t.Run("Missing title", func(_ *testing.T) {
 			err := suite.animeRepository.Create(context.Background(), model.Anime{
 				URL:   testURL,
 				Image: base64.StdEncoding.EncodeToString([]byte("random")),
@@ -104,7 +104,7 @@ func (suite *AnimeRepositorySuite) TestCreate() {
 		})
 	})
 
-	t.Run("Correct data", func(t *testing.T) {
+	t.Run("Correct data", func(_ *testing.T) {
 		err := suite.animeRepository.Create(context.Background(), suite.expectedAnime)
 		require.NoError(err)
 	})
