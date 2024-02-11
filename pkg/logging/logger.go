@@ -2,6 +2,7 @@ package logging
 
 import (
 	"os"
+	"sync"
 
 	"go.elastic.co/ecszap"
 	"go.uber.org/zap"
@@ -11,13 +12,16 @@ import (
 var (
 	lvl          = zap.NewAtomicLevel()
 	globalLogger *zap.Logger
+	once         sync.Once
 )
 
 // Get will return instance of configured logger using New. If none was configured - default logger will be provided.
 func Get() *zap.Logger {
-	if globalLogger == nil {
-		globalLogger = New()
-	}
+	once.Do(func() {
+		if globalLogger == nil {
+			globalLogger = New()
+		}
+	})
 
 	return globalLogger
 }
