@@ -6,23 +6,30 @@ import (
 
 	"anilibrary-scraper/internal/entity"
 	"anilibrary-scraper/internal/metrics"
-	"anilibrary-scraper/internal/repository"
 	"anilibrary-scraper/internal/repository/model"
-	"anilibrary-scraper/internal/scraper"
-	"anilibrary-scraper/internal/service"
 
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 )
 
-var _ service.ScraperService = (*Service)(nil)
+//go:generate mockgen -source=service.go -destination=./mocks.go -package=scraper
+type (
+	AnimeRepository interface {
+		FindByURL(ctx context.Context, url string) (*entity.Anime, error)
+		Create(ctx context.Context, anime model.Anime) error
+	}
+
+	Scraper interface {
+		ScrapeAnime(ctx context.Context, url string) (*entity.Anime, error)
+	}
+)
 
 type Service struct {
-	repository repository.AnimeRepository
-	scraper    scraper.Contract
+	repository AnimeRepository
+	scraper    Scraper
 }
 
-func NewScraperService(repository repository.AnimeRepository, scraper scraper.Contract) Service {
+func NewScraperService(repository AnimeRepository, scraper Scraper) Service {
 	return Service{
 		repository: repository,
 		scraper:    scraper,

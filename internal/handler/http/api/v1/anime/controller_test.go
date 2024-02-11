@@ -11,7 +11,6 @@ import (
 
 	"anilibrary-scraper/internal/entity"
 	"anilibrary-scraper/internal/scraper"
-	"anilibrary-scraper/internal/usecase"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/stretchr/testify/suite"
@@ -23,7 +22,7 @@ const endpoint string = "/api/v1/anime/parse"
 type AnimeControllerSuite struct {
 	suite.Suite
 
-	useCaseMock *usecase.MockScraperUseCaseMockRecorder
+	useCaseMock *MockScraperUseCaseMockRecorder
 	controller  Controller
 	router      *fiber.App
 }
@@ -36,7 +35,7 @@ func (suite *AnimeControllerSuite) SetupSuite() {
 	ctrl := gomock.NewController(suite.T())
 	defer ctrl.Finish()
 
-	useCaseMock := usecase.NewMockScraperUseCase(ctrl)
+	useCaseMock := NewMockScraperUseCase(ctrl)
 
 	suite.useCaseMock = useCaseMock.EXPECT()
 	suite.controller = NewController(useCaseMock)

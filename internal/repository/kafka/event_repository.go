@@ -5,14 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"anilibrary-scraper/internal/repository"
 	"anilibrary-scraper/internal/repository/model"
 
 	"github.com/segmentio/kafka-go"
 	"go.opentelemetry.io/otel/trace"
 )
-
-var _ repository.EventRepository = (*EventRepository)(nil)
 
 type EventRepository struct {
 	connection *kafka.Conn

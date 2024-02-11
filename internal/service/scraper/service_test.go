@@ -1,4 +1,4 @@
-package scraper_test
+package scraper
 
 import (
 	"context"
@@ -6,9 +6,7 @@ import (
 	"testing"
 
 	"anilibrary-scraper/internal/entity"
-	"anilibrary-scraper/internal/repository"
 	"anilibrary-scraper/internal/scraper"
-	scraperService "anilibrary-scraper/internal/service/scraper"
 
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/mock/gomock"
@@ -17,9 +15,9 @@ import (
 type ScraperServiceSuite struct {
 	suite.Suite
 
-	repositoryMock *repository.MockAnimeRepositoryMockRecorder
-	scraperMock    *scraper.MockContractMockRecorder
-	service        scraperService.Service
+	repositoryMock *MockAnimeRepositoryMockRecorder
+	scraperMock    *MockScraperMockRecorder
+	service        Service
 }
 
 func TestScraperServiceSuite(t *testing.T) {
@@ -31,13 +29,13 @@ func (suite *ScraperServiceSuite) SetupSuite() {
 	defer ctrl.Finish()
 
 	var (
-		repositoryMock = repository.NewMockAnimeRepository(ctrl)
-		scraperMock    = scraper.NewMockContract(ctrl)
+		repositoryMock = NewMockAnimeRepository(ctrl)
+		scraperMock    = NewMockScraper(ctrl)
 	)
 
 	suite.repositoryMock = repositoryMock.EXPECT()
 	suite.scraperMock = scraperMock.EXPECT()
-	suite.service = scraperService.NewScraperService(repositoryMock, scraperMock)
+	suite.service = NewScraperService(repositoryMock, scraperMock)
 }
 
 func (suite *ScraperServiceSuite) TestProcess() {

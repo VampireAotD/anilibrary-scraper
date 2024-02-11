@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"anilibrary-scraper/internal/entity"
-	"anilibrary-scraper/internal/repository"
 	"anilibrary-scraper/internal/repository/model"
 
 	"github.com/redis/go-redis/v9"
@@ -15,8 +14,6 @@ import (
 )
 
 const sevenDaysInHours string = "168h"
-
-var _ repository.AnimeRepository = (*AnimeRepository)(nil)
 
 type AnimeRepository struct {
 	client *redis.Client

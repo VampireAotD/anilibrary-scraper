@@ -5,9 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"anilibrary-scraper/internal/repository"
 	"anilibrary-scraper/internal/repository/model"
-	"anilibrary-scraper/internal/service"
 
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/mock/gomock"
@@ -16,8 +14,8 @@ import (
 type EventServiceSuite struct {
 	suite.Suite
 
-	repositoryMock *repository.MockEventRepositoryMockRecorder
-	service        service.EventService
+	repositoryMock *MockEventRepositoryMockRecorder
+	service        Service
 }
 
 func TestEventServiceSuite(t *testing.T) {
@@ -28,7 +26,7 @@ func (suite *EventServiceSuite) SetupSuite() {
 	ctrl := gomock.NewController(suite.T())
 	defer ctrl.Finish()
 
-	repositoryMock := repository.NewMockEventRepository(ctrl)
+	repositoryMock := NewMockEventRepository(ctrl)
 
 	suite.repositoryMock = repositoryMock.EXPECT()
 	suite.service = NewService(repositoryMock)

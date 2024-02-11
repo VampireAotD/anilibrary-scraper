@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"testing"
 
-	"anilibrary-scraper/internal/repository"
 	"anilibrary-scraper/internal/repository/model"
 
 	"github.com/alicebob/miniredis/v2"
@@ -20,7 +19,7 @@ type AnimeRepositorySuite struct {
 	suite.Suite
 
 	redisServer     *miniredis.Miniredis
-	animeRepository repository.AnimeRepository
+	animeRepository AnimeRepository
 	expectedAnime   model.Anime
 }
 

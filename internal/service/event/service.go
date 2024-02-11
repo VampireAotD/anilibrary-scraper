@@ -4,20 +4,22 @@ import (
 	"context"
 	"time"
 
-	"anilibrary-scraper/internal/repository"
 	"anilibrary-scraper/internal/repository/model"
-	"anilibrary-scraper/internal/service"
 
 	"go.opentelemetry.io/otel/trace"
 )
 
-var _ service.EventService = (*Service)(nil)
-
-type Service struct {
-	kafkaRepository repository.EventRepository
+//go:generate mockgen -source=service.go -destination=./mocks.go -package=event
+type Repository interface {
+	// Send method sends event data
+	Send(ctx context.Context, event model.Event) error
 }
 
-func NewService(kafkaRepository repository.EventRepository) Service {
+type Service struct {
+	kafkaRepository Repository
+}
+
+func NewService(kafkaRepository Repository) Service {
 	return Service{
 		kafkaRepository: kafkaRepository,
 	}

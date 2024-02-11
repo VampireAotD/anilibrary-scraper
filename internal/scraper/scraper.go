@@ -3,6 +3,7 @@ package scraper
 import (
 	"context"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -13,6 +14,10 @@ import (
 	"anilibrary-scraper/internal/scraper/parsers"
 
 	"github.com/PuerkitoBio/goquery"
+)
+
+var (
+	ErrUnsupportedScraper = errors.New("unsupported scraper")
 )
 
 type Scraper struct {

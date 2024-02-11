@@ -5,18 +5,24 @@ import (
 	"fmt"
 
 	"anilibrary-scraper/internal/entity"
-	"anilibrary-scraper/internal/service"
-	"anilibrary-scraper/internal/usecase"
 )
 
-var _ usecase.ScraperUseCase = (*UseCase)(nil)
+type (
+	Service interface {
+		Process(ctx context.Context, url string) (*entity.Anime, error)
+	}
+
+	EventService interface {
+		Send(ctx context.Context, url string) error
+	}
+)
 
 type UseCase struct {
-	scraperService service.ScraperService
-	eventService   service.EventService
+	scraperService Service
+	eventService   EventService
 }
 
-func NewUseCase(scraperService service.ScraperService, eventService service.EventService) UseCase {
+func NewUseCase(scraperService Service, eventService EventService) UseCase {
 	return UseCase{
 		scraperService: scraperService,
 		eventService:   eventService,

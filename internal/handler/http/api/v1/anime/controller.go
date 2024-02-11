@@ -1,8 +1,10 @@
 package anime
 
 import (
+	"context"
+
+	"anilibrary-scraper/internal/entity"
 	"anilibrary-scraper/internal/metrics"
-	"anilibrary-scraper/internal/usecase"
 	"anilibrary-scraper/pkg/logging"
 
 	"github.com/gofiber/fiber/v2"
@@ -11,13 +13,18 @@ import (
 	"go.uber.org/zap"
 )
 
-type Controller struct {
-	usecase usecase.ScraperUseCase
+//go:generate mockgen -source=controller.go -destination=./mocks.go -package=anime
+type ScraperUseCase interface {
+	Scrape(ctx context.Context, url string) (*entity.Anime, error)
 }
 
-func NewController(usecase usecase.ScraperUseCase) Controller {
+type Controller struct {
+	useCase ScraperUseCase
+}
+
+func NewController(useCase ScraperUseCase) Controller {
 	return Controller{
-		usecase: usecase,
+		useCase: useCase,
 	}
 }
 
@@ -52,7 +59,7 @@ func (c Controller) Parse(ctx *fiber.Ctx) error {
 	logging.Get().Info("Scraping", zap.String("url", request.URL))
 	span.AddEvent("Scraping data")
 
-	entity, err := c.usecase.Scrape(ctx.UserContext(), request.URL)
+	anime, err := c.useCase.Scrape(ctx.UserContext(), request.URL)
 	if err != nil {
 		metrics.IncrHTTPErrorsCounter()
 		span.SetStatus(codes.Error, err.Error())
@@ -65,5 +72,5 @@ func (c Controller) Parse(ctx *fiber.Ctx) error {
 	span.AddEvent("Finished scraping")
 
 	metrics.IncrHTTPSuccessCounter()
-	return ctx.JSON(EntityToResponse(entity))
+	return ctx.JSON(EntityToResponse(anime))
 }
