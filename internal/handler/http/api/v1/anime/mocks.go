@@ -36,10 +36,10 @@ func (m *MockScraperUseCase) EXPECT() *MockScraperUseCaseMockRecorder {
 }
 
 // Scrape mocks base method.
-func (m *MockScraperUseCase) Scrape(ctx context.Context, url string) (*entity.Anime, error) {
+func (m *MockScraperUseCase) Scrape(ctx context.Context, url string) (entity.Anime, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Scrape", ctx, url)
-	ret0, _ := ret[0].(*entity.Anime)
+	ret0, _ := ret[0].(entity.Anime)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

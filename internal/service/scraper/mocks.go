@@ -51,10 +51,10 @@ func (mr *MockAnimeRepositoryMockRecorder) Create(ctx, anime interface{}) *gomoc
 }
 
 // FindByURL mocks base method.
-func (m *MockAnimeRepository) FindByURL(ctx context.Context, url string) (*entity.Anime, error) {
+func (m *MockAnimeRepository) FindByURL(ctx context.Context, url string) (entity.Anime, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindByURL", ctx, url)
-	ret0, _ := ret[0].(*entity.Anime)
+	ret0, _ := ret[0].(entity.Anime)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -89,10 +89,10 @@ func (m *MockScraper) EXPECT() *MockScraperMockRecorder {
 }
 
 // ScrapeAnime mocks base method.
-func (m *MockScraper) ScrapeAnime(ctx context.Context, url string) (*entity.Anime, error) {
+func (m *MockScraper) ScrapeAnime(ctx context.Context, url string) (entity.Anime, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ScrapeAnime", ctx, url)
-	ret0, _ := ret[0].(*entity.Anime)
+	ret0, _ := ret[0].(entity.Anime)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

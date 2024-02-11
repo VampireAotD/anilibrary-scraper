@@ -10,3 +10,7 @@ type Anime struct {
 	Synonyms    []string
 	Rating      float32
 }
+
+func (a Anime) Acceptable() bool {
+	return a.Image != "" && a.Title != ""
+}

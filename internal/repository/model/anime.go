@@ -28,8 +28,8 @@ func (a Anime) Validate() error {
 	return nil
 }
 
-func (a Anime) MapToDomainEntity() *entity.Anime {
-	return &entity.Anime{
+func (a Anime) MapToDomainEntity() entity.Anime {
+	return entity.Anime{
 		Image:       a.Image,
 		Title:       a.Title,
 		Status:      a.Status,

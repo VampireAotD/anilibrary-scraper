@@ -13,8 +13,8 @@ type ScrapeResponse struct {
 	Rating      float32  `json:"rating"`
 }
 
-func EntityToResponse(anime *entity.Anime) ScrapeResponse {
-	return ScrapeResponse(*anime)
+func EntityToResponse(anime entity.Anime) ScrapeResponse {
+	return ScrapeResponse(anime)
 }
 
 type ErrorResponse struct {

@@ -85,7 +85,7 @@ func (suite *AnimeControllerSuite) TestParse() {
 		}
 
 		for _, testCase := range testCases {
-			suite.useCaseMock.Scrape(gomock.Any(), testCase.url).Return(nil, testCase.err)
+			suite.useCaseMock.Scrape(gomock.Any(), testCase.url).Return(entity.Anime{}, testCase.err)
 
 			response := suite.sendRequest(testCase.url)
 
@@ -102,7 +102,7 @@ func (suite *AnimeControllerSuite) TestParse() {
 
 	t.Run("Supported urls", func(_ *testing.T) {
 		const url string = "https://animego.org/anime/naruto-uragannye-hroniki-103"
-		expected := &entity.Anime{
+		expected := entity.Anime{
 			Image:       base64.StdEncoding.EncodeToString([]byte("data:image/jpeg;base64,random")),
 			Title:       "Наруто: Ураганные хроники",
 			Status:      "Вышел",
@@ -122,7 +122,7 @@ func (suite *AnimeControllerSuite) TestParse() {
 		decoder := json.NewDecoder(response.Body)
 		decoder.DisallowUnknownFields()
 
-		var anime *entity.Anime
+		var anime entity.Anime
 
 		require.NoError(decoder.Decode(&anime))
 		require.Equal(http.StatusOK, response.StatusCode)

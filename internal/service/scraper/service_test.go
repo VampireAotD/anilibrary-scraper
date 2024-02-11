@@ -48,22 +48,23 @@ func (suite *ScraperServiceSuite) TestProcess() {
 		testCases := []string{"", "https://google.com"}
 
 		for _, testCase := range testCases {
-			suite.repositoryMock.FindByURL(gomock.Any(), gomock.Any()).Return(nil, nil)
+			suite.repositoryMock.FindByURL(gomock.Any(), gomock.Any()).Return(entity.Anime{}, nil)
 			suite.repositoryMock.Create(gomock.Any(), gomock.Any()).Return(nil)
 
-			suite.scraperMock.ScrapeAnime(gomock.Any(), testCase).Return(nil, scraper.ErrUnsupportedScraper)
+			suite.scraperMock.ScrapeAnime(gomock.Any(), testCase).Return(entity.Anime{}, scraper.ErrUnsupportedScraper)
 
 			result, err := suite.service.Process(context.Background(), testCase)
 
 			require.Error(err)
-			require.Nil(result)
+			require.Empty(result)
 		}
 	})
 
 	t.Run("Supported urls", func(t *testing.T) {
 		t.Run("Retrieve from cache", func(_ *testing.T) {
 			const url string = "https://animego.org/anime/blich-tysyacheletnyaya-krovavaya-voyna-2129"
-			anime := &entity.Anime{
+			anime := entity.Anime{
+				Image:    base64.StdEncoding.EncodeToString([]byte("random")),
 				Title:    "Блич: Тысячелетняя кровавая война",
 				Status:   "Онгоинг",
 				Episodes: "1 / ?",
@@ -74,7 +75,7 @@ func (suite *ScraperServiceSuite) TestProcess() {
 
 			cached, err := suite.service.Process(context.Background(), url)
 
-			require.NotNil(cached)
+			require.NotEmpty(cached)
 			require.NoError(err)
 			require.Equal(anime, cached)
 		})
@@ -83,12 +84,12 @@ func (suite *ScraperServiceSuite) TestProcess() {
 			cases := []struct {
 				name     string
 				url      string
-				expected *entity.Anime
+				expected entity.Anime
 			}{
 				{
 					name: "AnimeGo",
 					url:  "https://animego.org/anime/naruto-102",
-					expected: &entity.Anime{
+					expected: entity.Anime{
 						Image: base64.StdEncoding.EncodeToString(
 							[]byte("https://animego.org/upload/anime/images/5a3ff73e8bd5b.jpg"),
 						),
@@ -104,7 +105,7 @@ func (suite *ScraperServiceSuite) TestProcess() {
 				{
 					name: "AnimeVostOrg",
 					url:  "https://animevost.org/tip/tv/855-akame-ga-kill-ubiyca-akame.html",
-					expected: &entity.Anime{
+					expected: entity.Anime{
 						Image: base64.StdEncoding.EncodeToString(
 							[]byte("https://animevost.org/uploads/posts/2014-08/1409038345_1.jpg"),
 						),
@@ -123,7 +124,7 @@ func (suite *ScraperServiceSuite) TestProcess() {
 				t.Run(testCase.name, func(t *testing.T) {
 					t.Parallel()
 
-					suite.repositoryMock.FindByURL(gomock.Any(), gomock.Any()).Return(nil, nil)
+					suite.repositoryMock.FindByURL(gomock.Any(), gomock.Any()).Return(entity.Anime{}, nil)
 					suite.repositoryMock.Create(gomock.Any(), gomock.Any()).Return(nil)
 
 					suite.scraperMock.ScrapeAnime(gomock.Any(), testCase.url).Return(testCase.expected, nil)
@@ -131,7 +132,7 @@ func (suite *ScraperServiceSuite) TestProcess() {
 					anime, err := suite.service.Process(context.Background(), testCase.url)
 
 					require.NoError(err)
-					require.NotNil(anime)
+					require.NotEmpty(anime)
 					require.Equal(testCase.expected, anime)
 
 					_, err = base64.StdEncoding.DecodeString(anime.Image)

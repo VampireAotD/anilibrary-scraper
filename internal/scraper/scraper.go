@@ -30,15 +30,15 @@ func New() Scraper {
 	}
 }
 
-func (s Scraper) ScrapeAnime(ctx context.Context, url string) (*entity.Anime, error) {
+func (s Scraper) ScrapeAnime(ctx context.Context, url string) (entity.Anime, error) {
 	parser, err := s.resolveParser(url)
 	if err != nil {
-		return nil, fmt.Errorf("resolving parser %s: %w", url, err)
+		return entity.Anime{}, fmt.Errorf("resolving parser %s: %w", url, err)
 	}
 
 	document, err := s.config.client.HTMLDocument(ctx, url)
 	if err != nil {
-		return nil, fmt.Errorf("scraping %s: %w", url, err)
+		return entity.Anime{}, fmt.Errorf("scraping %s: %w", url, err)
 	}
 
 	return s.extractData(ctx, parser, document).MapToDomainEntity(), nil

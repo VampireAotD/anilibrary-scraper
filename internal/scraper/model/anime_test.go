@@ -22,6 +22,9 @@ func TestAnime(t *testing.T) {
 
 	t.Run("MapToDomainEntity", func(t *testing.T) {
 		anime := Anime{Image: base64.StdEncoding.EncodeToString([]byte("random")), Title: "random"}
-		require.NotNil(t, anime.MapToDomainEntity())
+		mapped := anime.MapToDomainEntity()
+
+		require.Equal(t, anime.Image, mapped.Image)
+		require.Equal(t, anime.Title, mapped.Title)
 	})
 }

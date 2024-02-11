@@ -15,12 +15,12 @@ import (
 //go:generate mockgen -source=service.go -destination=./mocks.go -package=scraper
 type (
 	AnimeRepository interface {
-		FindByURL(ctx context.Context, url string) (*entity.Anime, error)
+		FindByURL(ctx context.Context, url string) (entity.Anime, error)
 		Create(ctx context.Context, anime model.Anime) error
 	}
 
 	Scraper interface {
-		ScrapeAnime(ctx context.Context, url string) (*entity.Anime, error)
+		ScrapeAnime(ctx context.Context, url string) (entity.Anime, error)
 	}
 )
 
@@ -36,14 +36,14 @@ func NewScraperService(repository AnimeRepository, scraper Scraper) Service {
 	}
 }
 
-func (s Service) Process(ctx context.Context, url string) (*entity.Anime, error) {
+func (s Service) Process(ctx context.Context, url string) (entity.Anime, error) {
 	ctx, span := trace.SpanFromContext(ctx).TracerProvider().Tracer("ScraperService").Start(ctx, "Process")
 	defer span.End()
 
 	span.AddEvent("Searching for scraped data in cache")
 
 	anime, _ := s.repository.FindByURL(ctx, url)
-	if anime != nil {
+	if anime.Acceptable() {
 		metrics.IncrCacheHitCounter()
 		span.SetStatus(codes.Ok, "anime was fetched from cache")
 		return anime, nil
@@ -55,7 +55,7 @@ func (s Service) Process(ctx context.Context, url string) (*entity.Anime, error)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
-		return nil, fmt.Errorf("scraping : %w", err)
+		return entity.Anime{}, fmt.Errorf("scraping : %w", err)
 	}
 
 	span.AddEvent("Creating cache")

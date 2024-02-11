@@ -25,20 +25,20 @@ func NewAnimeRepository(client *redis.Client) AnimeRepository {
 	}
 }
 
-func (a AnimeRepository) FindByURL(ctx context.Context, url string) (*entity.Anime, error) {
+func (a AnimeRepository) FindByURL(ctx context.Context, url string) (entity.Anime, error) {
 	_, span := trace.SpanFromContext(ctx).TracerProvider().Tracer("AnimeRepository").Start(ctx, "FindByURL")
 	defer span.End()
 
 	bytes, err := a.client.Get(ctx, url).Bytes()
 	if err != nil {
 		span.RecordError(err)
-		return nil, fmt.Errorf("while fetching from redis: %w", err)
+		return entity.Anime{}, fmt.Errorf("while fetching from redis: %w", err)
 	}
 
 	var anime model.Anime
 	if err = json.Unmarshal(bytes, &anime); err != nil {
 		span.RecordError(err)
-		return nil, fmt.Errorf("while converting from bytes: %w", err)
+		return entity.Anime{}, fmt.Errorf("while converting from bytes: %w", err)
 	}
 
 	return anime.MapToDomainEntity(), nil

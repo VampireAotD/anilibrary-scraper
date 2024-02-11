@@ -15,7 +15,7 @@ import (
 
 //go:generate mockgen -source=controller.go -destination=./mocks.go -package=anime
 type ScraperUseCase interface {
-	Scrape(ctx context.Context, url string) (*entity.Anime, error)
+	Scrape(ctx context.Context, url string) (entity.Anime, error)
 }
 
 type Controller struct {
