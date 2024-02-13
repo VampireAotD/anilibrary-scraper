@@ -9,19 +9,19 @@ install-dependencies:
 	go install go.uber.org/mock/mockgen@latest;
 	go install github.com/swaggo/swag/cmd/swag@latest;
 
-.PHONY: up
-up:
-	docker-compose -f docker/docker-compose.yml up --build
-
 .PHONY: install
 install:
 	@cp .env.example .env
 	@make install-dependencies
 	@make up
 
+.PHONY: up
+up:
+	docker-compose -f docker/docker-compose.yml up --build
+
 .PHONY: filebeat
 filebeat:
-	docker-compose -f docker/docker-compose.yml --profile filebeat up
+	docker-compose -f docker/docker-compose.yml --profile filebeat up --build
 
 .PHONY: down
 down:
@@ -38,10 +38,6 @@ integration-test:
 .PHONY: lint
 lint:
 	golangci-lint run
-
-.PHONY: generate
-generate:
-	go generate ./...
 
 .PHONY: swag
 swag:

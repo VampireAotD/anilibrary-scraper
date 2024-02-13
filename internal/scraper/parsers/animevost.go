@@ -1,20 +1,22 @@
 package parsers
 
 import (
+	"regexp"
 	"strconv"
 	"strings"
 
 	"anilibrary-scraper/internal/scraper/model"
+
 	"github.com/PuerkitoBio/goquery"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
 
+const amountToMakeFloat int = 10
+
 var _ Parser = (*AnimeVost)(nil)
 
 type AnimeVost struct{}
-
-const amountToMakeFloat int = 10
 
 func NewAnimeVost() AnimeVost {
 	return AnimeVost{}
@@ -23,7 +25,7 @@ func NewAnimeVost() AnimeVost {
 func (a AnimeVost) Title(document *goquery.Document) string {
 	if title := document.Find(".shortstoryHead h1, .infoContent h3").First().Text(); title != "" {
 		raw := strings.TrimSpace(title)
-		return raw[0:strings.Index(raw, " /")]
+		return raw[:strings.Index(raw, " /")]
 	}
 
 	return ""
@@ -51,14 +53,9 @@ func (a AnimeVost) Rating(document *goquery.Document) float32 {
 }
 
 func (a AnimeVost) Episodes(document *goquery.Document) string {
-	if episodes := document.Find("p strong:contains(Количество)").Parent().Children().Remove().End().Text(); episodes != "" {
-		episodes = strings.Replace(episodes, "+", "", 1)
-		end := strings.Index(episodes, " (")
-		if end < 0 {
-			end = len(episodes)
-		}
-
-		return episodes[0:end]
+	if episodesText := document.Find("p strong:contains(Количество)").Parent().Children().Remove().End().Text(); episodesText != "" {
+		regex := regexp.MustCompile(`^\d+`)
+		return regex.FindString(episodesText)
 	}
 
 	return MinimalAnimeEpisodes
@@ -80,17 +77,13 @@ func (a AnimeVost) VoiceActing(_ *goquery.Document) []string {
 
 func (a AnimeVost) Synonyms(document *goquery.Document) []string {
 	if title := document.Find(".shortstoryHead h1, .infoContent h3").First().Text(); title != "" {
-		text := strings.TrimSpace(title)
-		start := strings.Index(text, "/ ")
-		end := strings.Index(text, " [")
-
-		if start < 0 || end < 0 {
-			return nil
+		regex := regexp.MustCompile(`/\s*(.*?)\s*\[`)
+		// If there is a synonym, than the correct one without any symbols will be at index 1
+		if entries := regex.FindStringSubmatch(title); len(entries) > 1 {
+			return []string{entries[1]}
 		}
 
-		synonym := strings.TrimLeft(text[start:end], "/ ")
-
-		return []string{synonym}
+		return nil
 	}
 
 	return nil
