@@ -16,10 +16,10 @@ import (
 const sevenDaysInHours string = "168h"
 
 type AnimeRepository struct {
-	client *redis.Client
+	client redis.UniversalClient
 }
 
-func NewAnimeRepository(client *redis.Client) AnimeRepository {
+func NewAnimeRepository(client redis.UniversalClient) AnimeRepository {
 	return AnimeRepository{
 		client: client,
 	}

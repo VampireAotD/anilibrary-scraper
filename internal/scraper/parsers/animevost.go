@@ -25,7 +25,7 @@ func NewAnimeVost() AnimeVost {
 func (a AnimeVost) Title(document *goquery.Document) string {
 	if title := document.Find(".shortstoryHead h1, .infoContent h3").First().Text(); title != "" {
 		raw := strings.TrimSpace(title)
-		return raw[:strings.Index(raw, " /")]
+		return raw[0:strings.Index(raw, " /")]
 	}
 
 	return ""

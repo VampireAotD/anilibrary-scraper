@@ -11,7 +11,6 @@ install-dependencies:
 
 .PHONY: install
 install:
-	@cp .env.example .env
 	@make install-dependencies
 	@make up
 

@@ -7,11 +7,11 @@ import (
 )
 
 type Controller struct {
-	redisConnection *redis.Client
+	redisConnection redis.UniversalClient
 	kafkaConnection *kafka.Conn
 }
 
-func NewController(redisConnection *redis.Client, kafkaConnection *kafka.Conn) Controller {
+func NewController(redisConnection redis.UniversalClient, kafkaConnection *kafka.Conn) Controller {
 	return Controller{
 		redisConnection: redisConnection,
 		kafkaConnection: kafkaConnection,

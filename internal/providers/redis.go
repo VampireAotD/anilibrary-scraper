@@ -3,7 +3,6 @@ package providers
 import (
 	"context"
 	"fmt"
-	"runtime"
 
 	"anilibrary-scraper/internal/config"
 	"anilibrary-scraper/pkg/logging"
@@ -13,21 +12,11 @@ import (
 	"go.uber.org/fx"
 )
 
-func NewRedisProvider(lifecycle fx.Lifecycle, cfg config.Redis) (*redis.Client, error) {
-	if cfg.PoolSize <= 0 {
-		cfg.PoolSize = 10 * runtime.GOMAXPROCS(0)
-	}
-
-	if cfg.IdleSize <= 0 {
-		cfg.IdleSize = cfg.PoolSize / 4
-	}
-
+func NewRedisProvider(lifecycle fx.Lifecycle, cfg config.Redis) (redis.UniversalClient, error) {
 	opts := &redis.Options{
-		Addr:         cfg.Address,
-		Password:     cfg.Password,
-		PoolSize:     cfg.PoolSize,
-		PoolTimeout:  cfg.PoolTimeout,
-		MinIdleConns: cfg.IdleSize,
+		Addr:        cfg.Address,
+		Password:    cfg.Password,
+		PoolTimeout: cfg.PoolTimeout,
 	}
 
 	client := redis.NewClient(opts)
