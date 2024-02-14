@@ -33,8 +33,8 @@ func (s Service) Send(ctx context.Context, dto DTO) error {
 
 	return s.eventRepository.Send(ctx, model.Event{
 		URL:       dto.URL,
-		Timestamp: time.Now().Unix(),
 		IP:        dto.IP,
 		UserAgent: dto.UserAgent,
+		Timestamp: time.Now().Unix(),
 	})
 }
