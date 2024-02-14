@@ -78,8 +78,10 @@ func (suite *EventRepositorySuite) TestSend() {
 	const testURL string = "https://google.com/"
 
 	err := suite.eventRepository.Send(context.Background(), model.Event{
-		URL:  testURL,
-		Date: time.Now().Unix(),
+		URL:       testURL,
+		Timestamp: time.Now().Unix(),
+		IP:        "0.0.0.0",
+		UserAgent: "Mozilla/5.0",
 	})
 	suite.Require().NoError(err)
 }

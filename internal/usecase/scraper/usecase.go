@@ -3,8 +3,10 @@ package scraper
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"anilibrary-scraper/internal/entity"
+	"anilibrary-scraper/internal/service/event"
 )
 
 type (
@@ -13,7 +15,7 @@ type (
 	}
 
 	EventService interface {
-		Send(ctx context.Context, url string) error
+		Send(ctx context.Context, dto event.DTO) error
 	}
 )
 
@@ -29,10 +31,15 @@ func NewUseCase(scraperService Service, eventService EventService) UseCase {
 	}
 }
 
-func (u UseCase) Scrape(ctx context.Context, url string) (entity.Anime, error) {
-	if err := u.eventService.Send(ctx, url); err != nil {
+func (u UseCase) Scrape(ctx context.Context, dto DTO) (entity.Anime, error) {
+	if err := u.eventService.Send(ctx, event.DTO{
+		URL:       dto.URL,
+		Time:      time.Now(),
+		IP:        dto.IP,
+		UserAgent: dto.UserAgent,
+	}); err != nil {
 		return entity.Anime{}, fmt.Errorf("event service: %w", err)
 	}
 
-	return u.scraperService.Process(ctx, url)
+	return u.scraperService.Process(ctx, dto.URL)
 }

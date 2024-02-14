@@ -11,6 +11,7 @@ import (
 
 	"anilibrary-scraper/internal/entity"
 	"anilibrary-scraper/internal/scraper"
+	scraperUseCase "anilibrary-scraper/internal/usecase/scraper"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/stretchr/testify/suite"
@@ -66,28 +67,35 @@ func (suite *AnimeControllerSuite) TestParse() {
 
 	t.Run("Bad request", func(_ *testing.T) {
 		testCases := []struct {
-			name, url  string
+			name       string
+			dto        scraperUseCase.DTO
 			statusCode int
 			err        error
 		}{
 			{
-				name:       "Invalid url",
-				url:        "",
+				name: "Invalid url",
+				dto: scraperUseCase.DTO{
+					URL: "",
+					IP:  "0.0.0.0",
+				},
 				statusCode: http.StatusUnprocessableEntity,
 				err:        ErrInvalidURL,
 			},
 			{
-				name:       "Unsupported url",
-				url:        "https://www.google.com/",
+				name: "Unsupported url",
+				dto: scraperUseCase.DTO{
+					URL: "https://www.google.com",
+					IP:  "0.0.0.0",
+				},
 				statusCode: http.StatusUnprocessableEntity,
 				err:        scraper.ErrUnsupportedScraper,
 			},
 		}
 
 		for _, testCase := range testCases {
-			suite.useCaseMock.Scrape(gomock.Any(), testCase.url).Return(entity.Anime{}, testCase.err)
+			suite.useCaseMock.Scrape(gomock.Any(), testCase.dto).Return(entity.Anime{}, testCase.err)
 
-			response := suite.sendRequest(testCase.url)
+			response := suite.sendRequest(testCase.dto.URL)
 
 			decoder := json.NewDecoder(response.Body)
 			decoder.DisallowUnknownFields()
@@ -101,7 +109,11 @@ func (suite *AnimeControllerSuite) TestParse() {
 	})
 
 	t.Run("Supported urls", func(_ *testing.T) {
-		const url string = "https://animego.org/anime/naruto-uragannye-hroniki-103"
+		dto := scraperUseCase.DTO{
+			URL: "https://animego.org/anime/naruto-uragannye-hroniki-103",
+			IP:  "0.0.0.0",
+		}
+
 		expected := entity.Anime{
 			Image:       base64.StdEncoding.EncodeToString([]byte("data:image/jpeg;base64,random")),
 			Title:       "Наруто: Ураганные хроники",
@@ -113,8 +125,8 @@ func (suite *AnimeControllerSuite) TestParse() {
 			Rating:      9.5,
 		}
 
-		suite.useCaseMock.Scrape(gomock.Any(), url).Return(expected, nil)
-		response := suite.sendRequest(url)
+		suite.useCaseMock.Scrape(gomock.Any(), dto).Return(expected, nil)
+		response := suite.sendRequest(dto.URL)
 		defer func() {
 			require.NoError(response.Body.Close())
 		}()

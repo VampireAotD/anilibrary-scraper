@@ -6,6 +6,7 @@ package anime
 
 import (
 	entity "anilibrary-scraper/internal/entity"
+	scraper "anilibrary-scraper/internal/usecase/scraper"
 	context "context"
 	reflect "reflect"
 
@@ -36,16 +37,16 @@ func (m *MockScraperUseCase) EXPECT() *MockScraperUseCaseMockRecorder {
 }
 
 // Scrape mocks base method.
-func (m *MockScraperUseCase) Scrape(ctx context.Context, url string) (entity.Anime, error) {
+func (m *MockScraperUseCase) Scrape(ctx context.Context, dto scraper.DTO) (entity.Anime, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Scrape", ctx, url)
+	ret := m.ctrl.Call(m, "Scrape", ctx, dto)
 	ret0, _ := ret[0].(entity.Anime)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Scrape indicates an expected call of Scrape.
-func (mr *MockScraperUseCaseMockRecorder) Scrape(ctx, url interface{}) *gomock.Call {
+func (mr *MockScraperUseCaseMockRecorder) Scrape(ctx, dto interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Scrape", reflect.TypeOf((*MockScraperUseCase)(nil).Scrape), ctx, url)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Scrape", reflect.TypeOf((*MockScraperUseCase)(nil).Scrape), ctx, dto)
 }

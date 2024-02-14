@@ -5,6 +5,7 @@ import (
 
 	"anilibrary-scraper/internal/entity"
 	"anilibrary-scraper/internal/metrics"
+	"anilibrary-scraper/internal/usecase/scraper"
 	"anilibrary-scraper/pkg/logging"
 
 	"github.com/gofiber/fiber/v2"
@@ -15,7 +16,7 @@ import (
 
 //go:generate mockgen -source=controller.go -destination=./mocks.go -package=anime
 type ScraperUseCase interface {
-	Scrape(ctx context.Context, url string) (entity.Anime, error)
+	Scrape(ctx context.Context, dto scraper.DTO) (entity.Anime, error)
 }
 
 type Controller struct {
@@ -59,7 +60,11 @@ func (c Controller) Parse(ctx *fiber.Ctx) error {
 	logging.Get().Info("Scraping", zap.String("url", request.URL))
 	span.AddEvent("Scraping data")
 
-	anime, err := c.useCase.Scrape(ctx.UserContext(), request.URL)
+	anime, err := c.useCase.Scrape(ctx.UserContext(), scraper.DTO{
+		URL:       request.URL,
+		IP:        ctx.IP(),
+		UserAgent: ctx.Get("User-Agent"),
+	})
 	if err != nil {
 		metrics.IncrHTTPErrorsCounter()
 		span.SetStatus(codes.Error, err.Error())

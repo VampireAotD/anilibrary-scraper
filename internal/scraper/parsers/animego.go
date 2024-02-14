@@ -6,10 +6,9 @@ import (
 	"strings"
 
 	"anilibrary-scraper/internal/scraper/model"
+
 	"github.com/PuerkitoBio/goquery"
 )
-
-var _ Parser = (*AnimeGo)(nil)
 
 type AnimeGo struct{}
 

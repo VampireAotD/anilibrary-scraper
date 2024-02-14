@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"anilibrary-scraper/internal/scraper/model"
+
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/suite"
 )
@@ -12,7 +13,7 @@ import (
 type AnimeGoSuite struct {
 	suite.Suite
 
-	parser Parser
+	parser AnimeGo
 }
 
 func TestAnimeGoSuite(t *testing.T) {
@@ -28,7 +29,9 @@ func (suite *AnimeGoSuite) TestFullHTML() {
 
 	html, err := os.Open("testdata/animego/full.html")
 	require.NoError(err)
-	defer html.Close()
+	defer func() {
+		require.NoError(html.Close())
+	}()
 
 	document, err := goquery.NewDocumentFromReader(html)
 	require.NoError(err)
@@ -63,7 +66,9 @@ func (suite *AnimeGoSuite) TestPartialHTML() {
 
 	html, err := os.Open("testdata/animego/partial.html")
 	require.NoError(err)
-	defer html.Close()
+	defer func() {
+		require.NoError(html.Close())
+	}()
 
 	document, err := goquery.NewDocumentFromReader(html)
 	require.NoError(err)

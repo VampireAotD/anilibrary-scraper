@@ -39,14 +39,21 @@ func (suite *EventServiceSuite) TestSend() {
 	)
 
 	t.Run("Send message", func(_ *testing.T) {
-		const testURL string = "https://google.com/"
+		expected := DTO{
+			URL:       "https://google.com",
+			Time:      time.Now(),
+			IP:        "0.0.0.0",
+			UserAgent: "Mozilla/5.0",
+		}
 
 		suite.repositoryMock.Send(gomock.Any(), model.Event{
-			URL:  testURL,
-			Date: time.Now().Unix(),
+			URL:       expected.URL,
+			Timestamp: expected.Time.Unix(),
+			IP:        expected.IP,
+			UserAgent: expected.UserAgent,
 		}).Return(nil)
 
-		err := suite.service.Send(context.Background(), testURL)
+		err := suite.service.Send(context.Background(), expected)
 		require.NoError(err)
 	})
 }

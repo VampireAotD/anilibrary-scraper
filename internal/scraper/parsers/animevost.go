@@ -14,8 +14,6 @@ import (
 
 const amountToMakeFloat int = 10
 
-var _ Parser = (*AnimeVost)(nil)
-
 type AnimeVost struct{}
 
 func NewAnimeVost() AnimeVost {

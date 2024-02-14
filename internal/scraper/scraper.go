@@ -20,6 +20,32 @@ var (
 	ErrUnsupportedScraper = errors.New("unsupported scraper")
 )
 
+type Parser interface {
+	// Title method scraping anime title and returns empty string if none found
+	Title(document *goquery.Document) string
+
+	// Status method scraping current anime status
+	Status(document *goquery.Document) model.Status
+
+	// Rating method scraping current anime rating and returns parsers.MinimalAnimeRating if none found
+	Rating(document *goquery.Document) float32
+
+	// Episodes method scraping amount of anime episodes and returns parsers.MinimalAnimeEpisodes if none found
+	Episodes(document *goquery.Document) string
+
+	// Genres method scraping all anime genres
+	Genres(document *goquery.Document) []string
+
+	// VoiceActing method scraping all anime voice acting
+	VoiceActing(document *goquery.Document) []string
+
+	// Synonyms method scraping all similar anime names
+	Synonyms(document *goquery.Document) []string
+
+	// Image method scraping image url returns empty string if none found
+	Image(document *goquery.Document) string
+}
+
 type Scraper struct {
 	config Config
 }
@@ -44,7 +70,7 @@ func (s Scraper) ScrapeAnime(ctx context.Context, url string) (entity.Anime, err
 	return s.extractData(ctx, parser, document).MapToDomainEntity(), nil
 }
 
-func (s Scraper) resolveParser(url string) (parsers.Parser, error) {
+func (s Scraper) resolveParser(url string) (Parser, error) {
 	switch {
 	case strings.Contains(url, parsers.AnimeGoURL):
 		return parsers.NewAnimeGo(), nil
@@ -55,7 +81,7 @@ func (s Scraper) resolveParser(url string) (parsers.Parser, error) {
 	}
 }
 
-func (s Scraper) extractData(ctx context.Context, parser parsers.Parser, document *goquery.Document) model.Anime {
+func (s Scraper) extractData(ctx context.Context, parser Parser, document *goquery.Document) model.Anime {
 	var (
 		anime model.Anime
 		wg    sync.WaitGroup

@@ -16,23 +16,25 @@ type Repository interface {
 }
 
 type Service struct {
-	kafkaRepository Repository
+	eventRepository Repository
 }
 
-func NewService(kafkaRepository Repository) Service {
+func NewService(eventRepository Repository) Service {
 	return Service{
-		kafkaRepository: kafkaRepository,
+		eventRepository: eventRepository,
 	}
 }
 
-func (s Service) Send(ctx context.Context, url string) error {
+func (s Service) Send(ctx context.Context, dto DTO) error {
 	ctx, span := trace.SpanFromContext(ctx).TracerProvider().Tracer("EventService").Start(ctx, "Send")
 	defer span.End()
 
 	span.AddEvent("Sending event to Clickhouse")
 
-	return s.kafkaRepository.Send(ctx, model.Event{
-		URL:  url,
-		Date: time.Now().Unix(),
+	return s.eventRepository.Send(ctx, model.Event{
+		URL:       dto.URL,
+		Timestamp: time.Now().Unix(),
+		IP:        dto.IP,
+		UserAgent: dto.UserAgent,
 	})
 }
