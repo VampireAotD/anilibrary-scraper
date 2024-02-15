@@ -10,6 +10,8 @@ import (
 	"testing"
 
 	"anilibrary-scraper/internal/entity"
+	"anilibrary-scraper/internal/handler/http/api/v1/anime/request"
+	"anilibrary-scraper/internal/handler/http/api/v1/anime/response"
 	"anilibrary-scraper/internal/scraper"
 	scraperUseCase "anilibrary-scraper/internal/usecase/scraper"
 
@@ -45,18 +47,18 @@ func (suite *AnimeControllerSuite) SetupSuite() {
 }
 
 func (suite *AnimeControllerSuite) sendRequest(url string) *http.Response {
-	request := httptest.NewRequest(
+	req := httptest.NewRequest(
 		http.MethodPost,
 		endpoint,
 		bytes.NewBufferString(fmt.Sprintf(`{"url":"%s"}`, url)),
 	)
 
-	request.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Content-Type", "application/json")
 
-	response, err := suite.router.Test(request, -1)
+	resp, err := suite.router.Test(req, -1)
 	suite.Require().NoError(err)
 
-	return response
+	return resp
 }
 
 func (suite *AnimeControllerSuite) TestParse() {
@@ -79,7 +81,7 @@ func (suite *AnimeControllerSuite) TestParse() {
 					IP:  "0.0.0.0",
 				},
 				statusCode: http.StatusUnprocessableEntity,
-				err:        ErrInvalidURL,
+				err:        request.ErrInvalidURL,
 			},
 			{
 				name: "Unsupported url",
@@ -95,16 +97,16 @@ func (suite *AnimeControllerSuite) TestParse() {
 		for _, testCase := range testCases {
 			suite.useCaseMock.Scrape(gomock.Any(), testCase.dto).Return(entity.Anime{}, testCase.err)
 
-			response := suite.sendRequest(testCase.dto.URL)
+			resp := suite.sendRequest(testCase.dto.URL)
 
-			decoder := json.NewDecoder(response.Body)
+			decoder := json.NewDecoder(resp.Body)
 			decoder.DisallowUnknownFields()
 
-			var err ErrorResponse
+			var err response.ErrorResponse
 			require.NoError(decoder.Decode(&err))
-			require.Equal(testCase.statusCode, response.StatusCode)
+			require.Equal(testCase.statusCode, resp.StatusCode)
 			require.Equal(testCase.err.Error(), err.Message)
-			require.NoError(response.Body.Close())
+			require.NoError(resp.Body.Close())
 		}
 	})
 
@@ -114,7 +116,7 @@ func (suite *AnimeControllerSuite) TestParse() {
 			IP:  "0.0.0.0",
 		}
 
-		expected := entity.Anime{
+		expectedEntity := entity.Anime{
 			Image:       base64.StdEncoding.EncodeToString([]byte("data:image/jpeg;base64,random")),
 			Title:       "Наруто: Ураганные хроники",
 			Status:      "Вышел",
@@ -125,19 +127,45 @@ func (suite *AnimeControllerSuite) TestParse() {
 			Rating:      9.5,
 		}
 
-		suite.useCaseMock.Scrape(gomock.Any(), dto).Return(expected, nil)
-		response := suite.sendRequest(dto.URL)
+		expectedResponse := response.ScrapeResponse{
+			Image:    base64.StdEncoding.EncodeToString([]byte("data:image/jpeg;base64,random")),
+			Title:    "Наруто: Ураганные хроники",
+			Status:   "Вышел",
+			Episodes: "500",
+			Genres: []response.Entry{
+				{Name: "Боевые искусства"},
+				{Name: "Комедия"},
+				{Name: "Сёнэн"},
+				{Name: "Супер сила"},
+				{Name: "Экшен"},
+			},
+			VoiceActing: []response.Entry{
+				{Name: "AniDUB"},
+				{Name: "AniLibria"},
+				{Name: "SHIZA Project"},
+				{Name: "2x2"},
+			},
+			Synonyms: []response.Entry{
+				{Name: "Naruto: Shippuden"},
+				{Name: "ナルト- 疾風伝"},
+				{Name: "Naruto Hurricane Chronicles"},
+			},
+			Rating: 9.5,
+		}
+
+		suite.useCaseMock.Scrape(gomock.Any(), dto).Return(expectedEntity, nil)
+		resp := suite.sendRequest(dto.URL)
 		defer func() {
-			require.NoError(response.Body.Close())
+			require.NoError(resp.Body.Close())
 		}()
 
-		decoder := json.NewDecoder(response.Body)
+		decoder := json.NewDecoder(resp.Body)
 		decoder.DisallowUnknownFields()
 
-		var anime entity.Anime
+		var scrapeResponse response.ScrapeResponse
 
-		require.NoError(decoder.Decode(&anime))
-		require.Equal(http.StatusOK, response.StatusCode)
-		require.Equal(expected, anime)
+		require.NoError(decoder.Decode(&scrapeResponse))
+		require.Equal(http.StatusOK, resp.StatusCode)
+		require.Equal(expectedResponse, scrapeResponse)
 	})
 }

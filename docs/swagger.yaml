@@ -1,24 +1,29 @@
 basePath: /api/v1
 definitions:
-  anime.ErrorResponse:
-    properties:
-      message:
-        type: string
-    type: object
-  anime.ScrapeRequest:
+  request.ScrapeRequest:
     properties:
       url:
         type: string
     required:
     - url
     type: object
-  anime.ScrapeResponse:
+  response.Entry:
+    properties:
+      name:
+        type: string
+    type: object
+  response.ErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  response.ScrapeResponse:
     properties:
       episodes:
         type: string
       genres:
         items:
-          type: string
+          $ref: '#/definitions/response.Entry'
         type: array
       image:
         type: string
@@ -28,13 +33,13 @@ definitions:
         type: string
       synonyms:
         items:
-          type: string
+          $ref: '#/definitions/response.Entry'
         type: array
       title:
         type: string
       voiceActing:
         items:
-          type: string
+          $ref: '#/definitions/response.Entry'
         type: array
     type: object
 host: localhost:8080
@@ -44,7 +49,7 @@ info:
   license:
     name: Boost Software License, Version 1.0
     url: https://github.com/VampireAotD/anilibrary-scraper/blob/main/LICENSE
-  termsOfService: http://swagger.io/terms/
+  termsOfService: https://swagger.io/terms/
   title: Anilibrary Scraper
   version: "1.0"
 paths:
@@ -65,14 +70,14 @@ paths:
         name: url
         required: true
         schema:
-          $ref: '#/definitions/anime.ScrapeRequest'
+          $ref: '#/definitions/request.ScrapeRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/anime.ScrapeResponse'
+            $ref: '#/definitions/response.ScrapeResponse'
         "401":
           description: Unauthorized
           schema:
@@ -80,7 +85,7 @@ paths:
         "422":
           description: Unprocessable Entity
           schema:
-            $ref: '#/definitions/anime.ErrorResponse'
+            $ref: '#/definitions/response.ErrorResponse'
       summary: Scrape anime data
       tags:
       - anime

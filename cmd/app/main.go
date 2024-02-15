@@ -10,13 +10,13 @@ import (
 //	@title			Anilibrary Scraper
 //	@version		1.0
 //	@description	Microservice for scraping anime data
-//	@termsOfService	http://swagger.io/terms/
+//	@termsOfService	https://swagger.io/terms/
 
 //	@license.name	Boost Software License, Version 1.0
 //	@license.url	https://github.com/VampireAotD/anilibrary-scraper/blob/main/LICENSE
 
-//	@host		localhost:8080
-//	@BasePath	/api/v1
+// @host		localhost:8080
+// @BasePath	/api/v1
 func main() {
 	fx.New(createApp()).Run()
 }

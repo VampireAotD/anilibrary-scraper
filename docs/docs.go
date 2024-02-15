@@ -9,7 +9,7 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "termsOfService": "http://swagger.io/terms/",
+        "termsOfService": "https://swagger.io/terms/",
         "contact": {},
         "license": {
             "name": "Boost Software License, Version 1.0",
@@ -48,7 +48,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/anime.ScrapeRequest"
+                            "$ref": "#/definitions/request.ScrapeRequest"
                         }
                     }
                 ],
@@ -56,7 +56,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/anime.ScrapeResponse"
+                            "$ref": "#/definitions/response.ScrapeResponse"
                         }
                     },
                     "401": {
@@ -68,7 +68,7 @@ const docTemplate = `{
                     "422": {
                         "description": "Unprocessable Entity",
                         "schema": {
-                            "$ref": "#/definitions/anime.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     }
                 }
@@ -76,15 +76,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "anime.ErrorResponse": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "anime.ScrapeRequest": {
+        "request.ScrapeRequest": {
             "type": "object",
             "required": [
                 "url"
@@ -95,7 +87,23 @@ const docTemplate = `{
                 }
             }
         },
-        "anime.ScrapeResponse": {
+        "response.Entry": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.ScrapeResponse": {
             "type": "object",
             "properties": {
                 "episodes": {
@@ -104,7 +112,7 @@ const docTemplate = `{
                 "genres": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/response.Entry"
                     }
                 },
                 "image": {
@@ -119,7 +127,7 @@ const docTemplate = `{
                 "synonyms": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/response.Entry"
                     }
                 },
                 "title": {
@@ -128,7 +136,7 @@ const docTemplate = `{
                 "voiceActing": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/response.Entry"
                     }
                 }
             }

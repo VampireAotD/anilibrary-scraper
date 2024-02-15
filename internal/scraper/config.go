@@ -5,6 +5,7 @@ import (
 
 	"anilibrary-scraper/internal/metrics"
 	"anilibrary-scraper/internal/scraper/client"
+
 	"github.com/PuerkitoBio/goquery"
 )
 
