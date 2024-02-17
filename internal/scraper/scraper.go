@@ -7,13 +7,10 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"sync"
 
 	"anilibrary-scraper/internal/entity"
 	"anilibrary-scraper/internal/scraper/model"
 	"anilibrary-scraper/internal/scraper/parsers"
-
-	"github.com/PuerkitoBio/goquery"
 )
 
 var (
@@ -22,28 +19,28 @@ var (
 
 type Parser interface {
 	// Title method scraping anime title and returns empty string if none found
-	Title(document *goquery.Document) string
+	Title() string
 
 	// Status method scraping current anime status
-	Status(document *goquery.Document) model.Status
+	Status() model.Status
 
 	// Rating method scraping current anime rating and returns parsers.MinimalAnimeRating if none found
-	Rating(document *goquery.Document) float32
+	Rating() float32
 
 	// Episodes method scraping amount of anime episodes and returns parsers.MinimalAnimeEpisodes if none found
-	Episodes(document *goquery.Document) string
+	Episodes() string
 
 	// Genres method scraping all anime genres
-	Genres(document *goquery.Document) []string
+	Genres() []string
 
 	// VoiceActing method scraping all anime voice acting
-	VoiceActing(document *goquery.Document) []string
+	VoiceActing() []string
 
 	// Synonyms method scraping all similar anime names
-	Synonyms(document *goquery.Document) []string
+	Synonyms() []string
 
-	// Image method scraping image url returns empty string if none found
-	Image(document *goquery.Document) string
+	// ImageURL method scraping image url returns empty string if none found
+	ImageURL() string
 }
 
 type Scraper struct {
@@ -57,86 +54,90 @@ func New() Scraper {
 }
 
 func (s Scraper) ScrapeAnime(ctx context.Context, url string) (entity.Anime, error) {
-	parser, err := s.resolveParser(url)
+	parser, err := s.resolveParser(ctx, url)
 	if err != nil {
 		return entity.Anime{}, fmt.Errorf("resolving parser %s: %w", url, err)
 	}
 
-	document, err := s.config.client.HTMLDocument(ctx, url)
-	if err != nil {
-		return entity.Anime{}, fmt.Errorf("scraping %s: %w", url, err)
-	}
-
-	return s.extractData(ctx, parser, document).MapToDomainEntity(), nil
+	return s.extractData(ctx, parser).MapToDomainEntity(), nil
 }
 
-func (s Scraper) resolveParser(url string) (Parser, error) {
+func (s Scraper) resolveParser(ctx context.Context, url string) (Parser, error) {
 	switch {
 	case strings.Contains(url, parsers.AnimeGoURL):
-		return parsers.NewAnimeGo(), nil
+		document, err := s.config.client.HTMLDocument(ctx, url)
+		if err != nil {
+			return nil, fmt.Errorf("scraping %s: %w", url, err)
+		}
+
+		return parsers.NewAnimeGo(document), nil
 	case strings.Contains(url, parsers.AnimeVostURL):
-		return parsers.NewAnimeVost(), nil
+		document, err := s.config.client.HTMLDocument(ctx, url)
+		if err != nil {
+			return nil, fmt.Errorf("scraping %s: %w", url, err)
+		}
+
+		return parsers.NewAnimeVost(document), nil
 	default:
 		return nil, ErrUnsupportedScraper
 	}
 }
 
-func (s Scraper) extractData(ctx context.Context, parser Parser, document *goquery.Document) model.Anime {
-	var (
-		anime model.Anime
-		wg    sync.WaitGroup
-	)
+func (s Scraper) extractData(ctx context.Context, parser Parser) model.Anime {
+	var anime model.Anime
 
+	imageCh := make(chan struct{})
 	parseHTML := func(extractor func()) {
 		defer s.config.panicHandler()
-		defer wg.Done()
 		extractor()
 	}
 
-	wg.Add(8)
-
 	go parseHTML(func() {
-		response, err := s.config.client.Response(ctx, parser.Image(document))
-		if err != nil {
-			return
+		defer close(imageCh)
+
+		if url := parser.ImageURL(); url != "" {
+			response, err := s.config.client.Response(ctx, url)
+			if err != nil {
+				return
+			}
+
+			anime.Image = fmt.Sprintf(
+				"data:%s;base64,%s",
+				http.DetectContentType(response),
+				base64.StdEncoding.EncodeToString(response),
+			)
 		}
-
-		anime.Image = fmt.Sprintf(
-			"data:%s;base64,%s",
-			http.DetectContentType(response),
-			base64.StdEncoding.EncodeToString(response),
-		)
 	})
 
-	go parseHTML(func() {
-		anime.Title = parser.Title(document)
+	parseHTML(func() {
+		anime.Title = parser.Title()
 	})
 
-	go parseHTML(func() {
-		anime.Status = parser.Status(document)
+	parseHTML(func() {
+		anime.Status = parser.Status()
 	})
 
-	go parseHTML(func() {
-		anime.Rating = parser.Rating(document)
+	parseHTML(func() {
+		anime.Rating = parser.Rating()
 	})
 
-	go parseHTML(func() {
-		anime.Episodes = parser.Episodes(document)
+	parseHTML(func() {
+		anime.Episodes = parser.Episodes()
 	})
 
-	go parseHTML(func() {
-		anime.Genres = parser.Genres(document)
+	parseHTML(func() {
+		anime.Genres = parser.Genres()
 	})
 
-	go parseHTML(func() {
-		anime.VoiceActing = parser.VoiceActing(document)
+	parseHTML(func() {
+		anime.VoiceActing = parser.VoiceActing()
 	})
 
-	go parseHTML(func() {
-		anime.Synonyms = parser.Synonyms(document)
+	parseHTML(func() {
+		anime.Synonyms = parser.Synonyms()
 	})
 
-	wg.Wait()
+	<-imageCh
 
 	return anime
 }

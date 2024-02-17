@@ -10,30 +10,34 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-type AnimeGo struct{}
-
-func NewAnimeGo() AnimeGo {
-	return AnimeGo{}
+type AnimeGo struct {
+	document *goquery.Document
 }
 
-func (a AnimeGo) Title(document *goquery.Document) string {
-	if title := document.Find(".anime-title div h1").Text(); title != "" {
+func NewAnimeGo(document *goquery.Document) AnimeGo {
+	return AnimeGo{
+		document: document,
+	}
+}
+
+func (a AnimeGo) Title() string {
+	if title := a.document.Find(".anime-title div h1").Text(); title != "" {
 		return title
 	}
 
 	return ""
 }
 
-func (a AnimeGo) Status(document *goquery.Document) model.Status {
-	if status := document.Find(".anime-info .row dt:contains(Статус) + dd").Text(); status != "" {
+func (a AnimeGo) Status() model.Status {
+	if status := a.document.Find(".anime-info .row dt:contains(Статус) + dd").Text(); status != "" {
 		return model.Status(status)
 	}
 
 	return model.Ready
 }
 
-func (a AnimeGo) Rating(document *goquery.Document) float32 {
-	if rating := document.Find(".rating-value").Text(); rating != "" {
+func (a AnimeGo) Rating() float32 {
+	if rating := a.document.Find(".rating-value").Text(); rating != "" {
 		value, err := strconv.ParseFloat(strings.Replace(rating, ",", ".", 1), 64)
 		if err != nil {
 			return MinimalAnimeRating
@@ -45,16 +49,16 @@ func (a AnimeGo) Rating(document *goquery.Document) float32 {
 	return MinimalAnimeRating
 }
 
-func (a AnimeGo) Episodes(document *goquery.Document) string {
-	if episodesText := document.Find(".anime-info .row dt:contains(Эпизоды) + dd").Text(); episodesText != "" {
+func (a AnimeGo) Episodes() string {
+	if episodesText := a.document.Find(".anime-info .row dt:contains(Эпизоды) + dd").Text(); episodesText != "" {
 		return episodesText
 	}
 
 	return MinimalAnimeEpisodes
 }
 
-func (a AnimeGo) Genres(document *goquery.Document) []string {
-	if genresText := document.Find(".anime-info .row dt:contains(Жанр) + dd").Text(); genresText != "" {
+func (a AnimeGo) Genres() []string {
+	if genresText := a.document.Find(".anime-info .row dt:contains(Жанр) + dd").Text(); genresText != "" {
 		genres := strings.Split(genresText, ",")
 
 		for i := range genres {
@@ -67,8 +71,8 @@ func (a AnimeGo) Genres(document *goquery.Document) []string {
 	return nil
 }
 
-func (a AnimeGo) VoiceActing(document *goquery.Document) []string {
-	if voiceActingText := document.Find(".anime-info .row dt:contains(Озвучка) + dd").Text(); voiceActingText != "" {
+func (a AnimeGo) VoiceActing() []string {
+	if voiceActingText := a.document.Find(".anime-info .row dt:contains(Озвучка) + dd").Text(); voiceActingText != "" {
 		regex := regexp.MustCompile(`,\s+`)
 		return strings.Split(regex.ReplaceAllString(voiceActingText, ","), ",")
 	}
@@ -76,8 +80,8 @@ func (a AnimeGo) VoiceActing(document *goquery.Document) []string {
 	return nil
 }
 
-func (a AnimeGo) Synonyms(document *goquery.Document) []string {
-	if synonymsList := document.Find(".synonyms ul li"); synonymsList.Length() != 0 {
+func (a AnimeGo) Synonyms() []string {
+	if synonymsList := a.document.Find(".synonyms ul li"); synonymsList.Length() != 0 {
 		synonyms := make([]string, 0, synonymsList.Length())
 
 		synonymsList.Each(func(_ int, selection *goquery.Selection) {
@@ -90,8 +94,8 @@ func (a AnimeGo) Synonyms(document *goquery.Document) []string {
 	return nil
 }
 
-func (a AnimeGo) Image(document *goquery.Document) string {
-	if attr, exists := document.Find(".anime-poster img").First().Attr("src"); exists {
+func (a AnimeGo) ImageURL() string {
+	if attr, exists := a.document.Find(".anime-poster img").First().Attr("src"); exists {
 		return strings.Replace(attr, "/media/cache/thumbs_250x350", "", 1)
 	}
 
