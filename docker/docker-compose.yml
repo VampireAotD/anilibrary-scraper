@@ -60,8 +60,13 @@ services:
       - local
 
   kafka:
-    image: bitnami/kafka:${KAFKA_VERSION}
+    build:
+      context: kafka
+      args:
+        KAFKA_VERSION: ${KAFKA_VERSION}
     container_name: anilibrary-scraper-kafka
+    env_file:
+      - ../.env
     environment:
       # KRaft configuration
       - KAFKA_CFG_NODE_ID=0
@@ -75,14 +80,11 @@ services:
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=SCRAPER_CLIENT:SASL_PLAINTEXT,CONTROLLER:PLAINTEXT
       - KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL=SCRAM-SHA-512
       - KAFKA_NUM_PARTITIONS=2
-      # Client credentials, ie. the credentials used by golang client connection
-      - KAFKA_CLIENT_USERS=${KAFKA_CLIENT_USER}
-      - KAFKA_CLIENT_PASSWORDS=${KAFKA_CLIENT_PASSWORD}
-#    healthcheck:
-#      test: [ "CMD-SHELL", "kafka-broker-api-versions.sh --bootstrap-server localhost:9092" ]
-#      interval: 5s
-#      timeout: 5s
-#      retries: 5
+    healthcheck:
+      test: [ "CMD-SHELL", "kafka-broker-api-versions.sh --bootstrap-server localhost:9092 --command-config=/opt/bitnami/kafka/config/client.properties" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     ports:
       - "9092:9092"
     networks:
@@ -95,7 +97,7 @@ services:
       clickhouse:
         condition: service_healthy
       kafka:
-        condition: service_started
+        condition: service_healthy
     container_name: anilibrary-scraper
     build:
       context: ..
