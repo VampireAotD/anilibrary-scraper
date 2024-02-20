@@ -1,6 +1,7 @@
 include .env
 export
 
+compose := $(shell command -v docker-compose || echo docker compose)
 APP_PATH=./cmd/app
 
 .PHONY: install-dependencies
@@ -16,15 +17,15 @@ install:
 
 .PHONY: up
 up:
-	docker-compose -f docker/docker-compose.yml up --build
+	$(compose) -f docker/compose.yml up --build
 
 .PHONY: filebeat
 filebeat:
-	docker-compose -f docker/docker-compose.yml --profile filebeat up --build
+	$(compose) -f docker/compose.yml --profile filebeat up --build
 
 .PHONY: down
 down:
-	docker-compose -f docker/docker-compose.yml down
+	$(compose) -f docker/compose.yml down
 
 .PHONY: test
 test:
