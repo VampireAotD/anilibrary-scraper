@@ -17,7 +17,7 @@ import (
 	"go.uber.org/fx"
 )
 
-func NewTraceProvider(lifecycle fx.Lifecycle, cfg config.Tracer) error {
+func NewTraceProvider(lifecycle fx.Lifecycle, cfg config.App) error {
 	client := otlptracehttp.NewClient()
 	exporter, err := otlptrace.New(context.Background(), client)
 	if err != nil {
@@ -28,7 +28,7 @@ func NewTraceProvider(lifecycle fx.Lifecycle, cfg config.Tracer) error {
 		sdktrace.WithBatcher(exporter),
 		sdktrace.WithResource(resource.NewWithAttributes(
 			semconv.SchemaURL,
-			semconv.ServiceNameKey.String(cfg.ServiceName),
+			semconv.ServiceNameKey.String(cfg.Name),
 			semconv.DeploymentEnvironmentKey.String(cfg.Env),
 		)),
 	)

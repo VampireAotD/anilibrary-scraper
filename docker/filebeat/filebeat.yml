@@ -1,15 +1,12 @@
-filebeat.inputs:
-  - type: filestream
-    id: anilibrary-scraper
-    paths:
-      - /logs/*.log
-    parsers:
-      - ndjson:
-        overwrite_keys: true
-        add_error_key: true
-        expand_keys: true
+filebeat.autodiscover:
+  providers:
+    - type: docker
+      hints:
+        enabled: true
+        default_config:
+          enabled: false
 
 output.logstash:
-  hosts: ${FILEBEAT_OUTPUT}
-  username: ${FILEBEAT_USER}
-  password: ${FILEBEAT_PASSWORD}
+  hosts: '${FILEBEAT_OUTPUT}'
+  username: '${FILEBEAT_USER}'
+  password: '${FILEBEAT_PASSWORD}'

@@ -1,11 +1,13 @@
 package logging
 
-import "io"
+import (
+	"io"
+)
 
 type config struct {
 	output        io.Writer
-	logFiles      []io.Writer
 	ecsCompatible bool
+	jsonEncoder   bool
 }
 
 type Option func(cfg *config)
@@ -16,14 +18,14 @@ func WithOutput(output io.Writer) Option {
 	}
 }
 
-func WithLogFiles(files ...io.Writer) Option {
-	return func(cfg *config) {
-		cfg.logFiles = append(cfg.logFiles, files...)
-	}
-}
-
 func ECSCompatible() Option {
 	return func(cfg *config) {
 		cfg.ecsCompatible = true
+	}
+}
+
+func ConvertToJSON() Option {
+	return func(cfg *config) {
+		cfg.jsonEncoder = true
 	}
 }

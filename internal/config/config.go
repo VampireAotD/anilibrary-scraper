@@ -10,12 +10,11 @@ import (
 type Config struct {
 	fx.Out
 
-	App    App
-	JWT    JWT
-	Tracer Tracer
-	Kafka  Kafka
-	Redis  Redis
-	HTTP   HTTP
+	App   App
+	JWT   JWT
+	Kafka Kafka
+	Redis Redis
+	HTTP  HTTP
 }
 
 func New() (Config, error) {
@@ -52,11 +51,6 @@ type Kafka struct {
 	Password  string `env:"KAFKA_CLIENT_PASSWORDS" env-required:""`
 	Topic     string `env:"KAFKA_TOPIC" env-default:"scraper_topic"`
 	Partition int    `env:"KAFKA_PARTITION" env-default:"0"`
-}
-
-type Tracer struct {
-	Env         string `env:"APP_ENV" env-default:"local"`
-	ServiceName string `env:"APP_NAME" env-default:"anilibrary-scraper"`
 }
 
 type JWT struct {

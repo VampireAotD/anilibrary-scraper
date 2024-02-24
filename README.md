@@ -36,7 +36,7 @@ List of all variables and their description:
 | **REDIS_PASSWORD**              |                              | Specify Redis password.                                                                                                                            |
 | **REDIS_POOL_TIMEOUT**          | 5s                           | Max wait time for a connection from the pool, preventing hangs when all connections are busy.                                                      |
 | **OTEL_EXPORTER_OTLP_ENDPOINT** | http://localhost:4318        | Specify endpoint on where to send traces. By default traces are sent to [monitoring service](https://github.com/VampireAotD/anilibrary-monitoring) |
-| **FILEBEAT_VERSION**            | 8.12.0                       | Specify Filebeat version.                                                                                                                          |
+| **FILEBEAT_VERSION**            | 8.11.0                       | Specify Filebeat version.                                                                                                                          |
 | **FILEBEAT_OUTPUT**             |                              | Specify url on where to send logs to. Logs can be visualized by Kibana in [ELK service](https://github.com/VampireAotD/anilibrary-elk).            |
 | **FILEBEAT_USER**               |                              | Specify login for Filebeat user.                                                                                                                   |
 | **FILEBEAT_PASSWORD**           |                              | Specify password for Filebeat user.                                                                                                                |

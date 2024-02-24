@@ -3,20 +3,21 @@ module anilibrary-scraper
 go 1.22
 
 require (
-	github.com/PuerkitoBio/goquery v1.8.1
+	github.com/PuerkitoBio/goquery v1.9.0
 	github.com/alicebob/miniredis/v2 v2.31.1
 	github.com/ansrivas/fiberprometheus/v2 v2.6.1
 	github.com/bogdanfinn/fhttp v0.5.27
 	github.com/bogdanfinn/tls-client v1.7.2
 	github.com/corpix/uarand v0.2.0
 	github.com/go-playground/validator/v10 v10.18.0
+	github.com/gofiber/contrib/fiberzap/v2 v2.1.2
 	github.com/gofiber/contrib/jwt v1.0.8
-	github.com/gofiber/contrib/otelfiber/v2 v2.0.0-20240214064435-460c1f5b2b10
-	github.com/gofiber/fiber/v2 v2.52.0
+	github.com/gofiber/contrib/otelfiber/v2 v2.0.0
+	github.com/gofiber/fiber/v2 v2.52.1
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/prometheus/client_golang v1.18.0
 	github.com/redis/go-redis/extra/redisotel/v9 v9.0.5
-	github.com/redis/go-redis/v9 v9.4.0
+	github.com/redis/go-redis/v9 v9.5.1
 	github.com/segmentio/kafka-go v0.4.47
 	github.com/stretchr/testify v1.8.4
 	github.com/swaggo/fiber-swagger v1.3.0
@@ -30,7 +31,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.23.1
 	go.uber.org/fx v1.20.1
 	go.uber.org/mock v0.4.0
-	go.uber.org/zap v1.26.0
+	go.uber.org/zap v1.27.0
 	golang.org/x/text v0.14.0
 )
 
@@ -78,7 +79,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.1 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
-	github.com/klauspost/compress v1.17.6 // indirect
+	github.com/klauspost/compress v1.17.7 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
@@ -111,7 +112,7 @@ require (
 	github.com/tklauser/go-sysconf v0.3.12 // indirect
 	github.com/tklauser/numcpus v0.6.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	github.com/valyala/fasthttp v1.51.0 // indirect
+	github.com/valyala/fasthttp v1.52.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.1.2 // indirect

@@ -21,6 +21,7 @@ services:
   filebeat:
     image: elastic/filebeat:${FILEBEAT_VERSION}
     container_name: anilibrary-scraper-filebeat
+    user: root
     profiles:
       - filebeat
     command:
@@ -30,7 +31,8 @@ services:
       - ../.env
     volumes:
       - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
-      - ../storage/logs:/logs
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers/:/var/lib/docker/containers:ro
     networks:
       - shared
 
@@ -97,6 +99,12 @@ services:
       kafka:
         condition: service_healthy
     container_name: anilibrary-scraper
+    labels:
+      co.elastic.logs/enabled: true
+      co.elastic.logs/json.keys_under_root: true
+      co.elastic.logs/json.overwrite_keys: true
+      co.elastic.logs/json.add_error_key: true
+      co.elastic.logs/json.expand_keys: true
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -104,8 +112,6 @@ services:
         TIMEZONE: ${TIMEZONE:-Europe/Kiev}
     env_file:
       - ../.env
-    volumes:
-      - ../storage:/storage
     ports:
       - ${HTTP_MAIN_PORT}:${HTTP_MAIN_PORT}
       - ${HTTP_MONITORING_PORT}:${HTTP_MONITORING_PORT}

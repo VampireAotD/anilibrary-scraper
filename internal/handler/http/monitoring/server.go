@@ -8,8 +8,8 @@ import (
 	"anilibrary-scraper/internal/config"
 	"anilibrary-scraper/pkg/logging"
 
+	"github.com/gofiber/contrib/fiberzap/v2"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/pprof"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"go.uber.org/fx"
@@ -21,7 +21,9 @@ func NewServer(cfg config.HTTP, lifecycle fx.Lifecycle) fiber.Router {
 		AppName: "Anilibrary Monitoring Server",
 	})
 
-	app.Use(logger.New())
+	app.Use(fiberzap.New(fiberzap.Config{
+		Logger: logging.Get(),
+	}))
 	app.Use(recover.New())
 	app.Use(pprof.New())
 

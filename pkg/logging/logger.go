@@ -15,17 +15,6 @@ var (
 	once         sync.Once
 )
 
-// Get will return instance of configured logger using New. If none was configured - default logger will be provided.
-func Get() *zap.Logger {
-	once.Do(func() {
-		if globalLogger == nil {
-			globalLogger = New()
-		}
-	})
-
-	return globalLogger
-}
-
 // New will create a new instance of *zap.Logger with predefined encoders for log files and console output.
 // Default output is os.Stdout.
 func New(options ...Option) *zap.Logger {
@@ -43,46 +32,29 @@ func New(options ...Option) *zap.Logger {
 		encCfg = ecszap.ECSCompatibleEncoderConfig(encCfg)
 	}
 
-	consoleEncoder := defaultConsoleEncoder(encCfg)
-	fileEncoder := defaultFileEncoder(encCfg)
-
-	cores := make([]zapcore.Core, 0, len(cfg.logFiles)+1)
-
-	for i := range cfg.logFiles {
-		cores = append(cores, zapcore.NewCore(fileEncoder, zapcore.Lock(zapcore.AddSync(cfg.logFiles[i])), lvl))
-	}
-
-	cores = append(cores, zapcore.NewCore(consoleEncoder, zapcore.Lock(zapcore.AddSync(cfg.output)), lvl))
-
-	tee := zapcore.NewTee(cores...)
+	core := zapcore.NewCore(resolveEncoder(encCfg, cfg.jsonEncoder), zapcore.Lock(zapcore.AddSync(cfg.output)), lvl)
 
 	if cfg.ecsCompatible {
-		tee = ecszap.WrapCore(tee)
+		core = ecszap.WrapCore(core)
 	}
 
-	globalLogger = zap.New(tee, zap.AddCaller())
+	globalLogger = zap.New(core, zap.AddCaller())
 
 	return globalLogger
 }
 
-func defaultConsoleEncoder(cfg zapcore.EncoderConfig) zapcore.Encoder {
-	cfg.ConsoleSeparator = " "
+// Get will return instance of configured logger using New. If none was configured - default logger will be provided.
+func Get() *zap.Logger {
+	once.Do(func() {
+		if globalLogger == nil {
+			globalLogger = New()
+		}
+	})
 
-	cfg.EncodeTime = zapcore.ISO8601TimeEncoder
-	cfg.EncodeLevel = func(level zapcore.Level, encoder zapcore.PrimitiveArrayEncoder) {
-		encoder.AppendString("|")
-		encoder.AppendString(level.CapitalString())
-		encoder.AppendString("|")
-	}
-	cfg.EncodeName = func(s string, encoder zapcore.PrimitiveArrayEncoder) {
-		encoder.AppendString(s)
-		encoder.AppendString("|")
-	}
-
-	return zapcore.NewConsoleEncoder(cfg)
+	return globalLogger
 }
 
-func defaultFileEncoder(cfg zapcore.EncoderConfig) zapcore.Encoder {
+func resolveEncoder(cfg zapcore.EncoderConfig, encodeJSON bool) zapcore.Encoder {
 	cfg.CallerKey = "file"
 	cfg.TimeKey = "timestamp"
 	cfg.MessageKey = "message"
@@ -92,5 +64,9 @@ func defaultFileEncoder(cfg zapcore.EncoderConfig) zapcore.Encoder {
 		encoder.AppendString(level.CapitalString())
 	}
 
-	return zapcore.NewJSONEncoder(cfg)
+	if encodeJSON {
+		return zapcore.NewJSONEncoder(cfg)
+	}
+
+	return zapcore.NewConsoleEncoder(cfg)
 }
