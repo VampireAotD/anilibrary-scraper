@@ -28,8 +28,8 @@ func TestEventRepositorySuite(t *testing.T) {
 	suite.Run(t, new(EventRepositorySuite))
 }
 
-func (suite *EventRepositorySuite) SetupSuite() {
-	ctrl := gomock.NewController(suite.T())
+func (ers *EventRepositorySuite) SetupSuite() {
+	ctrl := gomock.NewController(ers.T())
 	defer ctrl.Finish()
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*2)
@@ -57,31 +57,31 @@ func (suite *EventRepositorySuite) SetupSuite() {
 		},
 		Started: true,
 	})
-	suite.Require().NoError(err)
+	ers.Require().NoError(err)
 
 	ip, err := kafkaContainer.ContainerIP(ctx)
-	suite.Require().NoError(err)
+	ers.Require().NoError(err)
 
 	conn, err := kafka.DialLeader(ctx, "tcp", ip+":9092", "test_topic", 0)
-	suite.Require().NoError(err)
+	ers.Require().NoError(err)
 
-	suite.kafkaContainer = kafkaContainer
-	suite.eventRepository = kafka2.NewEventRepository(conn)
+	ers.kafkaContainer = kafkaContainer
+	ers.eventRepository = kafka2.NewEventRepository(conn)
 }
 
-func (suite *EventRepositorySuite) TearDownSuite() {
-	suite.Require().NoError(suite.kafkaContainer.Stop(context.Background(), nil))
-	suite.Require().NoError(suite.kafkaContainer.Terminate(context.Background()))
+func (ers *EventRepositorySuite) TearDownSuite() {
+	ers.Require().NoError(ers.kafkaContainer.Stop(context.Background(), nil))
+	ers.Require().NoError(ers.kafkaContainer.Terminate(context.Background()))
 }
 
-func (suite *EventRepositorySuite) TestSend() {
+func (ers *EventRepositorySuite) TestSend() {
 	const testURL string = "https://google.com/"
 
-	err := suite.eventRepository.Send(context.Background(), model.Event{
+	err := ers.eventRepository.Send(context.Background(), model.Event{
 		URL:       testURL,
 		Timestamp: time.Now().Unix(),
 		IP:        "0.0.0.0",
 		UserAgent: "Mozilla/5.0",
 	})
-	suite.Require().NoError(err)
+	ers.Require().NoError(err)
 }

@@ -27,15 +27,15 @@ func TestAnimeRepositorySuite(t *testing.T) {
 	suite.Run(t, new(AnimeRepositorySuite))
 }
 
-func (suite *AnimeRepositorySuite) SetupSuite() {
-	ctrl := gomock.NewController(suite.T())
+func (ars *AnimeRepositorySuite) SetupSuite() {
+	ctrl := gomock.NewController(ars.T())
 	defer ctrl.Finish()
 
-	suite.redisServer = miniredis.RunT(suite.T())
-	suite.animeRepository = NewAnimeRepository(redis.NewClient(&redis.Options{
-		Addr: suite.redisServer.Addr(),
+	ars.redisServer = miniredis.RunT(ars.T())
+	ars.animeRepository = NewAnimeRepository(redis.NewClient(&redis.Options{
+		Addr: ars.redisServer.Addr(),
 	}))
-	suite.expectedAnime = model.Anime{
+	ars.expectedAnime = model.Anime{
 		URL:         testURL,
 		Image:       base64.StdEncoding.EncodeToString([]byte("random")),
 		Title:       "random",
@@ -48,46 +48,46 @@ func (suite *AnimeRepositorySuite) SetupSuite() {
 	}
 }
 
-func (suite *AnimeRepositorySuite) TearDownTest() {
-	suite.redisServer.Del(testURL)
+func (ars *AnimeRepositorySuite) TearDownTest() {
+	ars.redisServer.Del(testURL)
 }
 
-func (suite *AnimeRepositorySuite) TearDownSuite() {
-	suite.redisServer.Close()
+func (ars *AnimeRepositorySuite) TearDownSuite() {
+	ars.redisServer.Close()
 }
 
-func (suite *AnimeRepositorySuite) TestFindByURL() {
+func (ars *AnimeRepositorySuite) TestFindByURL() {
 	var (
-		t       = suite.T()
-		require = suite.Require()
+		t       = ars.T()
+		require = ars.Require()
 	)
 
 	t.Run("Not found in cache", func(_ *testing.T) {
-		anime, err := suite.animeRepository.FindByURL(context.Background(), testURL)
+		anime, err := ars.animeRepository.FindByURL(context.Background(), testURL)
 		require.Error(err)
 		require.Zero(anime)
 	})
 
 	t.Run("Found in cache", func(_ *testing.T) {
-		err := suite.animeRepository.Create(context.Background(), suite.expectedAnime)
+		err := ars.animeRepository.Create(context.Background(), ars.expectedAnime)
 		require.NoError(err)
 
-		anime, err := suite.animeRepository.FindByURL(context.Background(), testURL)
+		anime, err := ars.animeRepository.FindByURL(context.Background(), testURL)
 		require.NoError(err)
 		require.NotZero(anime)
-		require.Equal(suite.expectedAnime.MapToDomainEntity(), anime)
+		require.Equal(ars.expectedAnime.MapToDomainEntity(), anime)
 	})
 }
 
-func (suite *AnimeRepositorySuite) TestCreate() {
+func (ars *AnimeRepositorySuite) TestCreate() {
 	var (
-		t       = suite.T()
-		require = suite.Require()
+		t       = ars.T()
+		require = ars.Require()
 	)
 
 	t.Run("Invalid cases", func(t *testing.T) {
 		t.Run("Missing image", func(_ *testing.T) {
-			err := suite.animeRepository.Create(context.Background(), model.Anime{
+			err := ars.animeRepository.Create(context.Background(), model.Anime{
 				URL:   testURL,
 				Title: "random",
 			})
@@ -95,7 +95,7 @@ func (suite *AnimeRepositorySuite) TestCreate() {
 		})
 
 		t.Run("Missing title", func(_ *testing.T) {
-			err := suite.animeRepository.Create(context.Background(), model.Anime{
+			err := ars.animeRepository.Create(context.Background(), model.Anime{
 				URL:   testURL,
 				Image: base64.StdEncoding.EncodeToString([]byte("random")),
 			})
@@ -104,7 +104,7 @@ func (suite *AnimeRepositorySuite) TestCreate() {
 	})
 
 	t.Run("Correct data", func(_ *testing.T) {
-		err := suite.animeRepository.Create(context.Background(), suite.expectedAnime)
+		err := ars.animeRepository.Create(context.Background(), ars.expectedAnime)
 		require.NoError(err)
 	})
 }

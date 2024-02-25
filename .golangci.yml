@@ -1,4 +1,22 @@
+run:
+  build-tags:
+    - integration
+
+output:
+  sort-results: true
+
 linters-settings:
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
+    disabled-checks:
+      - hugeParam # disabled until another architecture refactoring
+  errcheck:
+    check-type-assertions: true
   govet:
     check-shadowing: true
     enable:
@@ -8,6 +26,7 @@ linters-settings:
     ignore-decls:
       - w http.ResponseWriter
       - r *http.Request
+      - i int
 
 linters:
   enable:
@@ -17,7 +36,6 @@ linters:
     - exportloopref
     - revive
     - varnamelen
-    - gci
     - bodyclose
     - exhaustive
     - gocritic
@@ -26,10 +44,15 @@ linters:
     - noctx
     - prealloc
     - predeclared
+    - gosec
+    - stylecheck
+    - unconvert
+    - unparam
+    - wastedassign
+    - nolintlint
+    - tenv
+    - tparallel
+    - usestdlibvars
 
 issues:
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - govet
   fix: true

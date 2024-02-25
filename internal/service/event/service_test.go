@@ -22,20 +22,20 @@ func TestEventServiceSuite(t *testing.T) {
 	suite.Run(t, new(EventServiceSuite))
 }
 
-func (suite *EventServiceSuite) SetupSuite() {
-	ctrl := gomock.NewController(suite.T())
+func (es *EventServiceSuite) SetupSuite() {
+	ctrl := gomock.NewController(es.T())
 	defer ctrl.Finish()
 
 	repositoryMock := NewMockEventRepository(ctrl)
 
-	suite.repositoryMock = repositoryMock.EXPECT()
-	suite.service = NewService(repositoryMock)
+	es.repositoryMock = repositoryMock.EXPECT()
+	es.service = NewService(repositoryMock)
 }
 
-func (suite *EventServiceSuite) TestSend() {
+func (es *EventServiceSuite) TestSend() {
 	var (
-		t       = suite.T()
-		require = suite.Require()
+		t       = es.T()
+		require = es.Require()
 	)
 
 	t.Run("Send message", func(_ *testing.T) {
@@ -46,14 +46,14 @@ func (suite *EventServiceSuite) TestSend() {
 			UserAgent: "Mozilla/5.0",
 		}
 
-		suite.repositoryMock.Send(gomock.Any(), model.Event{
+		es.repositoryMock.Send(gomock.Any(), model.Event{
 			URL:       expected.URL,
 			Timestamp: expected.Time.Unix(),
 			IP:        expected.IP,
 			UserAgent: expected.UserAgent,
 		}).Return(nil)
 
-		err := suite.service.Send(context.Background(), expected)
+		err := es.service.Send(context.Background(), expected)
 		require.NoError(err)
 	})
 }

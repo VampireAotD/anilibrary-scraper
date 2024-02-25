@@ -44,7 +44,6 @@ func TestLogger(t *testing.T) {
 	})
 
 	t.Run("ECS support", func(t *testing.T) {
-		var buff bytes.Buffer
 		defer buff.Reset()
 
 		logger := New(WithOutput(&buff), ConvertToJSON(), ECSCompatible())

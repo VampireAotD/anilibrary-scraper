@@ -24,8 +24,8 @@ func TestScraperServiceSuite(t *testing.T) {
 	suite.Run(t, new(ScraperServiceSuite))
 }
 
-func (suite *ScraperServiceSuite) SetupSuite() {
-	ctrl := gomock.NewController(suite.T())
+func (ss *ScraperServiceSuite) SetupSuite() {
+	ctrl := gomock.NewController(ss.T())
 	defer ctrl.Finish()
 
 	var (
@@ -33,27 +33,27 @@ func (suite *ScraperServiceSuite) SetupSuite() {
 		scraperMock    = NewMockScraper(ctrl)
 	)
 
-	suite.repositoryMock = repositoryMock.EXPECT()
-	suite.scraperMock = scraperMock.EXPECT()
-	suite.service = NewScraperService(repositoryMock, scraperMock)
+	ss.repositoryMock = repositoryMock.EXPECT()
+	ss.scraperMock = scraperMock.EXPECT()
+	ss.service = NewScraperService(repositoryMock, scraperMock)
 }
 
-func (suite *ScraperServiceSuite) TestProcess() {
+func (ss *ScraperServiceSuite) TestProcess() {
 	var (
-		t       = suite.T()
-		require = suite.Require()
+		t       = ss.T()
+		require = ss.Require()
 	)
 
 	t.Run("Errors", func(_ *testing.T) {
 		testCases := []string{"", "https://google.com"}
 
 		for _, testCase := range testCases {
-			suite.repositoryMock.FindByURL(gomock.Any(), gomock.Any()).Return(entity.Anime{}, nil)
-			suite.repositoryMock.Create(gomock.Any(), gomock.Any()).Return(nil)
+			ss.repositoryMock.FindByURL(gomock.Any(), gomock.Any()).Return(entity.Anime{}, nil)
+			ss.repositoryMock.Create(gomock.Any(), gomock.Any()).Return(nil)
 
-			suite.scraperMock.ScrapeAnime(gomock.Any(), testCase).Return(entity.Anime{}, scraper.ErrUnsupportedScraper)
+			ss.scraperMock.ScrapeAnime(gomock.Any(), testCase).Return(entity.Anime{}, scraper.ErrUnsupportedScraper)
 
-			result, err := suite.service.Process(context.Background(), testCase)
+			result, err := ss.service.Process(context.Background(), testCase)
 
 			require.Error(err)
 			require.Empty(result)
@@ -71,9 +71,9 @@ func (suite *ScraperServiceSuite) TestProcess() {
 				Rating:   9.7,
 			}
 
-			suite.repositoryMock.FindByURL(gomock.Any(), url).Return(anime, nil)
+			ss.repositoryMock.FindByURL(gomock.Any(), url).Return(anime, nil)
 
-			cached, err := suite.service.Process(context.Background(), url)
+			cached, err := ss.service.Process(context.Background(), url)
 
 			require.NotEmpty(cached)
 			require.NoError(err)
@@ -120,20 +120,20 @@ func (suite *ScraperServiceSuite) TestProcess() {
 				},
 			}
 
-			for _, testCase := range cases {
-				t.Run(testCase.name, func(t *testing.T) {
+			for i := range cases {
+				t.Run(cases[i].name, func(t *testing.T) {
 					t.Parallel()
 
-					suite.repositoryMock.FindByURL(gomock.Any(), gomock.Any()).Return(entity.Anime{}, nil)
-					suite.repositoryMock.Create(gomock.Any(), gomock.Any()).Return(nil)
+					ss.repositoryMock.FindByURL(gomock.Any(), gomock.Any()).Return(entity.Anime{}, nil)
+					ss.repositoryMock.Create(gomock.Any(), gomock.Any()).Return(nil)
 
-					suite.scraperMock.ScrapeAnime(gomock.Any(), testCase.url).Return(testCase.expected, nil)
+					ss.scraperMock.ScrapeAnime(gomock.Any(), cases[i].url).Return(cases[i].expected, nil)
 
-					anime, err := suite.service.Process(context.Background(), testCase.url)
+					anime, err := ss.service.Process(context.Background(), cases[i].url)
 
 					require.NoError(err)
 					require.NotEmpty(anime)
-					require.Equal(testCase.expected, anime)
+					require.Equal(cases[i].expected, anime)
 
 					_, err = base64.StdEncoding.DecodeString(anime.Image)
 					require.NoError(err)

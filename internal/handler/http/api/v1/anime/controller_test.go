@@ -34,45 +34,45 @@ func TestAnimeControllerSuite(t *testing.T) {
 	suite.Run(t, new(AnimeControllerSuite))
 }
 
-func (suite *AnimeControllerSuite) SetupSuite() {
-	ctrl := gomock.NewController(suite.T())
+func (acs *AnimeControllerSuite) SetupSuite() {
+	ctrl := gomock.NewController(acs.T())
 	defer ctrl.Finish()
 
 	useCaseMock := NewMockScraperUseCase(ctrl)
 
-	suite.useCaseMock = useCaseMock.EXPECT()
-	suite.controller = NewController(useCaseMock)
-	suite.router = fiber.New()
-	suite.router.Post(endpoint, suite.controller.Parse)
+	acs.useCaseMock = useCaseMock.EXPECT()
+	acs.controller = NewController(useCaseMock)
+	acs.router = fiber.New()
+	acs.router.Post(endpoint, acs.controller.Parse)
 }
 
-func (suite *AnimeControllerSuite) sendRequest(url string) *http.Response {
+func (acs *AnimeControllerSuite) sendRequest(url string) *http.Response {
 	req := httptest.NewRequest(
 		http.MethodPost,
 		endpoint,
-		bytes.NewBufferString(fmt.Sprintf(`{"url":"%s"}`, url)),
+		bytes.NewBufferString(fmt.Sprintf(`{"url":%q}`, url)),
 	)
 
 	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := suite.router.Test(req, -1)
-	suite.Require().NoError(err)
+	resp, err := acs.router.Test(req, -1)
+	acs.Require().NoError(err)
 
 	return resp
 }
 
-func (suite *AnimeControllerSuite) TestParse() {
+func (acs *AnimeControllerSuite) TestParse() {
 	var (
-		t       = suite.T()
-		require = suite.Require()
+		t       = acs.T()
+		require = acs.Require()
 	)
 
 	t.Run("Bad request", func(_ *testing.T) {
 		testCases := []struct {
-			name       string
 			dto        scraperUseCase.DTO
-			statusCode int
 			err        error
+			name       string
+			statusCode int
 		}{
 			{
 				name: "Invalid url",
@@ -95,9 +95,9 @@ func (suite *AnimeControllerSuite) TestParse() {
 		}
 
 		for _, testCase := range testCases {
-			suite.useCaseMock.Scrape(gomock.Any(), testCase.dto).Return(entity.Anime{}, testCase.err)
+			acs.useCaseMock.Scrape(gomock.Any(), testCase.dto).Return(entity.Anime{}, testCase.err)
 
-			resp := suite.sendRequest(testCase.dto.URL)
+			resp := acs.sendRequest(testCase.dto.URL)
 
 			decoder := json.NewDecoder(resp.Body)
 			decoder.DisallowUnknownFields()
@@ -153,8 +153,8 @@ func (suite *AnimeControllerSuite) TestParse() {
 			Rating: 9.5,
 		}
 
-		suite.useCaseMock.Scrape(gomock.Any(), dto).Return(expectedEntity, nil)
-		resp := suite.sendRequest(dto.URL)
+		acs.useCaseMock.Scrape(gomock.Any(), dto).Return(expectedEntity, nil)
+		resp := acs.sendRequest(dto.URL)
 		defer func() {
 			require.NoError(resp.Body.Close())
 		}()

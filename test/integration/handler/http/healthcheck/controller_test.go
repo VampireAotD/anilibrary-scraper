@@ -35,11 +35,11 @@ func TestHealthcheckControllerSuite(t *testing.T) {
 	suite.Run(t, new(HealthcheckControllerSuite))
 }
 
-func (suite *HealthcheckControllerSuite) initRedis() {
-	suite.redisServer = miniredis.RunT(suite.T())
+func (hcs *HealthcheckControllerSuite) initRedis() {
+	hcs.redisServer = miniredis.RunT(hcs.T())
 }
 
-func (suite *HealthcheckControllerSuite) initKafka() {
+func (hcs *HealthcheckControllerSuite) initKafka() {
 	kafkaCtx, cancel := context.WithTimeout(context.Background(), time.Minute*2)
 	defer cancel()
 
@@ -65,92 +65,95 @@ func (suite *HealthcheckControllerSuite) initKafka() {
 		},
 		Started: true,
 	})
-	suite.Require().NoError(err)
+	hcs.Require().NoError(err)
 
-	suite.kafkaContainer = kafkaContainer
+	hcs.kafkaContainer = kafkaContainer
 }
 
-func (suite *HealthcheckControllerSuite) SetupSuite() {
-	suite.initRedis()
-	suite.initKafka()
-	suite.router = fiber.New()
+func (hcs *HealthcheckControllerSuite) SetupSuite() {
+	hcs.initRedis()
+	hcs.initKafka()
+	hcs.router = fiber.New()
 
 	// Setup Redis client
 	redisClient := redis.NewClient(&redis.Options{
-		Addr: suite.redisServer.Addr(),
+		Addr: hcs.redisServer.Addr(),
 	})
 
-	kafkaIP, err := suite.kafkaContainer.ContainerIP(context.Background())
-	suite.Require().NoError(err)
+	kafkaIP, err := hcs.kafkaContainer.ContainerIP(context.Background())
+	hcs.Require().NoError(err)
 
 	// Dial Kafka connection
 	kafkaConnection, err := kafka.DialLeader(context.Background(), "tcp", kafkaIP+":9095", "test-topic", 0)
-	suite.Require().NoError(err)
+	hcs.Require().NoError(err)
 
-	suite.controller = healthcheck.NewController(redisClient, kafkaConnection)
-	suite.router.Get(endpoint, suite.controller.Healthcheck)
+	hcs.controller = healthcheck.NewController(redisClient, kafkaConnection)
+	hcs.router.Get(endpoint, hcs.controller.Healthcheck)
 }
 
-func (suite *HealthcheckControllerSuite) SetupTest() {
-	if suite.redisServer.Addr() == "" {
-		suite.Require().NoError(suite.redisServer.Start())
+func (hcs *HealthcheckControllerSuite) SetupTest() {
+	if hcs.redisServer.Addr() == "" {
+		hcs.Require().NoError(hcs.redisServer.Start())
 	}
 
-	if !suite.kafkaContainer.IsRunning() {
-		suite.Require().NoError(suite.kafkaContainer.Start(context.Background()))
+	if !hcs.kafkaContainer.IsRunning() {
+		hcs.Require().NoError(hcs.kafkaContainer.Start(context.Background()))
 	}
 }
 
-func (suite *HealthcheckControllerSuite) TearDownSuite() {
-	if suite.kafkaContainer.IsRunning() {
-		suite.Require().NoError(suite.kafkaContainer.Terminate(context.Background()))
+func (hcs *HealthcheckControllerSuite) TearDownSuite() {
+	if hcs.kafkaContainer.IsRunning() {
+		hcs.Require().NoError(hcs.kafkaContainer.Terminate(context.Background()))
 	}
 
-	suite.redisServer.Close()
+	hcs.redisServer.Close()
 }
 
-func (suite *HealthcheckControllerSuite) sendHealthcheckRequest() *http.Response {
-	request := httptest.NewRequest(http.MethodGet, endpoint, nil)
+func (hcs *HealthcheckControllerSuite) sendHealthcheckRequest() *http.Response {
+	request := httptest.NewRequest(http.MethodGet, endpoint, http.NoBody)
 
-	response, err := suite.router.Test(request, -1)
-	suite.Require().NoError(err)
+	response, err := hcs.router.Test(request, -1)
+	hcs.Require().NoError(err)
 
 	return response
 }
 
-func (suite *HealthcheckControllerSuite) TestHealthcheck() {
+func (hcs *HealthcheckControllerSuite) TestHealthcheck() {
 	var (
-		t       = suite.T()
-		require = suite.Require()
+		t       = hcs.T()
+		require = hcs.Require()
 	)
 
 	t.Run("Redis", func(t *testing.T) {
-		t.Run("Redis up", func(t *testing.T) {
-			response := suite.sendHealthcheckRequest()
+		t.Run("Redis up", func(_ *testing.T) {
+			response := hcs.sendHealthcheckRequest()
 			require.Equal(http.StatusOK, response.StatusCode)
+			require.NoError(response.Body.Close())
 		})
 
-		t.Run("Redis down", func(t *testing.T) {
-			suite.redisServer.Close()
+		t.Run("Redis down", func(_ *testing.T) {
+			hcs.redisServer.Close()
 
-			response := suite.sendHealthcheckRequest()
+			response := hcs.sendHealthcheckRequest()
 			require.Equal(http.StatusInternalServerError, response.StatusCode)
-
-			require.NoError(suite.redisServer.Start())
+			require.NoError(hcs.redisServer.Start())
+			require.NoError(response.Body.Close())
 		})
 	})
 
 	t.Run("Kafka", func(t *testing.T) {
-		t.Run("Kafka up", func(t *testing.T) {
-			response := suite.sendHealthcheckRequest()
+		t.Run("Kafka up", func(_ *testing.T) {
+			response := hcs.sendHealthcheckRequest()
 			require.Equal(http.StatusOK, response.StatusCode)
+			require.NoError(response.Body.Close())
 		})
 
-		t.Run("Kafka down", func(t *testing.T) {
-			require.NoError(suite.kafkaContainer.Stop(context.Background(), nil))
+		t.Run("Kafka down", func(_ *testing.T) {
+			require.NoError(hcs.kafkaContainer.Stop(context.Background(), nil))
 
-			response := suite.sendHealthcheckRequest()
+			response := hcs.sendHealthcheckRequest()
 			require.Equal(http.StatusInternalServerError, response.StatusCode)
+			require.NoError(response.Body.Close())
 		})
 	})
 }
