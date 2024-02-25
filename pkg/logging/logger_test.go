@@ -3,52 +3,59 @@ package logging
 import (
 	"bytes"
 	"encoding/json"
-	"io"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
 
-func TestCreateLogger(t *testing.T) {
-	logger := NewLogger(io.Discard)
-	require.NotNil(t, logger)
-}
+func TestLogger(t *testing.T) {
+	const testMessage string = "test"
 
-func TestMethods(t *testing.T) {
-	var buf bytes.Buffer
-	logger := NewLogger(io.Discard, &buf)
+	var buff bytes.Buffer
 
-	testCases := []struct {
-		Name string
-		Func func(msg string, fields ...Field)
-	}{
-		{
-			Name: "Debug",
-			Func: logger.Debug,
-		},
-		{
-			Name: "Info",
-			Func: logger.Info,
-		},
-		{
-			Name: "Warn",
-			Func: logger.Warn,
-		},
-		{
-			Name: "Error",
-			Func: logger.Error,
-		},
-	}
+	t.Run("Get logger", func(t *testing.T) {
+		require.NotNil(t, Get())
+	})
 
-	for _, testCase := range testCases {
-		buf.Reset()
+	t.Run("Console encoder", func(t *testing.T) {
+		defer buff.Reset()
 
-		t.Run(testCase.Name, func(t *testing.T) {
-			defer buf.Reset()
+		logger := New(WithOutput(&buff))
+		logger.Info(testMessage)
 
-			testCase.Func("test")
-			require.NoError(t, logger.Sync())
-			require.NoError(t, json.NewDecoder(&buf).Decode(&struct{}{}))
-		})
-	}
+		log := buff.String()
+		require.NotZero(t, log)
+		require.Contains(t, log, testMessage)
+	})
+
+	t.Run("JSON encoder", func(t *testing.T) {
+		defer buff.Reset()
+
+		logger := New(WithOutput(&buff), ConvertToJSON())
+		logger.Info(testMessage)
+
+		testLog := struct {
+			Message string `json:"message"`
+		}{}
+
+		require.NoError(t, json.NewDecoder(&buff).Decode(&testLog))
+		require.NotZero(t, testLog.Message)
+		require.Equal(t, testMessage, testLog.Message)
+	})
+
+	t.Run("ECS support", func(t *testing.T) {
+		defer buff.Reset()
+
+		logger := New(WithOutput(&buff), ConvertToJSON(), ECSCompatible())
+		logger.Info(testMessage)
+
+		testLog := struct {
+			Message    string `json:"message"`
+			ECSVersion string `json:"ecs.version"`
+		}{}
+
+		require.NoError(t, json.NewDecoder(&buff).Decode(&testLog))
+		require.Equal(t, testMessage, testLog.Message)
+		require.NotZero(t, testLog.ECSVersion)
+	})
 }

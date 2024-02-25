@@ -4,34 +4,23 @@ import (
 	"os"
 	"testing"
 
-	"anilibrary-scraper/internal/scraper/parsers/model"
+	"anilibrary-scraper/internal/scraper/model"
+
 	"github.com/PuerkitoBio/goquery"
-	"github.com/stretchr/testify/suite"
+	"github.com/stretchr/testify/require"
 )
 
-type AnimeVostSuite struct {
-	suite.Suite
-
-	parser Contract
-}
-
-func TestAnimeVostSuiteSuite(t *testing.T) {
-	suite.Run(t, new(AnimeVostSuite))
-}
-
-func (suite *AnimeVostSuite) SetupSuite() {
-	suite.parser = NewAnimeVost()
-}
-
-func (suite *AnimeVostSuite) TestFullHTML() {
-	require := suite.Require()
-
+func TestAnimeVost_FullHTML(t *testing.T) {
 	html, err := os.Open("testdata/animevost/full.html")
-	require.NoError(err)
-	defer html.Close()
+	require.NoError(t, err)
+	defer func() {
+		require.NoError(t, html.Close())
+	}()
 
 	document, err := goquery.NewDocumentFromReader(html)
-	require.NoError(err)
+	require.NoError(t, err)
+
+	parser := NewAnimeVost(document)
 
 	expected := model.Anime{
 		Image:       "https://animevost.org/uploads/posts/2021-11/1636403661_1.png",
@@ -44,29 +33,31 @@ func (suite *AnimeVostSuite) TestFullHTML() {
 		Rating:      10,
 	}
 
-	var actual model.Anime
+	actual := model.Anime{
+		Image:       parser.ImageURL(),
+		Title:       parser.Title(),
+		Status:      parser.Status(),
+		Episodes:    parser.Episodes(),
+		Genres:      parser.Genres(),
+		VoiceActing: parser.VoiceActing(),
+		Synonyms:    parser.Synonyms(),
+		Rating:      parser.Rating(),
+	}
 
-	actual.Image = suite.parser.Image(document)
-	actual.Title = suite.parser.Title(document)
-	actual.Status = suite.parser.Status(document)
-	actual.Episodes = suite.parser.Episodes(document)
-	actual.Genres = suite.parser.Genres(document)
-	actual.VoiceActing = suite.parser.VoiceActing(document)
-	actual.Synonyms = suite.parser.Synonyms(document)
-	actual.Rating = suite.parser.Rating(document)
-
-	require.Equal(expected, actual)
+	require.Equal(t, expected, actual)
 }
 
-func (suite *AnimeVostSuite) TestPartialHTML() {
-	require := suite.Require()
-
+func TestAnimeVost_PartialHTML(t *testing.T) {
 	html, err := os.Open("testdata/animevost/partial.html")
-	require.NoError(err)
-	defer html.Close()
+	require.NoError(t, err)
+	defer func() {
+		require.NoError(t, html.Close())
+	}()
 
 	document, err := goquery.NewDocumentFromReader(html)
-	require.NoError(err)
+	require.NoError(t, err)
+
+	parser := NewAnimeVost(document)
 
 	expected := model.Anime{
 		Image:       "https://animevost.org/uploads/posts/2021-11/1636403661_1.png",
@@ -79,16 +70,16 @@ func (suite *AnimeVostSuite) TestPartialHTML() {
 		Rating:      MinimalAnimeRating,
 	}
 
-	var actual model.Anime
+	actual := model.Anime{
+		Image:       parser.ImageURL(),
+		Title:       parser.Title(),
+		Status:      parser.Status(),
+		Episodes:    parser.Episodes(),
+		Genres:      parser.Genres(),
+		VoiceActing: parser.VoiceActing(),
+		Synonyms:    parser.Synonyms(),
+		Rating:      parser.Rating(),
+	}
 
-	actual.Image = suite.parser.Image(document)
-	actual.Title = suite.parser.Title(document)
-	actual.Status = suite.parser.Status(document)
-	actual.Episodes = suite.parser.Episodes(document)
-	actual.Genres = suite.parser.Genres(document)
-	actual.VoiceActing = suite.parser.VoiceActing(document)
-	actual.Synonyms = suite.parser.Synonyms(document)
-	actual.Rating = suite.parser.Rating(document)
-
-	require.Equal(expected, actual)
+	require.Equal(t, expected, actual)
 }

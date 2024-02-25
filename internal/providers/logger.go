@@ -1,41 +1,25 @@
 package providers
 
 import (
-	"fmt"
-	"os"
+	"context"
 
 	"anilibrary-scraper/pkg/logging"
+
+	"go.uber.org/fx"
 )
 
-const DefaultLoggerFileLocation string = "../../storage/logs/app.log"
-
-func NewLoggerProvider() (logging.Contract, func(), error) {
-	file, err := createLogFile()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	logger := logging.NewLogger(os.Stdout, file)
-
-	closer := func() {
-		logger.Info("closing logger")
-		_ = logger.Sync()
-		if err := file.Close(); err != nil {
-			logger.Error("closing logger file", logging.Error(err))
-		}
-	}
+func NewLoggerProvider(lifecycle fx.Lifecycle) error {
+	logger := logging.New(logging.ConvertToJSON(), logging.ECSCompatible())
 
 	logger.Info("Initialized logger")
 
-	return logger, closer, nil
-}
+	lifecycle.Append(fx.Hook{
+		OnStop: func(_ context.Context) error {
+			logger.Info("Closing logger")
 
-func createLogFile() (*os.File, error) {
-	file, err := os.OpenFile(DefaultLoggerFileLocation, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0666)
+			return logger.Sync()
+		},
+	})
 
-	if err != nil {
-		return nil, fmt.Errorf("creating log file %w", err)
-	}
-
-	return file, nil
+	return nil
 }

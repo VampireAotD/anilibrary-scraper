@@ -1,0 +1,132 @@
+services:
+  redis:
+    image: redis:${REDIS_VERSION}
+    container_name: anilibrary-scraper-redis
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    ports:
+      - ${REDIS_PORT:-6380}:6379
+    environment:
+      REDIS_REPLICATION_MODE: master
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli -a $$REDIS_PASSWORD ping | grep PONG" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - redis-data:/data
+    networks:
+      - local
+
+  filebeat:
+    image: elastic/filebeat:${FILEBEAT_VERSION}
+    container_name: anilibrary-scraper-filebeat
+    user: root
+    profiles:
+      - filebeat
+    command:
+      - -e
+      - --strict.perms=false
+    env_file:
+      - ../.env
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers/:/var/lib/docker/containers:ro
+    networks:
+      - shared
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:${CLICKHOUSE_VERSION}
+    container_name: anilibrary-scraper-clickhouse
+    env_file:
+      - ../.env
+    ports:
+      - "8123:8123"
+      - "9005:9000"
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+      - ./clickhouse/config.xml:/etc/clickhouse-server/config.d/config.xml
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    networks:
+      - local
+
+  kafka:
+    build:
+      context: kafka
+      args:
+        KAFKA_VERSION: ${KAFKA_VERSION}
+    container_name: anilibrary-scraper-kafka
+    env_file:
+      - ../.env
+    environment:
+      # KRaft configuration
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+      # Broker configuration
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=SCRAPER_CLIENT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_ADVERTISED_LISTENERS=SCRAPER_CLIENT://kafka:9092
+      - KAFKA_CFG_LISTENERS=SCRAPER_CLIENT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=SCRAPER_CLIENT:SASL_PLAINTEXT,CONTROLLER:PLAINTEXT
+      - KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL=SCRAM-SHA-512
+      - KAFKA_NUM_PARTITIONS=2
+    healthcheck:
+      test: [ "CMD-SHELL", "kafka-broker-api-versions.sh --bootstrap-server localhost:9092 --command-config=/opt/bitnami/kafka/config/client.properties" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "9092:9092"
+    networks:
+      - local
+
+  app:
+    depends_on:
+      redis:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    container_name: anilibrary-scraper
+    labels:
+      co.elastic.logs/enabled: true
+      co.elastic.logs/json.keys_under_root: true
+      co.elastic.logs/json.overwrite_keys: true
+      co.elastic.logs/json.add_error_key: true
+      co.elastic.logs/json.expand_keys: true
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        TIMEZONE: ${TIMEZONE:-Europe/Kiev}
+    env_file:
+      - ../.env
+    ports:
+      - ${HTTP_MAIN_PORT}:${HTTP_MAIN_PORT}
+      - ${HTTP_MONITORING_PORT}:${HTTP_MONITORING_PORT}
+    networks:
+      - local
+      - shared
+
+networks:
+  local:
+    name: local
+    driver: bridge
+  shared:
+    name: anilibrary
+    external: true
+
+volumes:
+  redis-data:
+  clickhouse-data:

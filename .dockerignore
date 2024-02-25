@@ -1,11 +1,11 @@
 .idea
 .github
-build
-cmd/bin
+docker
 storage
-Dockerfile
-docker-compose.yml
-.golangci.yml
 .env
+.env.example
+.gitignore
+.golangci.yml
 LICENSE
 Makefile
+README.md

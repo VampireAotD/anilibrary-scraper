@@ -1,111 +1,72 @@
 package logging
 
 import (
-	"io"
+	"os"
+	"sync"
 
 	"go.elastic.co/ecszap"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
-type Contract interface {
-	Debug(msg string, fields ...Field)
-	Info(msg string, fields ...Field)
-	Warn(msg string, fields ...Field)
-	Error(msg string, fields ...Field)
-	Named(s string) *Logger
-	With(fields ...Field) *Logger
-	Sync() error
+var (
+	lvl          = zap.NewAtomicLevel()
+	globalLogger *zap.Logger
+	once         sync.Once
+)
+
+// New will create a new instance of *zap.Logger with predefined encoders for log files and console output.
+// Default output is os.Stdout.
+func New(options ...Option) *zap.Logger {
+	cfg := &config{
+		output: os.Stdout,
+	}
+
+	for i := range options {
+		options[i](cfg)
+	}
+
+	encCfg := zap.NewProductionEncoderConfig()
+
+	if cfg.ecsCompatible {
+		encCfg = ecszap.ECSCompatibleEncoderConfig(encCfg)
+	}
+
+	core := zapcore.NewCore(resolveEncoder(encCfg, cfg.jsonEncoder), zapcore.Lock(zapcore.AddSync(cfg.output)), lvl)
+
+	if cfg.ecsCompatible {
+		core = ecszap.WrapCore(core)
+	}
+
+	globalLogger = zap.New(core, zap.AddCaller())
+
+	return globalLogger
 }
 
-type Logger struct {
-	base *zap.Logger
+// Get will return instance of configured logger using New. If none was configured - default logger will be provided.
+func Get() *zap.Logger {
+	once.Do(func() {
+		if globalLogger == nil {
+			globalLogger = New()
+		}
+	})
+
+	return globalLogger
 }
 
-func NewLogger(console io.Writer, files ...io.Writer) *Logger {
-	pe := zap.NewProductionEncoderConfig()
+func resolveEncoder(cfg zapcore.EncoderConfig, encodeJSON bool) zapcore.Encoder {
+	cfg.CallerKey = "file"
+	cfg.TimeKey = "timestamp"
+	cfg.MessageKey = "message"
 
-	// file
-	pe.CallerKey = "file"
-	pe.EncodeLevel = func(level zapcore.Level, encoder zapcore.PrimitiveArrayEncoder) {
+	cfg.EncodeTime = zapcore.ISO8601TimeEncoder
+	cfg.EncodeLevel = func(level zapcore.Level, encoder zapcore.PrimitiveArrayEncoder) {
 		encoder.AppendString(level.CapitalString())
 	}
-	fileEncoder := zapcore.NewJSONEncoder(ecszap.ECSCompatibleEncoderConfig(pe))
 
-	// console
-	pe.EncodeLevel = func(level zapcore.Level, encoder zapcore.PrimitiveArrayEncoder) {
-		encoder.AppendString("|")
-		encoder.AppendString(level.CapitalString())
-		encoder.AppendString("|")
-	}
-	pe.ConsoleSeparator = " "
-	pe.EncodeName = func(s string, encoder zapcore.PrimitiveArrayEncoder) {
-		encoder.AppendString(s)
-		encoder.AppendString("|")
-	}
-	consoleEncoder := zapcore.NewConsoleEncoder(ecszap.ECSCompatibleEncoderConfig(pe))
-
-	cores := make([]zapcore.Core, len(files)+1)
-
-	// console
-	cores[0] = zapcore.NewCore(consoleEncoder,
-		zapcore.AddSync(console),
-		zap.DebugLevel,
-	)
-
-	for i := range files {
-		cores[i+1] = zapcore.NewCore(
-			fileEncoder,
-			zapcore.AddSync(files[i]),
-			zap.DebugLevel,
-		)
+	if encodeJSON {
+		return zapcore.NewJSONEncoder(cfg)
 	}
 
-	return &Logger{base: zap.New(
-		ecszap.WrapCore(zapcore.NewTee(cores...)),
-		zap.AddCaller(),
-		zap.AddCallerSkip(1),
-	)}
-}
-
-func (l *Logger) Debug(msg string, fields ...Field) {
-	l.base.Debug(msg, fields...)
-}
-
-func (l *Logger) Info(msg string, fields ...Field) {
-	l.base.Info(msg, fields...)
-}
-
-func (l *Logger) Warn(msg string, fields ...Field) {
-	l.base.Warn(msg, fields...)
-}
-
-func (l *Logger) Error(msg string, fields ...Field) {
-	l.base.Error(msg, fields...)
-}
-
-func (l *Logger) Named(s string) *Logger {
-	if l.base == nil {
-		return l
-	}
-
-	l.base = l.base.Named(s)
-	return l
-}
-
-func (l *Logger) With(fields ...Field) *Logger {
-	if l.base == nil {
-		return l
-	}
-
-	l.base = l.base.With(fields...)
-	return l
-}
-
-func (l *Logger) Sync() error {
-	if l.base == nil {
-		return nil
-	}
-
-	return l.base.Sync()
+	return zapcore.NewConsoleEncoder(cfg)
 }

@@ -1,27 +1,35 @@
 package main
 
 import (
-	"log"
+	"anilibrary-scraper/internal/config"
+	"anilibrary-scraper/internal/di"
 
-	"anilibrary-scraper/internal/app"
+	"go.uber.org/fx"
 )
 
-//	@title			Anilibrary-scraper
+//	@title			Anilibrary Scraper
 //	@version		1.0
 //	@description	Microservice for scraping anime data
-//	@termsOfService	http://swagger.io/terms/
+//	@termsOfService	https://swagger.io/terms/
 
 //	@license.name	Boost Software License, Version 1.0
-//	@license.url	https://www.boost.org/LICENSE_1_0.txt
+//	@license.url	https://github.com/VampireAotD/anilibrary-scraper/blob/main/LICENSE
 
-//	@host		localhost:8080
-//	@BasePath	/api/v1
+// @host		localhost:8080
+// @BasePath	/api/v1
 func main() {
-	application, cleanup, err := app.New()
-	if err != nil {
-		log.Fatalln("bootstrap app", err)
-	}
-	defer cleanup()
+	fx.New(createApp()).Run()
+}
 
-	application.Run()
+func createApp() fx.Option {
+	return fx.Options(
+		fx.Provide(
+			config.New,
+		),
+		di.ProviderModule,
+		di.RepositoryModule,
+		di.ServiceModule,
+		di.UseCaseModule,
+		di.HTTPModule,
+	)
 }

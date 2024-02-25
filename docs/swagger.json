@@ -2,12 +2,12 @@
     "swagger": "2.0",
     "info": {
         "description": "Microservice for scraping anime data",
-        "title": "Anilibrary-scraper",
-        "termsOfService": "http://swagger.io/terms/",
+        "title": "Anilibrary Scraper",
+        "termsOfService": "https://swagger.io/terms/",
         "contact": {},
         "license": {
             "name": "Boost Software License, Version 1.0",
-            "url": "https://www.boost.org/LICENSE_1_0.txt"
+            "url": "https://github.com/VampireAotD/anilibrary-scraper/blob/main/LICENSE"
         },
         "version": "1.0"
     },
@@ -42,7 +42,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/anime.ScrapeRequest"
+                            "$ref": "#/definitions/request.ScrapeRequest"
                         }
                     }
                 ],
@@ -50,7 +50,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/entity.Anime"
+                            "$ref": "#/definitions/response.ScrapeResponse"
                         }
                     },
                     "401": {
@@ -62,7 +62,7 @@
                     "422": {
                         "description": "Unprocessable Entity",
                         "schema": {
-                            "$ref": "#/definitions/response.Error"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     }
                 }
@@ -70,7 +70,7 @@
         }
     },
     "definitions": {
-        "anime.ScrapeRequest": {
+        "request.ScrapeRequest": {
             "type": "object",
             "required": [
                 "url"
@@ -81,7 +81,23 @@
                 }
             }
         },
-        "entity.Anime": {
+        "response.Entry": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.ScrapeResponse": {
             "type": "object",
             "properties": {
                 "episodes": {
@@ -90,7 +106,7 @@
                 "genres": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/response.Entry"
                     }
                 },
                 "image": {
@@ -105,7 +121,7 @@
                 "synonyms": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/response.Entry"
                     }
                 },
                 "title": {
@@ -114,16 +130,8 @@
                 "voiceActing": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/response.Entry"
                     }
-                }
-            }
-        },
-        "response.Error": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
                 }
             }
         }

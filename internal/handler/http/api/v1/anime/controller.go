@@ -1,25 +1,33 @@
 package anime
 
 import (
-	"encoding/json"
-	"net/http"
+	"context"
 
-	"anilibrary-scraper/internal/domain/service"
-	"anilibrary-scraper/internal/handler/http/middleware"
+	"anilibrary-scraper/internal/entity"
+	"anilibrary-scraper/internal/handler/http/api/v1/anime/request"
+	"anilibrary-scraper/internal/handler/http/api/v1/anime/response"
 	"anilibrary-scraper/internal/metrics"
+	"anilibrary-scraper/internal/usecase/scraper"
 	"anilibrary-scraper/pkg/logging"
-	"anilibrary-scraper/pkg/response"
 
+	"github.com/gofiber/fiber/v2"
 	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
+	"go.uber.org/zap"
 )
 
-type Controller struct {
-	service service.ScraperService
+//go:generate mockgen -source=controller.go -destination=./mocks.go -package=anime
+type ScraperUseCase interface {
+	Scrape(ctx context.Context, dto scraper.DTO) (entity.Anime, error)
 }
 
-func NewController(service service.ScraperService) Controller {
+type Controller struct {
+	useCase ScraperUseCase
+}
+
+func NewController(useCase ScraperUseCase) Controller {
 	return Controller{
-		service: service,
+		useCase: useCase,
 	}
 }
 
@@ -30,63 +38,46 @@ func NewController(service service.ScraperService) Controller {
 //	@Tags			anime
 //	@Accept			json
 //	@Produce		json
-//	@Param			Authorization	header		string			true	"Access token"	default(Bearer)
-//	@Param			url				body		ScrapeRequest	true	"Url to scrape from"
-//	@Success		200				{object}	entity.Anime
+//	@Param			Authorization	header		string					true	"Access token"	default(Bearer)
+//	@Param			url				body		request.ScrapeRequest	true	"Url to scrape from"
+//	@Success		200				{object}	response.ScrapeResponse
 //	@Failure		401				string		Unauthorized
-//	@Failure		422				{object}	response.Error
+//	@Failure		422				{object}	response.ErrorResponse
 //	@Router			/anime/parse [post]
-func (c Controller) Parse(w http.ResponseWriter, r *http.Request) {
-	logger := middleware.MustGetLogger(r.Context())
-	tracer := middleware.MustGetTracer(r.Context())
-	ctx, span := tracer.Start(r.Context(), "Parse")
+func (c Controller) Parse(ctx *fiber.Ctx) error {
+	span := trace.SpanFromContext(ctx.UserContext())
 	defer span.End()
 
-	resp := response.New(w)
+	span.AddEvent("Decoding and validating request")
 
-	span.AddEvent("Decoding request")
-
-	var request ScrapeRequest
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(&request); err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		span.RecordError(err)
-		logger.Error("while decoding incoming request", logging.Error(err))
-
-		_ = resp.ErrorJSON(http.StatusUnprocessableEntity, err)
-		return
-	}
-
-	span.AddEvent("Validating request")
-
-	if err := request.Validate(); err != nil {
+	var req request.ScrapeRequest
+	if err := req.MapAndValidate(ctx); err != nil {
 		metrics.IncrHTTPErrorsCounter()
 		span.SetStatus(codes.Error, err.Error())
 		span.RecordError(err)
-		logger.Error("while decoding incoming url", logging.Error(err))
 
-		_ = resp.ErrorJSON(http.StatusUnprocessableEntity, err)
-		return
+		return ctx.Status(fiber.StatusUnprocessableEntity).JSON(response.NewErrorResponse(err))
 	}
 
-	logger.Info("Scraping", logging.String("url", request.URL))
-
+	logging.Get().Info("Scraping", zap.String("url", req.URL))
 	span.AddEvent("Scraping data")
 
-	entity, err := c.service.Process(ctx, request.URL)
+	anime, err := c.useCase.Scrape(ctx.UserContext(), scraper.DTO{
+		URL:       req.URL,
+		IP:        ctx.IP(),
+		UserAgent: ctx.Get("User-Agent"),
+	})
 	if err != nil {
 		metrics.IncrHTTPErrorsCounter()
 		span.SetStatus(codes.Error, err.Error())
 		span.RecordError(err)
-		logger.Error("while scraping", logging.Error(err))
+		logging.Get().Error("while scraping", zap.Error(err))
 
-		_ = resp.ErrorJSON(http.StatusUnprocessableEntity, err)
-		return
+		return ctx.Status(fiber.StatusUnprocessableEntity).JSON(response.NewErrorResponse(err))
 	}
 
 	span.AddEvent("Finished scraping")
 
 	metrics.IncrHTTPSuccessCounter()
-	_ = resp.JSON(http.StatusOK, entity)
+	return ctx.JSON(response.NewScrapeResponse(anime))
 }

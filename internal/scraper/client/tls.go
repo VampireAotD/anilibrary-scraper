@@ -2,37 +2,72 @@ package client
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 
 	"github.com/PuerkitoBio/goquery"
 	http "github.com/bogdanfinn/fhttp"
-	tls_client "github.com/bogdanfinn/tls-client"
+	tlsclient "github.com/bogdanfinn/tls-client"
+	"github.com/bogdanfinn/tls-client/profiles"
 	"github.com/corpix/uarand"
 )
 
 type TLSClient struct {
-	client tls_client.HttpClient
+	client tlsclient.HttpClient
 }
 
 func NewTLSClient(timeout int) TLSClient {
-	jar := tls_client.NewCookieJar()
-	options := []tls_client.HttpClientOption{
-		tls_client.WithTimeoutSeconds(timeout),
-		tls_client.WithClientProfile(tls_client.Chrome_110),
-		tls_client.WithCookieJar(jar),
-		tls_client.WithInsecureSkipVerify(),
+	jar := tlsclient.NewCookieJar()
+	options := []tlsclient.HttpClientOption{
+		tlsclient.WithTimeoutSeconds(timeout),
+		tlsclient.WithClientProfile(profiles.Chrome_117),
+		tlsclient.WithCookieJar(jar),
+		tlsclient.WithInsecureSkipVerify(),
 	}
 
-	client, _ := tls_client.NewHttpClient(tls_client.NewLogger(), options...)
+	// Error is ignored because method validateConfig in tlsclient package always returns nil
+	client, _ := tlsclient.NewHttpClient(tlsclient.NewLogger(), options...)
 
 	return TLSClient{
 		client: client,
 	}
 }
 
-func (c TLSClient) fetch(url string) (*http.Response, error) {
-	request, err := http.NewRequest(http.MethodGet, url, nil)
+func (c TLSClient) HTMLDocument(ctx context.Context, url string) (*goquery.Document, error) {
+	response, err := c.fetch(ctx, url)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		err = errors.Join(err, response.Body.Close())
+	}()
+
+	return goquery.NewDocumentFromReader(response.Body)
+}
+
+func (c TLSClient) Response(ctx context.Context, url string) ([]byte, error) {
+	response, err := c.fetch(ctx, url)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		err = errors.Join(err, response.Body.Close())
+	}()
+
+	var buf bytes.Buffer
+	_, err = buf.ReadFrom(response.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
+}
+
+func (c TLSClient) fetch(ctx context.Context, url string) (*http.Response, error) {
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("creating request: %w", err)
 	}
@@ -56,36 +91,4 @@ func (c TLSClient) fetch(url string) (*http.Response, error) {
 	}
 
 	return response, nil
-}
-
-func (c TLSClient) FetchDocument(url string) (document *goquery.Document, err error) {
-	response, err := c.fetch(url)
-	if err != nil {
-		return nil, err
-	}
-
-	defer func() {
-		err = errors.Join(err, response.Body.Close())
-	}()
-
-	return goquery.NewDocumentFromReader(response.Body)
-}
-
-func (c TLSClient) FetchResponseBody(url string) (body []byte, err error) {
-	response, err := c.fetch(url)
-	if err != nil {
-		return nil, err
-	}
-
-	defer func() {
-		err = errors.Join(err, response.Body.Close())
-	}()
-
-	var buf bytes.Buffer
-	_, err = buf.ReadFrom(response.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return buf.Bytes(), nil
 }

@@ -6,12 +6,10 @@ import (
 )
 
 var (
-	cacheHitCounter = promauto.NewCounter(
-		prometheus.CounterOpts{
-			Name: "cache_hits_counter",
-			Help: "Counter of cache hits",
-		},
-	)
+	cacheHitCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "cache_hits_counter",
+		Help: "Counter of cache hits",
+	})
 )
 
 func IncrCacheHitCounter() {

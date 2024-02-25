@@ -3,50 +3,44 @@ package providers
 import (
 	"context"
 	"fmt"
-	"runtime"
 
 	"anilibrary-scraper/internal/config"
 	"anilibrary-scraper/pkg/logging"
+
 	"github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
+	"go.uber.org/fx"
 )
 
-func NewRedisProvider(cfg config.Redis, logger logging.Contract) (*redis.Client, func(), error) {
-	ctx, cancel := context.WithTimeout(context.Background(), cfg.PoolTimeout)
-	defer cancel()
-
-	if cfg.PoolSize <= 0 {
-		cfg.PoolSize = 10 * runtime.GOMAXPROCS(0)
-	}
-
-	if cfg.IdleSize <= 0 {
-		cfg.IdleSize = cfg.PoolSize / 4
-	}
-
+func NewRedisProvider(lifecycle fx.Lifecycle, cfg config.Redis) (redis.UniversalClient, error) {
 	opts := &redis.Options{
-		Addr:         cfg.Address,
-		Password:     cfg.Password,
-		PoolSize:     cfg.PoolSize,
-		PoolTimeout:  cfg.PoolTimeout,
-		MinIdleConns: cfg.IdleSize,
+		Addr:        cfg.Address,
+		Password:    cfg.Password,
+		PoolTimeout: cfg.PoolTimeout,
 	}
 
 	client := redis.NewClient(opts)
 
-	if err := client.Ping(ctx).Err(); err != nil {
-		return nil, nil, fmt.Errorf("ping : %w", err)
-	}
+	lifecycle.Append(fx.Hook{
+		OnStart: func(ctx context.Context) error {
+			if err := client.Ping(ctx).Err(); err != nil {
+				return fmt.Errorf("redis ping : %w", err)
+			}
 
-	if err := redisotel.InstrumentTracing(client); err != nil {
-		return nil, nil, fmt.Errorf("redis tracing: %w", err)
-	}
+			if err := redisotel.InstrumentTracing(client); err != nil {
+				return fmt.Errorf("redis tracing: %w", err)
+			}
 
-	closer := func() {
-		logger.Info("closing redis connection")
-		if err := client.Close(); err != nil {
-			logger.Error("redis close", logging.Error(err))
-		}
-	}
+			logging.Get().Info("Connected to Redis")
 
-	return client, closer, nil
+			return nil
+		},
+		OnStop: func(_ context.Context) error {
+			logging.Get().Info("Closing Redis connection")
+
+			return client.Close()
+		},
+	})
+
+	return client, nil
 }

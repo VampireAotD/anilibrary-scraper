@@ -5,100 +5,118 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"anilibrary-scraper/internal/domain/entity"
-	"anilibrary-scraper/internal/domain/service"
-	"anilibrary-scraper/internal/handler/http/middleware"
+	"anilibrary-scraper/internal/entity"
+	"anilibrary-scraper/internal/handler/http/api/v1/anime/request"
+	"anilibrary-scraper/internal/handler/http/api/v1/anime/response"
 	"anilibrary-scraper/internal/scraper"
-	"anilibrary-scraper/pkg/logging"
-	"anilibrary-scraper/pkg/response"
-	"github.com/golang/mock/gomock"
+	scraperUseCase "anilibrary-scraper/internal/usecase/scraper"
+
+	"github.com/gofiber/fiber/v2"
 	"github.com/stretchr/testify/suite"
+	"go.uber.org/mock/gomock"
 )
+
+const endpoint string = "/api/v1/anime/parse"
 
 type AnimeControllerSuite struct {
 	suite.Suite
 
-	serviceMock *service.MockScraperServiceMockRecorder
+	useCaseMock *MockScraperUseCaseMockRecorder
 	controller  Controller
+	router      *fiber.App
 }
 
 func TestAnimeControllerSuite(t *testing.T) {
 	suite.Run(t, new(AnimeControllerSuite))
 }
 
-func (suite *AnimeControllerSuite) SetupSuite() {
-	ctrl := gomock.NewController(suite.T())
+func (acs *AnimeControllerSuite) SetupSuite() {
+	ctrl := gomock.NewController(acs.T())
 	defer ctrl.Finish()
 
-	serviceMock := service.NewMockScraperService(ctrl)
+	useCaseMock := NewMockScraperUseCase(ctrl)
 
-	suite.serviceMock = serviceMock.EXPECT()
-	suite.controller = NewController(serviceMock)
+	acs.useCaseMock = useCaseMock.EXPECT()
+	acs.controller = NewController(useCaseMock)
+	acs.router = fiber.New()
+	acs.router.Post(endpoint, acs.controller.Parse)
 }
 
-func (suite *AnimeControllerSuite) sendParseRequest(url string) *httptest.ResponseRecorder {
-	handler := suite.controller.Parse
-	recorder := httptest.NewRecorder()
-	request := httptest.NewRequest(
+func (acs *AnimeControllerSuite) sendRequest(url string) *http.Response {
+	req := httptest.NewRequest(
 		http.MethodPost,
-		"/api/v1/anime/parse",
-		bytes.NewBufferString(fmt.Sprintf(`{"url":"%s"}`, url)),
+		endpoint,
+		bytes.NewBufferString(fmt.Sprintf(`{"url":%q}`, url)),
 	)
 
-	ctx := middleware.WithLogger(request.Context(), logging.NewLogger(io.Discard))
-	ctx = middleware.WithTracer(ctx)
-	handler(recorder, request.WithContext(ctx))
+	req.Header.Set("Content-Type", "application/json")
 
-	return recorder
+	resp, err := acs.router.Test(req, -1)
+	acs.Require().NoError(err)
+
+	return resp
 }
 
-func (suite *AnimeControllerSuite) TestParse() {
-	t := suite.T()
-	require := suite.Require()
+func (acs *AnimeControllerSuite) TestParse() {
+	var (
+		t       = acs.T()
+		require = acs.Require()
+	)
 
-	t.Run("Bad request", func(t *testing.T) {
+	t.Run("Bad request", func(_ *testing.T) {
 		testCases := []struct {
-			name, url  string
-			statusCode int
+			dto        scraperUseCase.DTO
 			err        error
+			name       string
+			statusCode int
 		}{
 			{
-				name:       "Invalid url",
-				url:        "",
+				name: "Invalid url",
+				dto: scraperUseCase.DTO{
+					URL: "",
+					IP:  "0.0.0.0",
+				},
 				statusCode: http.StatusUnprocessableEntity,
-				err:        ErrInvalidURL,
+				err:        request.ErrInvalidURL,
 			},
 			{
-				name:       "Unsupported url",
-				url:        "https://www.google.com/",
+				name: "Unsupported url",
+				dto: scraperUseCase.DTO{
+					URL: "https://www.google.com",
+					IP:  "0.0.0.0",
+				},
 				statusCode: http.StatusUnprocessableEntity,
 				err:        scraper.ErrUnsupportedScraper,
 			},
 		}
 
 		for _, testCase := range testCases {
-			suite.serviceMock.Process(gomock.Any(), testCase.url).Return(nil, testCase.err)
+			acs.useCaseMock.Scrape(gomock.Any(), testCase.dto).Return(entity.Anime{}, testCase.err)
 
-			resp := suite.sendParseRequest(testCase.url)
+			resp := acs.sendRequest(testCase.dto.URL)
 
 			decoder := json.NewDecoder(resp.Body)
 			decoder.DisallowUnknownFields()
 
-			var err response.Error
+			var err response.ErrorResponse
 			require.NoError(decoder.Decode(&err))
-			require.Equal(testCase.statusCode, resp.Code)
-			require.Equal(err.Message, testCase.err.Error())
+			require.Equal(testCase.statusCode, resp.StatusCode)
+			require.Equal(testCase.err.Error(), err.Message)
+			require.NoError(resp.Body.Close())
 		}
 	})
 
-	t.Run("Supported urls", func(t *testing.T) {
-		const url string = "https://animego.org/anime/naruto-uragannye-hroniki-103"
-		expected := &entity.Anime{
+	t.Run("Supported urls", func(_ *testing.T) {
+		dto := scraperUseCase.DTO{
+			URL: "https://animego.org/anime/naruto-uragannye-hroniki-103",
+			IP:  "0.0.0.0",
+		}
+
+		expectedEntity := entity.Anime{
 			Image:       base64.StdEncoding.EncodeToString([]byte("data:image/jpeg;base64,random")),
 			Title:       "Наруто: Ураганные хроники",
 			Status:      "Вышел",
@@ -109,16 +127,45 @@ func (suite *AnimeControllerSuite) TestParse() {
 			Rating:      9.5,
 		}
 
-		suite.serviceMock.Process(gomock.Any(), url).Return(expected, nil)
-		resp := suite.sendParseRequest(url)
+		expectedResponse := response.ScrapeResponse{
+			Image:    base64.StdEncoding.EncodeToString([]byte("data:image/jpeg;base64,random")),
+			Title:    "Наруто: Ураганные хроники",
+			Status:   "Вышел",
+			Episodes: "500",
+			Genres: []response.Entry{
+				{Name: "Боевые искусства"},
+				{Name: "Комедия"},
+				{Name: "Сёнэн"},
+				{Name: "Супер сила"},
+				{Name: "Экшен"},
+			},
+			VoiceActing: []response.Entry{
+				{Name: "AniDUB"},
+				{Name: "AniLibria"},
+				{Name: "SHIZA Project"},
+				{Name: "2x2"},
+			},
+			Synonyms: []response.Entry{
+				{Name: "Naruto: Shippuden"},
+				{Name: "ナルト- 疾風伝"},
+				{Name: "Naruto Hurricane Chronicles"},
+			},
+			Rating: 9.5,
+		}
+
+		acs.useCaseMock.Scrape(gomock.Any(), dto).Return(expectedEntity, nil)
+		resp := acs.sendRequest(dto.URL)
+		defer func() {
+			require.NoError(resp.Body.Close())
+		}()
 
 		decoder := json.NewDecoder(resp.Body)
 		decoder.DisallowUnknownFields()
 
-		var anime *entity.Anime
+		var scrapeResponse response.ScrapeResponse
 
-		require.NoError(decoder.Decode(&anime))
-		require.Equal(http.StatusOK, resp.Code)
-		require.Equal(expected, anime)
+		require.NoError(decoder.Decode(&scrapeResponse))
+		require.Equal(http.StatusOK, resp.StatusCode)
+		require.Equal(expectedResponse, scrapeResponse)
 	})
 }
