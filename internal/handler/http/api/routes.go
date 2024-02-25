@@ -19,11 +19,14 @@ type Params struct {
 	Router          fiber.Router `name:"api-server"`
 	Metrics         *fiberprometheus.FiberPrometheus
 	AnimeController anime.Controller
+	AppConfig       config.App
 	JWTConfig       config.JWT
 }
 
 func RegisterAPIRoutes(params Params) {
-	params.Router.Get("/swagger/*", fiberSwagger.WrapHandler)
+	if !params.AppConfig.Env.Production() {
+		params.Router.Get("/swagger/*", fiberSwagger.WrapHandler)
+	}
 
 	api := params.Router.Group("/api")
 	v1 := api.Group("/v1")

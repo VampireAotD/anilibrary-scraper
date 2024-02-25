@@ -7,6 +7,12 @@ import (
 	"go.uber.org/fx"
 )
 
+type Environment string
+
+func (e Environment) Production() bool {
+	return e == Production
+}
+
 type Config struct {
 	fx.Out
 
@@ -35,8 +41,8 @@ type HTTP struct {
 }
 
 type App struct {
-	Env  string `env:"APP_ENV" env-default:"local"`
-	Name string `env:"APP_NAME" env-default:"anilibrary-scraper"`
+	Name string      `env:"APP_NAME" env-default:"anilibrary-scraper"`
+	Env  Environment `env:"APP_ENV" env-default:"local"`
 }
 
 type Redis struct {

@@ -29,7 +29,7 @@ func NewTraceProvider(lifecycle fx.Lifecycle, cfg config.App) error {
 		sdktrace.WithResource(resource.NewWithAttributes(
 			semconv.SchemaURL,
 			semconv.ServiceNameKey.String(cfg.Name),
-			semconv.DeploymentEnvironmentKey.String(cfg.Env),
+			semconv.DeploymentEnvironmentKey.String(string(cfg.Env)),
 		)),
 	)
 
