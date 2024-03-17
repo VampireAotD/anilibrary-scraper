@@ -31,6 +31,8 @@ func TestAnimeVost_FullHTML(t *testing.T) {
 		VoiceActing: []string{"AnimeVost"},
 		Synonyms:    []string{"Naruto Shippuuden"},
 		Rating:      10,
+		Year:        2007,
+		Type:        model.Show,
 	}
 
 	actual := model.Anime{
@@ -42,6 +44,8 @@ func TestAnimeVost_FullHTML(t *testing.T) {
 		VoiceActing: parser.VoiceActing(),
 		Synonyms:    parser.Synonyms(),
 		Rating:      parser.Rating(),
+		Year:        parser.Year(),
+		Type:        parser.Type(),
 	}
 
 	require.Equal(t, expected, actual)
@@ -64,10 +68,11 @@ func TestAnimeVost_PartialHTML(t *testing.T) {
 		Title:       "Наруто Ураганные Хроники",
 		Status:      model.Ready,
 		Episodes:    MinimalAnimeEpisodes,
-		Genres:      nil,
 		VoiceActing: []string{"AnimeVost"},
 		Synonyms:    []string{"Naruto Shippuuden"},
 		Rating:      MinimalAnimeRating,
+		Year:        2007,
+		Type:        model.Show,
 	}
 
 	actual := model.Anime{
@@ -79,6 +84,8 @@ func TestAnimeVost_PartialHTML(t *testing.T) {
 		VoiceActing: parser.VoiceActing(),
 		Synonyms:    parser.Synonyms(),
 		Rating:      parser.Rating(),
+		Year:        parser.Year(),
+		Type:        parser.Type(),
 	}
 
 	require.Equal(t, expected, actual)

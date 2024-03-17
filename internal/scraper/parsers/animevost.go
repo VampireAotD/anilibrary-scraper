@@ -12,7 +12,12 @@ import (
 	"golang.org/x/text/language"
 )
 
-const amountToMakeFloat int = 10
+const (
+	delimiter int = 10
+
+	animeVostMovie      string = "полнометражный фильм"
+	animeVostShortMovie string = "короткометражный фильм"
+)
 
 type AnimeVost struct {
 	document *goquery.Document
@@ -22,6 +27,14 @@ func NewAnimeVost(document *goquery.Document) AnimeVost {
 	return AnimeVost{
 		document: document,
 	}
+}
+
+func (a AnimeVost) ImageURL() string {
+	if attr, exists := a.document.Find(".imgRadius, .infoContent img").First().Attr("src"); exists {
+		return AnimeVostURL + attr
+	}
+
+	return ""
 }
 
 func (a AnimeVost) Title() string {
@@ -42,13 +55,13 @@ func (a AnimeVost) Status() model.Status {
 }
 
 func (a AnimeVost) Rating() float32 {
-	if rating := a.document.Find(".current-rating").Text(); rating != "" {
-		value, err := strconv.Atoi(rating)
+	if ratingText := a.document.Find(".current-rating").Text(); ratingText != "" {
+		rating, err := strconv.Atoi(ratingText)
 		if err != nil {
 			return MinimalAnimeRating
 		}
 
-		return float32(value / amountToMakeFloat)
+		return float32(rating / delimiter)
 	}
 
 	return MinimalAnimeRating
@@ -80,7 +93,7 @@ func (a AnimeVost) VoiceActing() []string {
 func (a AnimeVost) Synonyms() []string {
 	if title := a.document.Find(".shortstoryHead h1, .infoContent h3").First().Text(); title != "" {
 		regex := regexp.MustCompile(`/\s*(.*?)\s*\[`)
-		// If there is a synonym, than the correct one without any symbols will be at index 1
+		// If there is a synonym, then the correct one without any symbols will be at index 1
 		if entries := regex.FindStringSubmatch(title); len(entries) > 1 {
 			return []string{entries[1]}
 		}
@@ -91,10 +104,31 @@ func (a AnimeVost) Synonyms() []string {
 	return nil
 }
 
-func (a AnimeVost) ImageURL() string {
-	if attr, exists := a.document.Find(".imgRadius, .infoContent img").First().Attr("src"); exists {
-		return AnimeVostURL + attr
+func (a AnimeVost) Year() int {
+	if yearText := a.document.Find("p strong:contains(Год)").Parent().Text(); yearText != "" {
+		regex := regexp.MustCompile(`\d{4}`)
+		year, err := strconv.Atoi(regex.FindString(yearText))
+		if err != nil {
+			return 0
+		}
+
+		return year
 	}
 
-	return ""
+	return 0
+}
+
+func (a AnimeVost) Type() model.Type {
+	if typeText := a.document.Find("p strong:contains(Тип)").Parent().Text(); typeText != "" {
+		animeType := strings.Replace(typeText, "Тип: ", "", 1)
+
+		switch animeType {
+		case animeVostMovie, animeVostShortMovie:
+			return model.Movie
+		default:
+			return model.Show
+		}
+	}
+
+	return model.Show
 }

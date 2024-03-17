@@ -18,6 +18,9 @@ var (
 )
 
 type Parser interface {
+	// ImageURL method scraping image url returns empty string if none found
+	ImageURL() string
+
 	// Title method scraping anime title and returns empty string if none found
 	Title() string
 
@@ -39,17 +42,26 @@ type Parser interface {
 	// Synonyms method scraping all similar anime names
 	Synonyms() []string
 
-	// ImageURL method scraping image url returns empty string if none found
-	ImageURL() string
+	// Year method scraping anime year
+	Year() int
+
+	// Type method scraping anime type
+	Type() model.Type
 }
 
 type Scraper struct {
-	config Config
+	config config
 }
 
-func New() Scraper {
+func New(options ...Option) Scraper {
+	cfg := config{}
+
+	for i := range options {
+		options[i](&cfg)
+	}
+
 	return Scraper{
-		config: NewDefaultConfig(),
+		config: cfg,
 	}
 }
 
@@ -59,7 +71,12 @@ func (s Scraper) ScrapeAnime(ctx context.Context, url string) (entity.Anime, err
 		return entity.Anime{}, fmt.Errorf("resolving parser %s: %w", url, err)
 	}
 
-	return s.extractData(ctx, parser).MapToDomainEntity(), nil
+	anime, err := s.extractData(ctx, parser)
+	if err != nil {
+		return entity.Anime{}, fmt.Errorf("parsing response %s: %w", url, err)
+	}
+
+	return anime.MapToDomainEntity(), nil
 }
 
 func (s Scraper) resolveParser(ctx context.Context, url string) (Parser, error) {
@@ -83,7 +100,7 @@ func (s Scraper) resolveParser(ctx context.Context, url string) (Parser, error) 
 	}
 }
 
-func (s Scraper) extractData(ctx context.Context, parser Parser) model.Anime {
+func (s Scraper) extractData(ctx context.Context, parser Parser) (model.Anime, error) {
 	var anime model.Anime
 
 	imageCh := make(chan struct{})
@@ -137,7 +154,19 @@ func (s Scraper) extractData(ctx context.Context, parser Parser) model.Anime {
 		anime.Synonyms = parser.Synonyms()
 	})
 
+	parseHTML(func() {
+		anime.Year = parser.Year()
+	})
+
+	parseHTML(func() {
+		anime.Type = parser.Type()
+	})
+
 	<-imageCh
 
-	return anime
+	if err := anime.Validate(s.config.validator); err != nil {
+		return model.Anime{}, fmt.Errorf("validating: %w", err)
+	}
+
+	return anime, nil
 }

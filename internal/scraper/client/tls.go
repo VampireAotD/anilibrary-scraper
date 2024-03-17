@@ -13,14 +13,16 @@ import (
 	"github.com/corpix/uarand"
 )
 
+const defaultTimeoutInSeconds int = 10
+
 type TLSClient struct {
 	client tlsclient.HttpClient
 }
 
-func NewTLSClient(timeout int) TLSClient {
+func NewTLSClient() TLSClient {
 	jar := tlsclient.NewCookieJar()
 	options := []tlsclient.HttpClientOption{
-		tlsclient.WithTimeoutSeconds(timeout),
+		tlsclient.WithTimeoutSeconds(defaultTimeoutInSeconds),
 		tlsclient.WithClientProfile(profiles.Chrome_117),
 		tlsclient.WithCookieJar(jar),
 		tlsclient.WithInsecureSkipVerify(),

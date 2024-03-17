@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"testing"
+	"time"
 
 	"anilibrary-scraper/internal/repository/model"
 
@@ -85,26 +86,13 @@ func (ars *AnimeRepositorySuite) TestCreate() {
 		require = ars.Require()
 	)
 
-	t.Run("Invalid cases", func(t *testing.T) {
-		t.Run("Missing image", func(_ *testing.T) {
-			err := ars.animeRepository.Create(context.Background(), model.Anime{
-				URL:   testURL,
-				Title: "random",
-			})
-			require.ErrorIs(err, model.ErrInvalidData)
-		})
-
-		t.Run("Missing title", func(_ *testing.T) {
-			err := ars.animeRepository.Create(context.Background(), model.Anime{
-				URL:   testURL,
-				Image: base64.StdEncoding.EncodeToString([]byte("random")),
-			})
-			require.ErrorIs(err, model.ErrInvalidData)
-		})
-	})
-
-	t.Run("Correct data", func(_ *testing.T) {
+	t.Run("With required TTL", func(_ *testing.T) {
 		err := ars.animeRepository.Create(context.Background(), ars.expectedAnime)
 		require.NoError(err)
+
+		ttl := ars.redisServer.TTL(testURL)
+		expectedTTL, err := time.ParseDuration(sevenDaysInHours)
+		require.NoError(err)
+		require.Equal(expectedTTL, ttl)
 	})
 }

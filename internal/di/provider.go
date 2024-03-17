@@ -11,6 +11,7 @@ var ProviderModule = fx.Module(
 	fx.Provide(
 		providers.NewRedisProvider,
 		providers.NewKafkaProvider,
+		providers.NewValidator,
 	),
 
 	// Tracer is invoked because it does not consider as dependency, but rather as global provider

@@ -70,6 +70,8 @@ func (s Service) Process(ctx context.Context, url string) (entity.Anime, error) 
 		VoiceActing: anime.VoiceActing,
 		Synonyms:    anime.Synonyms,
 		Rating:      anime.Rating,
+		Year:        anime.Year,
+		Type:        anime.Type,
 	})
 
 	return anime, nil

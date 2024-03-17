@@ -15,6 +15,7 @@ import (
 	"anilibrary-scraper/internal/scraper"
 	scraperUseCase "anilibrary-scraper/internal/usecase/scraper"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/mock/gomock"
@@ -41,7 +42,7 @@ func (acs *AnimeControllerSuite) SetupSuite() {
 	useCaseMock := NewMockScraperUseCase(ctrl)
 
 	acs.useCaseMock = useCaseMock.EXPECT()
-	acs.controller = NewController(useCaseMock)
+	acs.controller = NewController(useCaseMock, validator.New())
 	acs.router = fiber.New()
 	acs.router.Post(endpoint, acs.controller.Parse)
 }
@@ -119,18 +120,20 @@ func (acs *AnimeControllerSuite) TestParse() {
 		expectedEntity := entity.Anime{
 			Image:       base64.StdEncoding.EncodeToString([]byte("data:image/jpeg;base64,random")),
 			Title:       "Наруто: Ураганные хроники",
-			Status:      "Вышел",
+			Status:      entity.Ready,
 			Episodes:    "500",
 			Genres:      []string{"Боевые искусства", "Комедия", "Сёнэн", "Супер сила", "Экшен"},
 			VoiceActing: []string{"AniDUB", "AniLibria", "SHIZA Project", "2x2"},
 			Synonyms:    []string{"Naruto: Shippuden", "ナルト- 疾風伝", "Naruto Hurricane Chronicles"},
 			Rating:      9.5,
+			Year:        2007,
+			Type:        entity.Show,
 		}
 
 		expectedResponse := response.ScrapeResponse{
 			Image:    base64.StdEncoding.EncodeToString([]byte("data:image/jpeg;base64,random")),
 			Title:    "Наруто: Ураганные хроники",
-			Status:   "Вышел",
+			Status:   string(entity.Ready),
 			Episodes: "500",
 			Genres: []response.Entry{
 				{Name: "Боевые искусства"},
@@ -151,6 +154,8 @@ func (acs *AnimeControllerSuite) TestParse() {
 				{Name: "Naruto Hurricane Chronicles"},
 			},
 			Rating: 9.5,
+			Year:   2007,
+			Type:   string(entity.Show),
 		}
 
 		acs.useCaseMock.Scrape(gomock.Any(), dto).Return(expectedEntity, nil)

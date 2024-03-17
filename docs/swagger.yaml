@@ -37,10 +37,14 @@ definitions:
         type: array
       title:
         type: string
+      type:
+        type: string
       voiceActing:
         items:
           $ref: '#/definitions/response.Entry'
         type: array
+      year:
+        type: integer
     type: object
 host: localhost:8080
 info:

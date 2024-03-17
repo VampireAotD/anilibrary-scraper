@@ -3,14 +3,12 @@ package scraper
 import (
 	"context"
 
-	"anilibrary-scraper/internal/metrics"
-	"anilibrary-scraper/internal/scraper/client"
-
 	"github.com/PuerkitoBio/goquery"
+	"github.com/go-playground/validator/v10"
 )
 
-// Client interface must be implemented by all clients that will be scraping
-type Client interface {
+// HTTPClient interface must be implemented by all clients that will be scraping
+type HTTPClient interface {
 	// HTMLDocument returns response body as *goquery.Document
 	HTMLDocument(ctx context.Context, url string) (*goquery.Document, error)
 
@@ -18,18 +16,28 @@ type Client interface {
 	Response(ctx context.Context, url string) ([]byte, error)
 }
 
-type Config struct {
-	client       Client
+type config struct {
+	client       HTTPClient
+	validator    *validator.Validate
 	panicHandler func()
 }
 
-func NewDefaultConfig() Config {
-	return Config{
-		client: client.NewTLSClient(10),
-		panicHandler: func() {
-			if err := recover(); err != nil {
-				metrics.IncrPanicCounter()
-			}
-		},
+type Option func(cfg *config)
+
+func WithHTTPClient(client HTTPClient) Option {
+	return func(cfg *config) {
+		cfg.client = client
+	}
+}
+
+func WithValidator(validate *validator.Validate) Option {
+	return func(cfg *config) {
+		cfg.validator = validate
+	}
+}
+
+func WithPanicHandler(handler func()) Option {
+	return func(cfg *config) {
+		cfg.panicHandler = handler
 	}
 }

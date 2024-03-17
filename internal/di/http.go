@@ -5,6 +5,7 @@ import (
 	"anilibrary-scraper/internal/handler/http/api/v1/anime"
 	"anilibrary-scraper/internal/handler/http/monitoring"
 	"anilibrary-scraper/internal/handler/http/monitoring/healthcheck"
+	"anilibrary-scraper/internal/usecase/scraper"
 
 	"github.com/ansrivas/fiberprometheus/v2"
 	"go.uber.org/fx"
@@ -14,6 +15,7 @@ var HTTPModule = fx.Module(
 	"http servers",
 
 	fx.Provide(
+		fx.Annotate(scraper.NewUseCase, fx.As(new(anime.ScraperUseCase))),
 		anime.NewController,
 		healthcheck.NewController,
 	),

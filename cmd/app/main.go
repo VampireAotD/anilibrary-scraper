@@ -23,13 +23,21 @@ func main() {
 
 func createApp() fx.Option {
 	return fx.Options(
+		// Resolve config
 		fx.Provide(
 			config.New,
 		),
+
+		// Provide dependencies
 		di.ProviderModule,
-		di.RepositoryModule,
+
+		// Resolve services
 		di.ServiceModule,
+
+		// Resolve use cases
 		di.UseCaseModule,
+
+		// Start API and Monitoring servers
 		di.HTTPModule,
 	)
 }

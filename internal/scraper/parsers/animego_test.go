@@ -31,6 +31,8 @@ func TestAnimeGo_FullHTML(t *testing.T) {
 		VoiceActing: []string{"AniDUB", "AniLibria", "SHIZA Project", "2x2"},
 		Synonyms:    []string{"Naruto: Shippuuden", "Naruto: Shippuden", "ナルト- 疾風伝", "Naruto Hurricane Chronicles"},
 		Rating:      9.5,
+		Year:        2007,
+		Type:        model.Show,
 	}
 
 	actual := model.Anime{
@@ -42,6 +44,8 @@ func TestAnimeGo_FullHTML(t *testing.T) {
 		Genres:      parser.Genres(),
 		VoiceActing: parser.VoiceActing(),
 		Synonyms:    parser.Synonyms(),
+		Year:        parser.Year(),
+		Type:        parser.Type(),
 	}
 
 	require.Equal(t, expected, actual)
@@ -60,14 +64,12 @@ func TestAnimeGo_PartialHTML(t *testing.T) {
 	parser := NewAnimeGo(document)
 
 	expected := model.Anime{
-		Image:       "https://animego.org/upload/anime/images/5a3ff73e8bd5b.jpg",
-		Title:       "Наруто: Ураганные хроники",
-		Status:      model.Ready,
-		Episodes:    MinimalAnimeEpisodes,
-		Genres:      nil,
-		VoiceActing: nil,
-		Synonyms:    nil,
-		Rating:      MinimalAnimeRating,
+		Image:    "https://animego.org/upload/anime/images/5a3ff73e8bd5b.jpg",
+		Title:    "Наруто: Ураганные хроники",
+		Status:   model.Ready,
+		Episodes: MinimalAnimeEpisodes,
+		Rating:   MinimalAnimeRating,
+		Type:     model.Show,
 	}
 
 	actual := model.Anime{
@@ -79,6 +81,8 @@ func TestAnimeGo_PartialHTML(t *testing.T) {
 		VoiceActing: parser.VoiceActing(),
 		Synonyms:    parser.Synonyms(),
 		Rating:      parser.Rating(),
+		Year:        parser.Year(),
+		Type:        parser.Type(),
 	}
 
 	require.Equal(t, expected, actual)

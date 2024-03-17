@@ -133,11 +133,17 @@ const docTemplate = `{
                 "title": {
                     "type": "string"
                 },
+                "type": {
+                    "type": "string"
+                },
                 "voiceActing": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/response.Entry"
                     }
+                },
+                "year": {
+                    "type": "integer"
                 }
             }
         }

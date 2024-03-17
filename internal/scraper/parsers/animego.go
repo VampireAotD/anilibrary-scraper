@@ -10,6 +10,10 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
+const (
+	animeGoMovie string = "Фильм"
+)
+
 type AnimeGo struct {
 	document *goquery.Document
 }
@@ -18,6 +22,14 @@ func NewAnimeGo(document *goquery.Document) AnimeGo {
 	return AnimeGo{
 		document: document,
 	}
+}
+
+func (a AnimeGo) ImageURL() string {
+	if attr, exists := a.document.Find(".anime-poster img").First().Attr("src"); exists {
+		return strings.Replace(attr, "/media/cache/thumbs_250x350", "", 1)
+	}
+
+	return ""
 }
 
 func (a AnimeGo) Title() string {
@@ -94,10 +106,29 @@ func (a AnimeGo) Synonyms() []string {
 	return nil
 }
 
-func (a AnimeGo) ImageURL() string {
-	if attr, exists := a.document.Find(".anime-poster img").First().Attr("src"); exists {
-		return strings.Replace(attr, "/media/cache/thumbs_250x350", "", 1)
+func (a AnimeGo) Year() int {
+	if yearText := a.document.Find(".anime-info .row dt:contains(Сезон) + dd").Text(); yearText != "" {
+		regex := regexp.MustCompile(`\d{4}`)
+		year, err := strconv.Atoi(regex.FindString(yearText))
+		if err != nil {
+			return 0
+		}
+
+		return year
 	}
 
-	return ""
+	return 0
+}
+
+func (a AnimeGo) Type() model.Type {
+	if typeText := a.document.Find(".anime-info .row dt:contains(Тип) + dd").Text(); typeText != "" {
+		switch typeText {
+		case animeGoMovie:
+			return model.Movie
+		default:
+			return model.Show
+		}
+	}
+
+	return model.Show
 }

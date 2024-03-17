@@ -10,6 +10,7 @@ import (
 	"anilibrary-scraper/internal/usecase/scraper"
 	"anilibrary-scraper/pkg/logging"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
@@ -22,12 +23,14 @@ type ScraperUseCase interface {
 }
 
 type Controller struct {
-	useCase ScraperUseCase
+	useCase   ScraperUseCase
+	validator *validator.Validate
 }
 
-func NewController(useCase ScraperUseCase) Controller {
+func NewController(useCase ScraperUseCase, validate *validator.Validate) Controller {
 	return Controller{
-		useCase: useCase,
+		useCase:   useCase,
+		validator: validate,
 	}
 }
 
@@ -51,7 +54,7 @@ func (c Controller) Parse(ctx *fiber.Ctx) error {
 	span.AddEvent("Decoding and validating request")
 
 	var req request.ScrapeRequest
-	if err := req.MapAndValidate(ctx); err != nil {
+	if err := req.MapAndValidate(ctx, c.validator); err != nil {
 		metrics.IncrHTTPErrorsCounter()
 		span.SetStatus(codes.Error, err.Error())
 		span.RecordError(err)

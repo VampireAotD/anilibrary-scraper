@@ -48,11 +48,8 @@ func (a AnimeRepository) Create(ctx context.Context, anime model.Anime) error {
 	_, span := trace.SpanFromContext(ctx).TracerProvider().Tracer("AnimeRepository").Start(ctx, "Create")
 	defer span.End()
 
-	if err := anime.Validate(); err != nil {
-		span.RecordError(err)
-		return fmt.Errorf("while caching: %w", err)
-	}
-
+	// Error is not checked here because the only way error can occur
+	// is when sevenDaysInHours will have invalid data
 	expire, _ := time.ParseDuration(sevenDaysInHours)
 	data, err := json.Marshal(anime)
 	if err != nil {
