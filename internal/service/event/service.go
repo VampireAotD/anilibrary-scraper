@@ -29,7 +29,7 @@ func (s Service) Send(ctx context.Context, dto DTO) error {
 	ctx, span := trace.SpanFromContext(ctx).TracerProvider().Tracer("EventService").Start(ctx, "Send")
 	defer span.End()
 
-	span.AddEvent("Sending event to Clickhouse")
+	span.AddEvent("Sending event to ClickHouse")
 
 	return s.eventRepository.Send(ctx, model.Event{
 		URL:       dto.URL,

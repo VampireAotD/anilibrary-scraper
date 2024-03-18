@@ -32,7 +32,8 @@ List of all variables and their description:
 | **JWT_SECRET**                  |                              | Token to communicate with other Anilibrary services.                                                                                               | 
 | **TIMEZONE**                    | Europe/Kiev                  | Specify current timezone in container.                                                                                                             | 
 | **REDIS_VERSION**               | latest                       | Specify desired Redis version.                                                                                                                     | 
-| **REDIS_ADDRESS**               | redis:6379                   | Specify Redis connection address.                                                                                                                  | 
+| **REDIS_PORT**                  | 6379                         | Specify Redis port.                                                                                                                                | 
+| **REDIS_ADDRESS**               | redis:${REDIS_PORT}          | Specify Redis connection address.                                                                                                                  | 
 | **REDIS_PASSWORD**              |                              | Specify Redis password.                                                                                                                            |
 | **REDIS_POOL_TIMEOUT**          | 5s                           | Max wait time for a connection from the pool, preventing hangs when all connections are busy.                                                      |
 | **OTEL_EXPORTER_OTLP_ENDPOINT** | http://localhost:4318        | Specify endpoint on where to send traces. By default traces are sent to [monitoring service](https://github.com/VampireAotD/anilibrary-monitoring) |
@@ -41,19 +42,22 @@ List of all variables and their description:
 | **FILEBEAT_USER**               |                              | Specify login for Filebeat user.                                                                                                                   |
 | **FILEBEAT_PASSWORD**           |                              | Specify password for Filebeat user.                                                                                                                |
 | **KAFKA_VERSION**               | latest                       | Specify desired Kafka image version.                                                                                                               |
-| **KAFKA_ADDRESS**               | kafka:9092                   | Specify Kafka connection address.                                                                                                                  |
+| **KAFKA_PORT**                  | 9092                         | Specify Kafka port.                                                                                                                                |
+| **KAFKA_ADDRESS**               | kafka:${KAFKA_PORT}          | Specify Kafka connection address.                                                                                                                  |
 | **KAFKA_CLIENT_USERS**          | example                      | Specify Kafka username for client connection.                                                                                                      |
 | **KAFKA_CLIENT_PASSWORDS**      |                              | Specify Kafka password for client connection.                                                                                                      |
 | **KAFKA_INTER_BROKER_USER**     | kafka                        | Specify Kafka inter broker username for broker communication.                                                                                      |
 | **KAFKA_INTER_BROKER_PASSWORD** |                              | Specify Kafka inter broker password for broker communication.                                                                                      |
 | **KAFKA_TOPIC**                 |                              | Specify Kafka topic.                                                                                                                               |
 | **KAFKA_PARTITION**             |                              | Specify Kafka partition.                                                                                                                           |
-| **CLICKHOUSE_VERSION**          | latest                       | Specify desired Clickhouse version.                                                                                                                |
-| **CLICKHOUSE_USER**             | example                      | Specify username for Clickhouse connection.                                                                                                        |
-| **CLICKHOUSE_PASSWORD**         |                              | Specify password for Clickhouse connection.                                                                                                        |
+| **CLICKHOUSE_VERSION**          | latest                       | Specify desired ClickHouse version.                                                                                                                |
+| **CLICKHOUSE_HTTP_PORT**        | 8123                         | Specify ClickHouse HTTP interface port.                                                                                                            |
+| **CLICKHOUSE_TCP_PORT**         | 9005                         | Specifies the port for the ClickHouse TCP interface, used for cluster communications and client connections over TCP.                              |
+| **CLICKHOUSE_USER**             | example                      | Specify username for ClickHouse connection.                                                                                                        |
+| **CLICKHOUSE_PASSWORD**         |                              | Specify password for ClickHouse connection.                                                                                                        |
 | **CLICKHOUSE_KAFKA_USER**       | KAFKA_CLIENT_USERS value     | Specify Kafka client name for Kafka table engine.                                                                                                  |
 | **CLICKHOUSE_KAFKA_PASSWORD**   | KAFKA_CLIENT_PASSWORDS value | Specify Kafka client password for Kafka table engine.                                                                                              |
-| **CLICKHOUSE_ADDRESS**          |                              | Specify Clickhouse connection address.                                                                                                             |
+| **CLICKHOUSE_ADDRESS**          |                              | Specify ClickHouse connection address.                                                                                                             |
 
 ---
 
@@ -100,5 +104,5 @@ List of used services and their ports:
 | Application | 8080       |
 | Monitoring  | 8081       |
 | Redis       | 6379       |
-| Clickhouse  | 8123, 9005 |
+| ClickHouse  | 8123, 9005 |
 | Kafka       | 9092       |
