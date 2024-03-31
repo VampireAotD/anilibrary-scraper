@@ -1,20 +1,26 @@
 package model
 
 import (
+	"bytes"
 	"errors"
+	"fmt"
+	"sync"
 
 	"anilibrary-scraper/internal/entity"
 
 	"github.com/go-playground/validator/v10"
 )
 
-var (
-	ErrNotEnoughData = errors.New("entity wasn't filled with required data")
-)
+var validationPool = sync.Pool{
+	New: func() any {
+		return new(bytes.Buffer)
+	},
+}
 
 type Status = entity.Status
 type Type = entity.Type
 
+// TODO to eng
 const (
 	Ongoing = entity.Ongoing
 	Ready   = entity.Ready
@@ -24,9 +30,9 @@ const (
 )
 
 type Anime struct {
-	Image       string   `validate:"required,url"`
+	Image       string   `validate:"required"`
 	Title       string   `validate:"required"`
-	Status      Status   `validate:"required,oneof=Онгоинг Вышел"`
+	Status      Status   `validate:"required,oneof=Анонс Онгоинг Вышел"`
 	Type        Type     `validate:"required,oneof='ТВ Сериал' Фильм"`
 	Episodes    string   // validation not required
 	Genres      []string // validation not required
@@ -38,8 +44,26 @@ type Anime struct {
 
 func (a Anime) Validate(validate *validator.Validate) error {
 	if err := validate.Struct(a); err != nil {
-		// TODO add more informative error
-		return ErrNotEnoughData
+		if errs, ok := err.(validator.ValidationErrors); ok {
+			buf, _ := validationPool.Get().(*bytes.Buffer)
+			defer func() {
+				buf.Reset()
+				validationPool.Put(buf)
+			}()
+
+			for i := range errs {
+				buf.WriteString(errs[i].Field())
+				buf.WriteString(" - ")
+				buf.WriteString(errs[i].Tag())
+				if i != len(errs)-1 {
+					buf.WriteString("; ")
+				}
+			}
+
+			return errors.New(buf.String())
+		}
+
+		return fmt.Errorf("validator: %w", err)
 	}
 
 	return nil

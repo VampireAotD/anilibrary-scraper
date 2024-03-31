@@ -13,6 +13,44 @@ import (
 	gomock "go.uber.org/mock/gomock"
 )
 
+// MockScraper is a mock of Scraper interface.
+type MockScraper struct {
+	ctrl     *gomock.Controller
+	recorder *MockScraperMockRecorder
+}
+
+// MockScraperMockRecorder is the mock recorder for MockScraper.
+type MockScraperMockRecorder struct {
+	mock *MockScraper
+}
+
+// NewMockScraper creates a new mock instance.
+func NewMockScraper(ctrl *gomock.Controller) *MockScraper {
+	mock := &MockScraper{ctrl: ctrl}
+	mock.recorder = &MockScraperMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockScraper) EXPECT() *MockScraperMockRecorder {
+	return m.recorder
+}
+
+// ScrapeAnime mocks base method.
+func (m *MockScraper) ScrapeAnime(ctx context.Context, url string) (entity.Anime, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ScrapeAnime", ctx, url)
+	ret0, _ := ret[0].(entity.Anime)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ScrapeAnime indicates an expected call of ScrapeAnime.
+func (mr *MockScraperMockRecorder) ScrapeAnime(ctx, url interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScrapeAnime", reflect.TypeOf((*MockScraper)(nil).ScrapeAnime), ctx, url)
+}
+
 // MockAnimeRepository is a mock of AnimeRepository interface.
 type MockAnimeRepository struct {
 	ctrl     *gomock.Controller
@@ -63,42 +101,4 @@ func (m *MockAnimeRepository) FindByURL(ctx context.Context, url string) (entity
 func (mr *MockAnimeRepositoryMockRecorder) FindByURL(ctx, url interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByURL", reflect.TypeOf((*MockAnimeRepository)(nil).FindByURL), ctx, url)
-}
-
-// MockScraper is a mock of Scraper interface.
-type MockScraper struct {
-	ctrl     *gomock.Controller
-	recorder *MockScraperMockRecorder
-}
-
-// MockScraperMockRecorder is the mock recorder for MockScraper.
-type MockScraperMockRecorder struct {
-	mock *MockScraper
-}
-
-// NewMockScraper creates a new mock instance.
-func NewMockScraper(ctrl *gomock.Controller) *MockScraper {
-	mock := &MockScraper{ctrl: ctrl}
-	mock.recorder = &MockScraperMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockScraper) EXPECT() *MockScraperMockRecorder {
-	return m.recorder
-}
-
-// ScrapeAnime mocks base method.
-func (m *MockScraper) ScrapeAnime(ctx context.Context, url string) (entity.Anime, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ScrapeAnime", ctx, url)
-	ret0, _ := ret[0].(entity.Anime)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ScrapeAnime indicates an expected call of ScrapeAnime.
-func (mr *MockScraperMockRecorder) ScrapeAnime(ctx, url interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScrapeAnime", reflect.TypeOf((*MockScraper)(nil).ScrapeAnime), ctx, url)
 }

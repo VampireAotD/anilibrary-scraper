@@ -51,19 +51,19 @@ func (c Controller) Parse(ctx *fiber.Ctx) error {
 	span := trace.SpanFromContext(ctx.UserContext())
 	defer span.End()
 
-	span.AddEvent("Decoding and validating request")
+	span.AddEvent("Parsing and validating request")
 
 	var req request.ScrapeRequest
-	if err := req.MapAndValidate(ctx, c.validator); err != nil {
+	if err := req.Validate(ctx, c.validator); err != nil {
 		metrics.IncrHTTPErrorsCounter()
-		span.SetStatus(codes.Error, err.Error())
+		span.SetStatus(codes.Error, "failed to parse HTTP request")
 		span.RecordError(err)
 
 		return ctx.Status(fiber.StatusUnprocessableEntity).JSON(response.NewErrorResponse(err))
 	}
 
 	logging.Get().Info("Scraping", zap.String("url", req.URL))
-	span.AddEvent("Scraping data")
+	span.AddEvent("Scraping anime")
 
 	anime, err := c.useCase.Scrape(ctx.UserContext(), scraper.DTO{
 		URL:       req.URL,
@@ -72,9 +72,9 @@ func (c Controller) Parse(ctx *fiber.Ctx) error {
 	})
 	if err != nil {
 		metrics.IncrHTTPErrorsCounter()
-		span.SetStatus(codes.Error, err.Error())
+		logging.Get().Error("Failed to scrape anime", zap.Error(err))
+		span.SetStatus(codes.Error, "failed to scrape anime from HTTP request")
 		span.RecordError(err)
-		logging.Get().Error("while scraping", zap.Error(err))
 
 		return ctx.Status(fiber.StatusUnprocessableEntity).JSON(response.NewErrorResponse(err))
 	}

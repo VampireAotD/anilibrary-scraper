@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"anilibrary-scraper/internal/entity"
 	"anilibrary-scraper/internal/repository/model"
 
 	"github.com/alicebob/miniredis/v2"
@@ -33,19 +34,19 @@ func (ars *AnimeRepositorySuite) SetupSuite() {
 	defer ctrl.Finish()
 
 	ars.redisServer = miniredis.RunT(ars.T())
-	ars.animeRepository = NewAnimeRepository(redis.NewClient(&redis.Options{
-		Addr: ars.redisServer.Addr(),
-	}))
+	ars.animeRepository = NewAnimeRepository(
+		redis.NewClient(&redis.Options{
+			Addr: ars.redisServer.Addr(),
+		}),
+	)
 	ars.expectedAnime = model.Anime{
-		URL:         testURL,
-		Image:       base64.StdEncoding.EncodeToString([]byte("random")),
-		Title:       "random",
-		Status:      "Вышел",
-		Episodes:    "120",
-		Genres:      nil,
-		VoiceActing: nil,
-		Synonyms:    nil,
-		Rating:      0,
+		URL:      testURL,
+		Image:    base64.StdEncoding.EncodeToString([]byte("data:image/png;base64,image")),
+		Title:    "test",
+		Status:   entity.Ready,
+		Type:     entity.Show,
+		Episodes: "120",
+		Year:     time.Now().Year(),
 	}
 }
 

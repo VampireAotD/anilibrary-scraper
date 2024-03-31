@@ -5,38 +5,75 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
+	"sync"
 
 	"github.com/PuerkitoBio/goquery"
 	http "github.com/bogdanfinn/fhttp"
 	tlsclient "github.com/bogdanfinn/tls-client"
 	"github.com/bogdanfinn/tls-client/profiles"
-	"github.com/corpix/uarand"
 )
 
-const defaultTimeoutInSeconds int = 10
+var tlsClientRequestHeaders = http.Header{
+	"accept":                    {"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"},
+	"accept-encoding":           {"gzip"},
+	"accept-language":           {"de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7"},
+	"cache-control":             {"max-age=0"},
+	"sec-ch-ua":                 {`"Google Chrome";v="123", "Not:A-Brand";v="8", "Chromium";v="123"`},
+	"sec-ch-ua-mobile":          {"?0"},
+	"sec-ch-ua-platform":        {`"macOS"`},
+	"sec-fetch-dest":            {"document"},
+	"sec-fetch-mode":            {"navigate"},
+	"sec-fetch-site":            {"none"},
+	"sec-fetch-user":            {"?1"},
+	"upgrade-insecure-requests": {"1"},
+	"user-agent":                {"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"},
+	http.HeaderOrderKey: {
+		"accept",
+		"accept-encoding",
+		"accept-language",
+		"cache-control",
+		"sec-ch-ua",
+		"sec-ch-ua-mobile",
+		"sec-ch-ua-platform",
+		"sec-fetch-dest",
+		"sec-fetch-mode",
+		"sec-fetch-site",
+		"sec-fetch-user",
+		"upgrade-insecure-requests",
+		"user-agent",
+	},
+}
 
 type TLSClient struct {
 	client tlsclient.HttpClient
+	pool   *sync.Pool
 }
 
-func NewTLSClient() TLSClient {
-	jar := tlsclient.NewCookieJar()
-	options := []tlsclient.HttpClientOption{
-		tlsclient.WithTimeoutSeconds(defaultTimeoutInSeconds),
-		tlsclient.WithClientProfile(profiles.Chrome_117),
-		tlsclient.WithCookieJar(jar),
+func NewTLSClient() (TLSClient, error) {
+	client, err := tlsclient.NewHttpClient(
+		tlsclient.NewLogger(),
+		tlsclient.WithTimeoutSeconds(tlsclient.DefaultTimeoutSeconds),
+		tlsclient.WithClientProfile(profiles.DefaultClientProfile),
+		tlsclient.WithRandomTLSExtensionOrder(),
 		tlsclient.WithInsecureSkipVerify(),
+		tlsclient.WithCookieJar(tlsclient.NewCookieJar()),
+	)
+	if err != nil {
+		return TLSClient{}, err
 	}
-
-	// Error is ignored because method validateConfig in tlsclient package always returns nil
-	client, _ := tlsclient.NewHttpClient(tlsclient.NewLogger(), options...)
 
 	return TLSClient{
 		client: client,
-	}
+		pool: &sync.Pool{
+			New: func() any {
+				return new(bytes.Buffer)
+			},
+		},
+	}, nil
 }
 
-func (c TLSClient) HTMLDocument(ctx context.Context, url string) (*goquery.Document, error) {
+func (c TLSClient) HTMLDocument(ctx context.Context, url string) (_ *goquery.Document, err error) {
 	response, err := c.fetch(ctx, url)
 	if err != nil {
 		return nil, err
@@ -49,7 +86,7 @@ func (c TLSClient) HTMLDocument(ctx context.Context, url string) (*goquery.Docum
 	return goquery.NewDocumentFromReader(response.Body)
 }
 
-func (c TLSClient) Response(ctx context.Context, url string) ([]byte, error) {
+func (c TLSClient) Response(ctx context.Context, url string) (_ []byte, err error) {
 	response, err := c.fetch(ctx, url)
 	if err != nil {
 		return nil, err
@@ -59,8 +96,13 @@ func (c TLSClient) Response(ctx context.Context, url string) ([]byte, error) {
 		err = errors.Join(err, response.Body.Close())
 	}()
 
-	var buf bytes.Buffer
-	_, err = buf.ReadFrom(response.Body)
+	buf, _ := c.pool.Get().(*bytes.Buffer)
+	defer func() {
+		buf.Reset()
+		c.pool.Put(buf)
+	}()
+
+	_, err = io.Copy(buf, response.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -74,22 +116,16 @@ func (c TLSClient) fetch(ctx context.Context, url string) (*http.Response, error
 		return nil, fmt.Errorf("creating request: %w", err)
 	}
 
-	request.Header = http.Header{
-		"accept":          {"*/*"},
-		"accept-language": {"de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7"},
-		"user-agent":      {uarand.GetRandom()},
-		"origin":          {"https://www.google.com"},
-		http.HeaderOrderKey: {
-			"accept",
-			"accept-language",
-			"user-agent",
-			"origin",
-		},
-	}
+	request.Header = tlsClientRequestHeaders
 
 	response, err := c.client.Do(request)
-	if err != nil || response.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("bad response: %w:%d", err, response.StatusCode)
+	if err != nil {
+		return nil, fmt.Errorf("sending request: %w", err)
+	}
+
+	if response.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("bad response: %d", response.StatusCode)
+
 	}
 
 	return response, nil

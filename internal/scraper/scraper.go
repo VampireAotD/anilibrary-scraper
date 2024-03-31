@@ -13,39 +13,37 @@ import (
 	"anilibrary-scraper/internal/scraper/parsers"
 )
 
-var (
-	ErrUnsupportedScraper = errors.New("unsupported scraper")
-)
+var ErrSiteNotSupported = errors.New("site is not supported for scraping")
 
 type Parser interface {
-	// ImageURL method scraping image url returns empty string if none found
+	// ImageURL scrapes and returns the URL of an anime's promotional image or cover art.
 	ImageURL() string
 
-	// Title method scraping anime title and returns empty string if none found
+	// Title scrapes and returns the title of the anime.
 	Title() string
 
-	// Status method scraping current anime status
+	// Status scrapes and returns the current status of the anime (e.g., ongoing, completed).
 	Status() model.Status
 
-	// Rating method scraping current anime rating and returns parsers.MinimalAnimeRating if none found
+	// Rating scrapes and returns the current rating of the anime from a predetermined source.
 	Rating() float32
 
-	// Episodes method scraping amount of anime episodes and returns parsers.MinimalAnimeEpisodes if none found
+	// Episodes scrapes and returns the total number of episodes for the anime.
 	Episodes() string
 
-	// Genres method scraping all anime genres
+	// Genres scrapes and returns all genres associated with the anime.
 	Genres() []string
 
-	// VoiceActing method scraping all anime voice acting
+	// VoiceActing scrapes and returns the list of voice actors associated with the anime.
 	VoiceActing() []string
 
-	// Synonyms method scraping all similar anime names
+	// Synonyms scrapes and returns alternative names or titles for the anime.
 	Synonyms() []string
 
-	// Year method scraping anime year
+	// Year scrapes and returns the year the anime was released.
 	Year() int
 
-	// Type method scraping anime type
+	// Type scrapes and returns the format type of the anime (e.g., TV series, movie).
 	Type() model.Type
 }
 
@@ -66,41 +64,41 @@ func New(options ...Option) Scraper {
 }
 
 func (s Scraper) ScrapeAnime(ctx context.Context, url string) (entity.Anime, error) {
-	parser, err := s.resolveParser(ctx, url)
+	parser, err := s.scrape(ctx, url)
 	if err != nil {
-		return entity.Anime{}, fmt.Errorf("resolving parser %s: %w", url, err)
+		return entity.Anime{}, err
 	}
 
-	anime, err := s.extractData(ctx, parser)
+	anime, err := s.parse(ctx, parser)
 	if err != nil {
-		return entity.Anime{}, fmt.Errorf("parsing response %s: %w", url, err)
+		return entity.Anime{}, err
 	}
 
 	return anime.MapToDomainEntity(), nil
 }
 
-func (s Scraper) resolveParser(ctx context.Context, url string) (Parser, error) {
+func (s Scraper) scrape(ctx context.Context, url string) (Parser, error) {
 	switch {
 	case strings.Contains(url, parsers.AnimeGoURL):
 		document, err := s.config.client.HTMLDocument(ctx, url)
 		if err != nil {
-			return nil, fmt.Errorf("scraping %s: %w", url, err)
+			return nil, fmt.Errorf("fetching HTML: %w", err)
 		}
 
 		return parsers.NewAnimeGo(document), nil
 	case strings.Contains(url, parsers.AnimeVostURL):
 		document, err := s.config.client.HTMLDocument(ctx, url)
 		if err != nil {
-			return nil, fmt.Errorf("scraping %s: %w", url, err)
+			return nil, fmt.Errorf("fetching HTML: %w", err)
 		}
 
 		return parsers.NewAnimeVost(document), nil
 	default:
-		return nil, ErrUnsupportedScraper
+		return nil, ErrSiteNotSupported
 	}
 }
 
-func (s Scraper) extractData(ctx context.Context, parser Parser) (model.Anime, error) {
+func (s Scraper) parse(ctx context.Context, parser Parser) (model.Anime, error) {
 	var anime model.Anime
 
 	imageCh := make(chan struct{})
@@ -165,7 +163,7 @@ func (s Scraper) extractData(ctx context.Context, parser Parser) (model.Anime, e
 	<-imageCh
 
 	if err := anime.Validate(s.config.validator); err != nil {
-		return model.Anime{}, fmt.Errorf("validating: %w", err)
+		return model.Anime{}, fmt.Errorf("validating response data: %w", err)
 	}
 
 	return anime, nil

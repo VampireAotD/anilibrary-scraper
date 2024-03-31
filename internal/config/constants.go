@@ -1,6 +1,6 @@
 package config
 
 const (
-	Local      Environment = "local"
+	_          Environment = "local"
 	Production Environment = "production"
 )

@@ -8,12 +8,11 @@ require (
 	github.com/ansrivas/fiberprometheus/v2 v2.6.1
 	github.com/bogdanfinn/fhttp v0.5.27
 	github.com/bogdanfinn/tls-client v1.7.2
-	github.com/corpix/uarand v0.2.0
 	github.com/go-playground/validator/v10 v10.19.0
 	github.com/gofiber/contrib/fiberzap/v2 v2.1.2
 	github.com/gofiber/contrib/jwt v1.0.8
 	github.com/gofiber/contrib/otelfiber/v2 v2.0.0
-	github.com/gofiber/fiber/v2 v2.52.2
+	github.com/gofiber/fiber/v2 v2.52.4
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/prometheus/client_golang v1.19.0
 	github.com/redis/go-redis/extra/redisotel/v9 v9.0.5
@@ -50,7 +49,7 @@ require (
 	github.com/bogdanfinn/utls v1.6.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
-	github.com/cloudflare/circl v1.3.7 // indirect
+	github.com/cloudflare/circl v1.3.6 // indirect
 	github.com/containerd/containerd v1.7.12 // indirect
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/cpuguy83/dockercfg v0.3.1 // indirect
@@ -101,7 +100,7 @@ require (
 	github.com/prometheus/client_model v0.5.0 // indirect
 	github.com/prometheus/common v0.48.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
-	github.com/quic-go/quic-go v0.41.0 // indirect
+	github.com/quic-go/quic-go v0.37.4 // indirect
 	github.com/redis/go-redis/extra/rediscmd/v9 v9.0.5 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/shirou/gopsutil/v3 v3.23.12 // indirect

@@ -16,7 +16,7 @@ WORKDIR /build/cmd/app
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags '-w -s -extldflags "-static"' -o=scraper
 
 ## final stage
-FROM alpine:latest
+FROM scratch
 
 COPY --from=builder /usr/share/zoneinfo/ /usr/share/zoneinfo/
 COPY --from=builder /build/cmd/app /cmd/bin

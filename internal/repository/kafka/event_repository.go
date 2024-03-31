@@ -8,7 +8,6 @@ import (
 	"anilibrary-scraper/internal/repository/model"
 
 	"github.com/segmentio/kafka-go"
-	"go.opentelemetry.io/otel/trace"
 )
 
 type EventRepository struct {
@@ -21,22 +20,17 @@ func NewEventRepository(connection *kafka.Conn) EventRepository {
 	}
 }
 
-func (r EventRepository) Send(ctx context.Context, event model.Event) error {
-	_, span := trace.SpanFromContext(ctx).TracerProvider().Tracer("EventRepository").Start(ctx, "Send")
-	defer span.End()
-
+func (r EventRepository) Send(_ context.Context, event model.Event) error {
 	bytes, err := json.Marshal(event)
 	if err != nil {
-		span.RecordError(err)
-		return err
+		return fmt.Errorf("marshal 'event' model for Kafka: %w", err)
 	}
 
 	_, err = r.connection.WriteMessages(kafka.Message{
 		Value: bytes,
 	})
 	if err != nil {
-		span.RecordError(err)
-		return fmt.Errorf("sending event: %w", err)
+		return fmt.Errorf("send event to Kafka: %w", err)
 	}
 
 	return nil

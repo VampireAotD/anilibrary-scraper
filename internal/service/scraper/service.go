@@ -2,65 +2,74 @@ package scraper
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"anilibrary-scraper/internal/entity"
 	"anilibrary-scraper/internal/metrics"
 	"anilibrary-scraper/internal/repository/model"
 
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
-	"go.opentelemetry.io/otel/trace"
 )
 
 //go:generate mockgen -source=service.go -destination=./mocks.go -package=scraper
 type (
+	Scraper interface {
+		ScrapeAnime(ctx context.Context, url string) (entity.Anime, error)
+	}
+
 	AnimeRepository interface {
 		FindByURL(ctx context.Context, url string) (entity.Anime, error)
 		Create(ctx context.Context, anime model.Anime) error
 	}
-
-	Scraper interface {
-		ScrapeAnime(ctx context.Context, url string) (entity.Anime, error)
-	}
 )
 
 type Service struct {
-	repository AnimeRepository
-	scraper    Scraper
+	scraper         Scraper
+	cacheRepository AnimeRepository
 }
 
-func NewScraperService(repository AnimeRepository, scraper Scraper) Service {
+func NewScraperService(scraper Scraper, repository AnimeRepository) Service {
 	return Service{
-		repository: repository,
-		scraper:    scraper,
+		scraper:         scraper,
+		cacheRepository: repository,
 	}
 }
 
 func (s Service) Process(ctx context.Context, url string) (entity.Anime, error) {
-	ctx, span := trace.SpanFromContext(ctx).TracerProvider().Tracer("ScraperService").Start(ctx, "Process")
+	ctx, span := otel.Tracer("ScraperService").Start(ctx, "Process")
 	defer span.End()
 
-	span.AddEvent("Searching for scraped data in cache")
+	span.AddEvent("Searching for anime in cache")
 
-	anime, _ := s.repository.FindByURL(ctx, url)
-	if anime.Acceptable() {
+	anime, err := s.cacheRepository.FindByURL(ctx, url)
+	if err != nil {
+		if errors.Is(err, entity.ErrAnimeNotFound) {
+			// No need to record error if anime is not found in cache
+			metrics.IncrCacheMissCounter()
+		} else {
+			span.SetStatus(codes.Error, "failed to get anime from cache")
+			span.RecordError(err)
+		}
+	} else {
 		metrics.IncrCacheHitCounter()
-		span.SetStatus(codes.Ok, "anime was fetched from cache")
+		span.SetStatus(codes.Ok, "anime has been fetched from cache")
 		return anime, nil
 	}
 
 	span.AddEvent("Scraping data from url")
 
-	anime, err := s.scraper.ScrapeAnime(ctx, url)
+	anime, err = s.scraper.ScrapeAnime(ctx, url)
 	if err != nil {
+		span.SetStatus(codes.Error, "failed to scrape anime")
 		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		return entity.Anime{}, fmt.Errorf("scraping : %w", err)
+		return entity.Anime{}, fmt.Errorf("scraping anime: %w", err)
 	}
 
-	span.AddEvent("Creating cache")
+	span.AddEvent("Creating anime record in cache")
 
-	_ = s.repository.Create(ctx, model.Anime{
+	err = s.cacheRepository.Create(ctx, model.Anime{
 		URL:         url,
 		Image:       anime.Image,
 		Title:       anime.Title,
@@ -73,6 +82,10 @@ func (s Service) Process(ctx context.Context, url string) (entity.Anime, error) 
 		Year:        anime.Year,
 		Type:        anime.Type,
 	})
+	if err != nil {
+		span.SetStatus(codes.Error, "failed to create anime record in cache")
+		span.RecordError(err)
+	}
 
 	return anime, nil
 }

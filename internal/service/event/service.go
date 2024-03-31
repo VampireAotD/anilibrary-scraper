@@ -2,11 +2,13 @@ package event
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"anilibrary-scraper/internal/repository/model"
 
-	"go.opentelemetry.io/otel/trace"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/codes"
 )
 
 //go:generate mockgen -source=service.go -destination=./mocks.go -package=event
@@ -26,15 +28,22 @@ func NewService(eventRepository Repository) Service {
 }
 
 func (s Service) Send(ctx context.Context, dto DTO) error {
-	ctx, span := trace.SpanFromContext(ctx).TracerProvider().Tracer("EventService").Start(ctx, "Send")
+	ctx, span := otel.Tracer("EventService").Start(ctx, "Send")
 	defer span.End()
 
-	span.AddEvent("Sending event to ClickHouse")
+	span.AddEvent("Sending event")
 
-	return s.eventRepository.Send(ctx, model.Event{
+	err := s.eventRepository.Send(ctx, model.Event{
 		URL:       dto.URL,
 		IP:        dto.IP,
 		UserAgent: dto.UserAgent,
 		Timestamp: time.Now().Unix(),
 	})
+	if err != nil {
+		span.SetStatus(codes.Error, "failed to send event")
+		span.RecordError(err)
+		return fmt.Errorf("sending event: %w", err)
+	}
+
+	return nil
 }

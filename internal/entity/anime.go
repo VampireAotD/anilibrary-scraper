@@ -1,9 +1,14 @@
 package entity
 
+import "errors"
+
+var ErrAnimeNotFound = errors.New("anime not found")
+
 type Status string
 type Type string
 
 const (
+	_       Status = "Анонс"
 	Ongoing Status = "Онгоинг"
 	Ready   Status = "Вышел"
 
@@ -22,8 +27,4 @@ type Anime struct {
 	Synonyms    []string
 	Rating      float32
 	Year        int
-}
-
-func (a Anime) Acceptable() bool {
-	return a.Image != "" && a.Title != ""
 }

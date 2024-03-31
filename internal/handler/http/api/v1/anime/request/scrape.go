@@ -16,12 +16,12 @@ type ScrapeRequest struct {
 	URL string `json:"url" validate:"required,url"`
 }
 
-func (request *ScrapeRequest) MapAndValidate(c *fiber.Ctx, validate *validator.Validate) error {
-	if err := c.BodyParser(&request); err != nil {
+func (r *ScrapeRequest) Validate(c *fiber.Ctx, validate *validator.Validate) error {
+	if err := c.BodyParser(&r); err != nil {
 		return ErrUnableToDecodeRequest
 	}
 
-	if validate.Struct(request) != nil {
+	if validate.Struct(r) != nil {
 		return ErrInvalidURL
 	}
 

@@ -91,7 +91,7 @@ func (acs *AnimeControllerSuite) TestParse() {
 					IP:  "0.0.0.0",
 				},
 				statusCode: http.StatusUnprocessableEntity,
-				err:        scraper.ErrUnsupportedScraper,
+				err:        scraper.ErrSiteNotSupported,
 			},
 		}
 
@@ -118,7 +118,7 @@ func (acs *AnimeControllerSuite) TestParse() {
 		}
 
 		expectedEntity := entity.Anime{
-			Image:       base64.StdEncoding.EncodeToString([]byte("data:image/jpeg;base64,random")),
+			Image:       base64.StdEncoding.EncodeToString([]byte("data:image/jpeg;base64,image")),
 			Title:       "Наруто: Ураганные хроники",
 			Status:      entity.Ready,
 			Episodes:    "500",
@@ -131,7 +131,7 @@ func (acs *AnimeControllerSuite) TestParse() {
 		}
 
 		expectedResponse := response.ScrapeResponse{
-			Image:    base64.StdEncoding.EncodeToString([]byte("data:image/jpeg;base64,random")),
+			Image:    base64.StdEncoding.EncodeToString([]byte("data:image/jpeg;base64,image")),
 			Title:    "Наруто: Ураганные хроники",
 			Status:   string(entity.Ready),
 			Episodes: "500",
