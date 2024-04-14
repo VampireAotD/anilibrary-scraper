@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	"anilibrary-scraper/internal/entity"
-	"anilibrary-scraper/internal/handler/http/api/v1/anime/request"
 	"anilibrary-scraper/internal/handler/http/api/v1/anime/response"
 	"anilibrary-scraper/internal/scraper"
 	scraperUseCase "anilibrary-scraper/internal/usecase/scraper"
@@ -35,19 +34,19 @@ func TestAnimeControllerSuite(t *testing.T) {
 	suite.Run(t, new(AnimeControllerSuite))
 }
 
-func (acs *AnimeControllerSuite) SetupSuite() {
-	ctrl := gomock.NewController(acs.T())
+func (s *AnimeControllerSuite) SetupSuite() {
+	ctrl := gomock.NewController(s.T())
 	defer ctrl.Finish()
 
 	useCaseMock := NewMockScraperUseCase(ctrl)
 
-	acs.useCaseMock = useCaseMock.EXPECT()
-	acs.controller = NewController(useCaseMock, validator.New())
-	acs.router = fiber.New()
-	acs.router.Post(endpoint, acs.controller.Parse)
+	s.useCaseMock = useCaseMock.EXPECT()
+	s.controller = NewController(useCaseMock, validator.New())
+	s.router = fiber.New()
+	s.router.Post(endpoint, s.controller.Scrape)
 }
 
-func (acs *AnimeControllerSuite) sendRequest(url string) *http.Response {
+func (s *AnimeControllerSuite) sendRequest(url string) *http.Response {
 	req := httptest.NewRequest(
 		http.MethodPost,
 		endpoint,
@@ -56,57 +55,52 @@ func (acs *AnimeControllerSuite) sendRequest(url string) *http.Response {
 
 	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := acs.router.Test(req, -1)
-	acs.Require().NoError(err)
+	resp, err := s.router.Test(req, -1)
+	s.Require().NoError(err)
 
 	return resp
 }
 
-func (acs *AnimeControllerSuite) TestParse() {
+func (s *AnimeControllerSuite) TestParse() {
 	var (
-		t       = acs.T()
-		require = acs.Require()
+		t       = s.T()
+		require = s.Require()
 	)
 
 	t.Run("Bad request", func(_ *testing.T) {
 		testCases := []struct {
-			dto        scraperUseCase.DTO
-			err        error
-			name       string
-			statusCode int
+			name            string
+			URL             string
+			responseMessage string
+			statusCode      int
 		}{
 			{
-				name: "Invalid url",
-				dto: scraperUseCase.DTO{
-					URL: "",
-					IP:  "0.0.0.0",
-				},
-				statusCode: http.StatusUnprocessableEntity,
-				err:        request.ErrInvalidURL,
+				name:            "Invalid url",
+				URL:             "",
+				responseMessage: "Invalid URL",
+				statusCode:      http.StatusUnprocessableEntity,
 			},
 			{
-				name: "Unsupported url",
-				dto: scraperUseCase.DTO{
-					URL: "https://www.google.com",
-					IP:  "0.0.0.0",
-				},
-				statusCode: http.StatusUnprocessableEntity,
-				err:        scraper.ErrSiteNotSupported,
+				name:            "Unsupported url",
+				URL:             "https://www.google.com",
+				responseMessage: scraper.ErrSiteNotSupported.Error(),
+				statusCode:      http.StatusUnprocessableEntity,
 			},
 		}
 
 		for _, testCase := range testCases {
-			acs.useCaseMock.Scrape(gomock.Any(), testCase.dto).Return(entity.Anime{}, testCase.err)
+			dto := scraperUseCase.DTO{URL: testCase.URL, IP: "0.0.0.0"}
+			s.useCaseMock.Scrape(gomock.Any(), dto).Return(entity.Anime{}, scraper.ErrSiteNotSupported)
 
-			resp := acs.sendRequest(testCase.dto.URL)
+			resp := s.sendRequest(testCase.URL)
 
 			decoder := json.NewDecoder(resp.Body)
 			decoder.DisallowUnknownFields()
 
-			var err response.ErrorResponse
+			var err response.ScrapeErrorResponse
 			require.NoError(decoder.Decode(&err))
 			require.Equal(testCase.statusCode, resp.StatusCode)
-			require.Equal(testCase.err.Error(), err.Message)
+			require.Equal(testCase.responseMessage, err.Message)
 			require.NoError(resp.Body.Close())
 		}
 	})
@@ -158,8 +152,8 @@ func (acs *AnimeControllerSuite) TestParse() {
 			Type:   string(entity.Show),
 		}
 
-		acs.useCaseMock.Scrape(gomock.Any(), dto).Return(expectedEntity, nil)
-		resp := acs.sendRequest(dto.URL)
+		s.useCaseMock.Scrape(gomock.Any(), dto).Return(expectedEntity, nil)
+		resp := s.sendRequest(dto.URL)
 		defer func() {
 			require.NoError(resp.Body.Close())
 		}()

@@ -2,6 +2,7 @@ package anime
 
 import (
 	"context"
+	"errors"
 
 	"anilibrary-scraper/internal/entity"
 	"anilibrary-scraper/internal/handler/http/api/v1/anime/request"
@@ -14,7 +15,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
-	"go.uber.org/zap"
 )
 
 //go:generate mockgen -source=controller.go -destination=./mocks.go -package=anime
@@ -34,7 +34,7 @@ func NewController(useCase ScraperUseCase, validate *validator.Validate) Control
 	}
 }
 
-// Parse
+// Scrape
 //
 //	@Summary		Scrape anime data
 //	@Description	Scrape anime data
@@ -45,9 +45,10 @@ func NewController(useCase ScraperUseCase, validate *validator.Validate) Control
 //	@Param			url				body		request.ScrapeRequest	true	"Url to scrape from"
 //	@Success		200				{object}	response.ScrapeResponse
 //	@Failure		401				string		Unauthorized
-//	@Failure		422				{object}	response.ErrorResponse
-//	@Router			/anime/parse [post]
-func (c Controller) Parse(ctx *fiber.Ctx) error {
+//	@Failure		422				{object}	response.ScrapeErrorResponse
+//	@Router			/anime/scrape [post]
+func (c Controller) Scrape(ctx *fiber.Ctx) error {
+	logger := logging.FromContext(ctx.UserContext())
 	span := trace.SpanFromContext(ctx.UserContext())
 	defer span.End()
 
@@ -59,10 +60,18 @@ func (c Controller) Parse(ctx *fiber.Ctx) error {
 		span.SetStatus(codes.Error, "failed to parse HTTP request")
 		span.RecordError(err)
 
-		return ctx.Status(fiber.StatusUnprocessableEntity).JSON(response.NewErrorResponse(err))
+		if errors.Is(err, request.ErrUnableToDecodeRequest) {
+			return ctx.Status(fiber.StatusUnprocessableEntity).JSON(response.NewScrapeError("Invalid request type"))
+		}
+
+		if errors.Is(err, request.ErrInvalidURL) {
+			return ctx.Status(fiber.StatusUnprocessableEntity).JSON(response.NewScrapeError("Invalid URL"))
+		}
+
+		return ctx.Status(fiber.StatusUnprocessableEntity).JSON(response.NewScrapeError(err.Error()))
 	}
 
-	logging.Get().Info("Scraping", zap.String("url", req.URL))
+	logger.Info("Scraping", logging.String("url", req.URL))
 	span.AddEvent("Scraping anime")
 
 	anime, err := c.useCase.Scrape(ctx.UserContext(), scraper.DTO{
@@ -72,11 +81,11 @@ func (c Controller) Parse(ctx *fiber.Ctx) error {
 	})
 	if err != nil {
 		metrics.IncrHTTPErrorsCounter()
-		logging.Get().Error("Failed to scrape anime", zap.Error(err))
+		logger.Error("Failed to scrape anime", logging.Error(err))
 		span.SetStatus(codes.Error, "failed to scrape anime from HTTP request")
 		span.RecordError(err)
 
-		return ctx.Status(fiber.StatusUnprocessableEntity).JSON(response.NewErrorResponse(err))
+		return ctx.Status(fiber.StatusUnprocessableEntity).JSON(response.NewScrapeError(err.Error()))
 	}
 
 	span.AddEvent("Finished scraping")

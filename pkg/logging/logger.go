@@ -2,24 +2,18 @@ package logging
 
 import (
 	"os"
-	"sync"
 
 	"go.elastic.co/ecszap"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
-var (
-	lvl          = zap.NewAtomicLevel()
-	globalLogger *zap.Logger
-	once         sync.Once
-)
-
-// New will create a new instance of *zap.Logger with predefined encoders for log files and console output.
-// Default output is os.Stdout.
-func New(options ...Option) *zap.Logger {
+// New will create a new Logger instance with predefined encoders for log files and console output.
+// Default output is os.Stdout and default level is InfoLevel.
+func New(options ...Option) *Logger {
 	cfg := &config{
 		output: os.Stdout,
+		level:  InfoLevel,
 	}
 
 	for i := range options {
@@ -32,26 +26,33 @@ func New(options ...Option) *zap.Logger {
 		encCfg = ecszap.ECSCompatibleEncoderConfig(encCfg)
 	}
 
-	core := zapcore.NewCore(resolveEncoder(encCfg, cfg.jsonEncoder), zapcore.Lock(zapcore.AddSync(cfg.output)), lvl)
+	core := zapcore.NewCore(
+		resolveEncoder(encCfg, cfg.jsonEncoder),
+		zapcore.Lock(zapcore.AddSync(cfg.output)),
+		cfg.level,
+	)
 
 	if cfg.ecsCompatible {
 		core = ecszap.WrapCore(core)
 	}
 
-	globalLogger = zap.New(core, zap.AddCaller())
+	logger := zap.New(core, zap.AddCaller())
 
-	return globalLogger
+	if cfg.asDefault {
+		SetDefault(logger)
+	}
+
+	return logger
 }
 
-// Get will return instance of configured logger using New. If none was configured - default logger will be provided.
-func Get() *zap.Logger {
-	once.Do(func() {
-		if globalLogger == nil {
-			globalLogger = New()
-		}
-	})
+func SetDefault(logger *Logger) {
+	zap.ReplaceGlobals(logger)
+}
 
-	return globalLogger
+// Get will return instance of configured logger using New.
+// If logger wasn't configured - default logger will be provided.
+func Get() *Logger {
+	return zap.L()
 }
 
 func resolveEncoder(cfg zapcore.EncoderConfig, encodeJSON bool) zapcore.Encoder {

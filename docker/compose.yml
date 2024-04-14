@@ -100,9 +100,10 @@ services:
         condition: service_healthy
     build:
       context: ..
-      dockerfile: docker/Dockerfile
       args:
         TIMEZONE: ${TIMEZONE:-Europe/Kiev}
+      dockerfile: docker/Dockerfile
+      target: final
     container_name: anilibrary-scraper
     labels:
       co.elastic.logs/enabled: true

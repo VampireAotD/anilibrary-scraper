@@ -36,5 +36,5 @@ func RegisterAPIRoutes(params Params) {
 	animeGroup.Use(otelfiber.Middleware())
 	animeGroup.Use(params.Metrics.Middleware)
 
-	animeGroup.Post("/parse", params.AnimeController.Parse)
+	animeGroup.Post("/scrape", params.AnimeController.Scrape)
 }

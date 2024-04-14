@@ -20,7 +20,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/anime/parse": {
+        "/anime/scrape": {
             "post": {
                 "description": "Scrape anime data",
                 "consumes": [
@@ -68,7 +68,7 @@ const docTemplate = `{
                     "422": {
                         "description": "Unprocessable Entity",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/response.ScrapeErrorResponse"
                         }
                     }
                 }
@@ -95,7 +95,7 @@ const docTemplate = `{
                 }
             }
         },
-        "response.ErrorResponse": {
+        "response.ScrapeErrorResponse": {
             "type": "object",
             "properties": {
                 "message": {

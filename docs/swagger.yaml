@@ -12,7 +12,7 @@ definitions:
       name:
         type: string
     type: object
-  response.ErrorResponse:
+  response.ScrapeErrorResponse:
     properties:
       message:
         type: string
@@ -57,7 +57,7 @@ info:
   title: Anilibrary Scraper
   version: "1.0"
 paths:
-  /anime/parse:
+  /anime/scrape:
     post:
       consumes:
       - application/json
@@ -89,7 +89,7 @@ paths:
         "422":
           description: Unprocessable Entity
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/response.ScrapeErrorResponse'
       summary: Scrape anime data
       tags:
       - anime

@@ -14,7 +14,7 @@
     "host": "localhost:8080",
     "basePath": "/api/v1",
     "paths": {
-        "/anime/parse": {
+        "/anime/scrape": {
             "post": {
                 "description": "Scrape anime data",
                 "consumes": [
@@ -62,7 +62,7 @@
                     "422": {
                         "description": "Unprocessable Entity",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/response.ScrapeErrorResponse"
                         }
                     }
                 }
@@ -89,7 +89,7 @@
                 }
             }
         },
-        "response.ErrorResponse": {
+        "response.ScrapeErrorResponse": {
             "type": "object",
             "properties": {
                 "message": {

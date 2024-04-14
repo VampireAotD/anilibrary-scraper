@@ -1,12 +1,11 @@
 ## modules stage
 FROM golang:1.22-alpine AS modules
-ADD go.mod go.sum /modules/
 WORKDIR /modules
+ADD go.mod go.sum ./
 RUN go mod download
 
 ## build stage
 FROM golang:1.22-alpine AS builder
-RUN apk --no-cache add tzdata
 
 COPY --from=modules /go/pkg /go/pkg
 
@@ -16,15 +15,25 @@ WORKDIR /build/cmd/app
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags '-w -s -extldflags "-static"' -o=scraper
 
 ## final stage
-FROM scratch
+FROM alpine as final
 
-COPY --from=builder /usr/share/zoneinfo/ /usr/share/zoneinfo/
-COPY --from=builder /build/cmd/app /cmd/bin
+RUN --mount=type=cache,target=/var/cache/apk \
+    apk --update add tzdata
+
+ARG UID=10001
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --home "/nonexistent" \
+    --shell "/sbin/nologin" \
+    --no-create-home \
+    --uid "${UID}" \
+    scraper
+USER scraper
+
+COPY --from=builder /build/cmd/app /bin/
 
 ARG TIMEZONE
-
 ENV TZ=$TIMEZONE
 
-WORKDIR /cmd/bin
-
-ENTRYPOINT ["./scraper"]
+ENTRYPOINT ["/bin/scraper"]

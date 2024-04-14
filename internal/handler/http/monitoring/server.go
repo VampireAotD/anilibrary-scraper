@@ -13,10 +13,9 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/pprof"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"go.uber.org/fx"
-	"go.uber.org/zap"
 )
 
-func NewServer(cfg config.HTTP, lifecycle fx.Lifecycle) fiber.Router {
+func NewServer(lifecycle fx.Lifecycle, cfg config.HTTP) fiber.Router {
 	app := fiber.New(fiber.Config{
 		AppName: "Anilibrary Monitoring Server",
 	})
@@ -31,11 +30,11 @@ func NewServer(cfg config.HTTP, lifecycle fx.Lifecycle) fiber.Router {
 		OnStart: func(_ context.Context) error {
 			addr := net.JoinHostPort(cfg.Addr, strconv.Itoa(cfg.MonitoringPort))
 
-			logging.Get().Info("Monitoring server started at", zap.String("addr", addr))
+			logging.Get().Info("Monitoring server started at", logging.String("addr", addr))
 
 			go func() {
 				if err := app.Listen(addr); err != nil {
-					logging.Get().Error("Monitoring server failed to start", zap.Error(err))
+					logging.Get().Error("Monitoring server failed to start", logging.Error(err))
 				}
 			}()
 

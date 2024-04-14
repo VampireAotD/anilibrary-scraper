@@ -9,7 +9,7 @@ import (
 )
 
 func NewLoggerProvider(lifecycle fx.Lifecycle) error {
-	logger := logging.New(logging.ConvertToJSON(), logging.ECSCompatible())
+	logger := logging.New(logging.ConvertToJSON(), logging.ECSCompatible(), logging.AsDefault())
 
 	logger.Info("Initialized logger")
 

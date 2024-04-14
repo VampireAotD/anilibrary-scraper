@@ -18,9 +18,9 @@ linters-settings:
   errcheck:
     check-type-assertions: true
   govet:
-    check-shadowing: true
     enable:
       - fieldalignment
+      - shadow
   varnamelen:
     min-name-length: 2
     ignore-decls:

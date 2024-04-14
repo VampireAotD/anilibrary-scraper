@@ -43,3 +43,13 @@ func mapToEntries(data []string) []Entry {
 
 	return entries
 }
+
+type ScrapeErrorResponse struct {
+	Message string `json:"message"`
+}
+
+func NewScrapeError(message string) ScrapeErrorResponse {
+	return ScrapeErrorResponse{
+		Message: message,
+	}
+}
