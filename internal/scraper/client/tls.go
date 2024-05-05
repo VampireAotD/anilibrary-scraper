@@ -3,9 +3,11 @@ package client
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
-	"io"
+	"maps"
+	"strings"
 	"sync"
 
 	"github.com/PuerkitoBio/goquery"
@@ -67,34 +69,27 @@ func NewTLSClient() (TLSClient, error) {
 		client: client,
 		pool: &sync.Pool{
 			New: func() any {
-				return new(bytes.Buffer)
+				// Most of the anime covers are around 150-200KB
+				return bytes.NewBuffer(make([]byte, 0, 170<<10)) // 170KB
 			},
 		},
 	}, nil
 }
 
-func (c TLSClient) HTMLDocument(ctx context.Context, url string) (_ *goquery.Document, err error) {
+func (c TLSClient) Image(ctx context.Context, url string) (_ string, err error) {
 	response, err := c.fetch(ctx, url)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	defer func() {
-		err = errors.Join(err, response.Body.Close())
+		_ = response.Body.Close()
 	}()
 
-	return goquery.NewDocumentFromReader(response.Body)
-}
-
-func (c TLSClient) Response(ctx context.Context, url string) (_ []byte, err error) {
-	response, err := c.fetch(ctx, url)
-	if err != nil {
-		return nil, err
+	contentType := response.Header.Get("Content-Type")
+	if !strings.HasPrefix(contentType, "image/") {
+		return "", fmt.Errorf("invalid content type: %s", contentType)
 	}
-
-	defer func() {
-		err = errors.Join(err, response.Body.Close())
-	}()
 
 	buf, _ := c.pool.Get().(*bytes.Buffer)
 	defer func() {
@@ -102,12 +97,47 @@ func (c TLSClient) Response(ctx context.Context, url string) (_ []byte, err erro
 		c.pool.Put(buf)
 	}()
 
-	_, err = io.Copy(buf, response.Body)
+	length := int(response.ContentLength)
+	if length > buf.Cap() {
+		buf.Grow(length)
+	}
+
+	_, err = buf.ReadFrom(response.Body)
+	if err != nil {
+		return "", err
+	}
+
+	image := base64.StdEncoding.EncodeToString(buf.Bytes())
+
+	var builder strings.Builder
+	defer builder.Reset()
+
+	builder.Grow(5 + len(contentType) + 8 + len(image)) // 5 - "data:", 8 - ";base64,"
+
+	builder.WriteString("data:")
+	builder.WriteString(contentType)
+	builder.WriteString(";base64,")
+	builder.WriteString(image)
+
+	return builder.String(), nil
+}
+
+func (c TLSClient) HTML(ctx context.Context, url string) (_ *goquery.Document, err error) {
+	response, err := c.fetch(ctx, url)
 	if err != nil {
 		return nil, err
 	}
 
-	return buf.Bytes(), nil
+	defer func() {
+		err = errors.Join(err, response.Body.Close())
+	}()
+
+	contentType := response.Header.Get("Content-Type")
+	if !strings.HasPrefix(contentType, "text/html") {
+		return nil, fmt.Errorf("invalid content1 type: %s, expected text/html", contentType)
+	}
+
+	return goquery.NewDocumentFromReader(response.Body)
 }
 
 func (c TLSClient) fetch(ctx context.Context, url string) (*http.Response, error) {
@@ -116,8 +146,7 @@ func (c TLSClient) fetch(ctx context.Context, url string) (*http.Response, error
 		return nil, fmt.Errorf("creating request: %w", err)
 	}
 
-	request.Header = tlsClientRequestHeaders
-
+	request.Header = maps.Clone(tlsClientRequestHeaders)
 	response, err := c.client.Do(request)
 	if err != nil {
 		return nil, fmt.Errorf("sending request: %w", err)
@@ -125,7 +154,6 @@ func (c TLSClient) fetch(ctx context.Context, url string) (*http.Response, error
 
 	if response.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("bad response: %d", response.StatusCode)
-
 	}
 
 	return response, nil

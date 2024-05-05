@@ -2,19 +2,32 @@ package scraper
 
 import (
 	"context"
-	"encoding/base64"
 	"errors"
 	"fmt"
-	"net/http"
 	"strings"
+	"time"
 
 	"anilibrary-scraper/internal/entity"
+	"anilibrary-scraper/internal/metrics"
 	"anilibrary-scraper/internal/scraper/model"
 	"anilibrary-scraper/internal/scraper/parsers"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/go-playground/validator/v10"
 )
 
 var ErrSiteNotSupported = errors.New("site is not supported for scraping")
 
+// HTTPClient must be implemented by any client that will be used for scraping.
+type HTTPClient interface {
+	// Image scrapes response and returns its as string.
+	Image(ctx context.Context, url string) (string, error)
+
+	// HTML scrapes response and returns its as goquery.Document.
+	HTML(ctx context.Context, url string) (*goquery.Document, error)
+}
+
+// Parser must be implemented by any parser that will be used for scraping particular site.
 type Parser interface {
 	// ImageURL scrapes and returns the URL of an anime's promotional image or cover art.
 	ImageURL() string
@@ -48,18 +61,20 @@ type Parser interface {
 }
 
 type Scraper struct {
-	config config
+	client       HTTPClient
+	validator    *validator.Validate
+	panicHandler func()
 }
 
-func New(options ...Option) Scraper {
-	cfg := config{}
-
-	for i := range options {
-		options[i](&cfg)
-	}
-
+func New(client HTTPClient, validate *validator.Validate) Scraper {
 	return Scraper{
-		config: cfg,
+		client:    client,
+		validator: validate,
+		panicHandler: func() {
+			if err := recover(); err != nil {
+				metrics.IncrPanicCounter()
+			}
+		},
 	}
 }
 
@@ -80,14 +95,14 @@ func (s Scraper) ScrapeAnime(ctx context.Context, url string) (entity.Anime, err
 func (s Scraper) scrape(ctx context.Context, url string) (Parser, error) {
 	switch {
 	case strings.Contains(url, parsers.AnimeGoURL):
-		document, err := s.config.client.HTMLDocument(ctx, url)
+		document, err := s.client.HTML(ctx, url)
 		if err != nil {
 			return nil, fmt.Errorf("fetching HTML: %w", err)
 		}
 
 		return parsers.NewAnimeGo(document), nil
 	case strings.Contains(url, parsers.AnimeVostURL):
-		document, err := s.config.client.HTMLDocument(ctx, url)
+		document, err := s.client.HTML(ctx, url)
 		if err != nil {
 			return nil, fmt.Errorf("fetching HTML: %w", err)
 		}
@@ -103,7 +118,7 @@ func (s Scraper) parse(ctx context.Context, parser Parser) (model.Anime, error) 
 
 	imageCh := make(chan struct{})
 	parseHTML := func(extractor func()) {
-		defer s.config.panicHandler()
+		defer s.panicHandler()
 		extractor()
 	}
 
@@ -111,58 +126,31 @@ func (s Scraper) parse(ctx context.Context, parser Parser) (model.Anime, error) 
 		defer close(imageCh)
 
 		if url := parser.ImageURL(); url != "" {
-			response, err := s.config.client.Response(ctx, url)
+			imageCtx, cancel := context.WithTimeout(ctx, 1*time.Second)
+			defer cancel()
+
+			image, err := s.client.Image(imageCtx, url)
 			if err != nil {
 				return
 			}
 
-			anime.Image = fmt.Sprintf(
-				"data:%s;base64,%s",
-				http.DetectContentType(response),
-				base64.StdEncoding.EncodeToString(response),
-			)
+			anime.Image = image
 		}
 	})
 
-	parseHTML(func() {
-		anime.Title = parser.Title()
-	})
-
-	parseHTML(func() {
-		anime.Status = parser.Status()
-	})
-
-	parseHTML(func() {
-		anime.Rating = parser.Rating()
-	})
-
-	parseHTML(func() {
-		anime.Episodes = parser.Episodes()
-	})
-
-	parseHTML(func() {
-		anime.Genres = parser.Genres()
-	})
-
-	parseHTML(func() {
-		anime.VoiceActing = parser.VoiceActing()
-	})
-
-	parseHTML(func() {
-		anime.Synonyms = parser.Synonyms()
-	})
-
-	parseHTML(func() {
-		anime.Year = parser.Year()
-	})
-
-	parseHTML(func() {
-		anime.Type = parser.Type()
-	})
+	parseHTML(func() { anime.Title = parser.Title() })
+	parseHTML(func() { anime.Status = parser.Status() })
+	parseHTML(func() { anime.Rating = parser.Rating() })
+	parseHTML(func() { anime.Episodes = parser.Episodes() })
+	parseHTML(func() { anime.Genres = parser.Genres() })
+	parseHTML(func() { anime.VoiceActing = parser.VoiceActing() })
+	parseHTML(func() { anime.Synonyms = parser.Synonyms() })
+	parseHTML(func() { anime.Year = parser.Year() })
+	parseHTML(func() { anime.Type = parser.Type() })
 
 	<-imageCh
 
-	if err := anime.Validate(s.config.validator); err != nil {
+	if err := anime.Validate(s.validator); err != nil {
 		return model.Anime{}, fmt.Errorf("validating response data: %w", err)
 	}
 
