@@ -20,7 +20,6 @@ var validationPool = sync.Pool{
 type Status = entity.Status
 type Type = entity.Type
 
-// TODO to eng
 const (
 	Ongoing = entity.Ongoing
 	Ready   = entity.Ready

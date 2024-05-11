@@ -1,7 +1,6 @@
 package parsers
 
 import (
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -85,8 +84,13 @@ func (a AnimeGo) Genres() []string {
 
 func (a AnimeGo) VoiceActing() []string {
 	if voiceActingText := a.document.Find(".anime-info .row dt:contains(Озвучка) + dd").Text(); voiceActingText != "" {
-		regex := regexp.MustCompile(`,\s+`)
-		return strings.Split(regex.ReplaceAllString(voiceActingText, ","), ",")
+		voiceActing := strings.Split(voiceActingText, ",")
+
+		for i := range voiceActing {
+			voiceActing[i] = strings.TrimSpace(voiceActing[i])
+		}
+
+		return voiceActing
 	}
 
 	return nil
@@ -108,8 +112,7 @@ func (a AnimeGo) Synonyms() []string {
 
 func (a AnimeGo) Year() int {
 	if yearText := a.document.Find(".anime-info .row dt:contains(Сезон) + dd").Text(); yearText != "" {
-		regex := regexp.MustCompile(`\d{4}`)
-		year, err := strconv.Atoi(regex.FindString(yearText))
+		year, err := strconv.Atoi(yearRegex.FindString(yearText))
 		if err != nil {
 			return 0
 		}

@@ -19,6 +19,11 @@ const (
 	animeVostShortMovie string = "короткометражный фильм"
 )
 
+var (
+	animeVostEpisodesRegex = regexp.MustCompile(`\d+`)
+	animeVostSynonymsRegex = regexp.MustCompile(`/\s*(.*?)\s*\[`)
+)
+
 type AnimeVost struct {
 	document *goquery.Document
 }
@@ -68,19 +73,18 @@ func (a AnimeVost) Rating() float32 {
 }
 
 func (a AnimeVost) Episodes() string {
-	if episodesText := a.document.Find("p strong:contains(Количество)").Parent().Children().Remove().End().Text(); episodesText != "" {
-		regex := regexp.MustCompile(`^\d+`)
-		return regex.FindString(episodesText)
+	if episodesText := a.document.Find("p strong:contains(Количество)").Parent().Text(); episodesText != "" {
+		return animeVostEpisodesRegex.FindString(episodesText)
 	}
 
 	return MinimalAnimeEpisodes
 }
 
 func (a AnimeVost) Genres() []string {
-	if genres := a.document.Find("p strong:contains(Жанр)").Parent().Text(); genres != "" {
-		genres = strings.Replace(genres, "Жанр: ", "", 1)
+	if genresText := a.document.Find("p strong:contains(Жанр)").Parent().Text(); genresText != "" {
+		raw := strings.Replace(genresText, "Жанр: ", "", 1)
 
-		return strings.Split(cases.Title(language.Russian).String(genres), ", ")
+		return strings.Split(cases.Title(language.Russian).String(raw), ", ")
 	}
 
 	return nil
@@ -92,9 +96,8 @@ func (a AnimeVost) VoiceActing() []string {
 
 func (a AnimeVost) Synonyms() []string {
 	if title := a.document.Find(".shortstoryHead h1, .infoContent h3").First().Text(); title != "" {
-		regex := regexp.MustCompile(`/\s*(.*?)\s*\[`)
 		// If there is a synonym, then the correct one without any symbols will be at index 1
-		if entries := regex.FindStringSubmatch(title); len(entries) > 1 {
+		if entries := animeVostSynonymsRegex.FindStringSubmatch(title); len(entries) > 1 {
 			return []string{entries[1]}
 		}
 
@@ -106,8 +109,7 @@ func (a AnimeVost) Synonyms() []string {
 
 func (a AnimeVost) Year() int {
 	if yearText := a.document.Find("p strong:contains(Год)").Parent().Text(); yearText != "" {
-		regex := regexp.MustCompile(`\d{4}`)
-		year, err := strconv.Atoi(regex.FindString(yearText))
+		year, err := strconv.Atoi(yearRegex.FindString(yearText))
 		if err != nil {
 			return 0
 		}

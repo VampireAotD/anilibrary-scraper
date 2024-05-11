@@ -1,5 +1,7 @@
 package parsers
 
+import "regexp"
+
 // Urls to scrape
 const (
 	AnimeGoURL   string = "https://animego.org"
@@ -10,4 +12,9 @@ const (
 const (
 	MinimalAnimeRating   float32 = 0
 	MinimalAnimeEpisodes string  = "0 / ?"
+)
+
+// Common regexes for scrapers
+var (
+	yearRegex = regexp.MustCompile(`\d{4}`)
 )
