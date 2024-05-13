@@ -14,7 +14,7 @@ const (
 	MinimalAnimeEpisodes string  = "0 / ?"
 )
 
-// Common regexes for scrapers
+// Common regexes for parsers
 var (
 	yearRegex = regexp.MustCompile(`\d{4}`)
 )

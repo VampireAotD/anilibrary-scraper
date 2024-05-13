@@ -4,12 +4,12 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"unicode"
+	"unicode/utf8"
 
 	"anilibrary-scraper/internal/scraper/model"
 
 	"github.com/PuerkitoBio/goquery"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 )
 
 const (
@@ -84,7 +84,16 @@ func (a AnimeVost) Genres() []string {
 	if genresText := a.document.Find("p strong:contains(Жанр)").Parent().Text(); genresText != "" {
 		raw := strings.Replace(genresText, "Жанр: ", "", 1)
 
-		return strings.Split(cases.Title(language.Russian).String(raw), ", ")
+		genres := strings.Split(raw, ", ")
+
+		for i := range genres {
+			// Genres on AnimeVost are always in lowercase, need to make first rune in uppercase
+			letter, size := utf8.DecodeRuneInString(genres[i])
+			letterToUpper := unicode.ToUpper(letter)
+			genres[i] = string(letterToUpper) + genres[i][size:]
+		}
+
+		return genres
 	}
 
 	return nil

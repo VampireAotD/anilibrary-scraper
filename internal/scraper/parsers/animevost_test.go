@@ -27,7 +27,7 @@ func TestAnimeVost_FullHTML(t *testing.T) {
 		Title:       "Наруто Ураганные Хроники",
 		Status:      "Вышел",
 		Episodes:    "500",
-		Genres:      []string{"Приключения", "Боевые Искусства", "Сёнэн"},
+		Genres:      []string{"Приключения", "Боевые искусства", "Сёнэн"},
 		VoiceActing: []string{"AnimeVost"},
 		Synonyms:    []string{"Naruto Shippuuden"},
 		Rating:      10,
