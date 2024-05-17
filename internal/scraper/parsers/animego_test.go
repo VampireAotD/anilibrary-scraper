@@ -2,6 +2,7 @@ package parsers
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 
 	"anilibrary-scraper/internal/scraper/model"
@@ -11,7 +12,7 @@ import (
 )
 
 func TestAnimeGo_FullHTML(t *testing.T) {
-	html, err := os.Open("testdata/animego/full.html")
+	html, err := os.Open(filepath.Join("..", "testdata", "animego", "full.html"))
 	require.NoError(t, err)
 	defer func() {
 		require.NoError(t, html.Close())
@@ -52,7 +53,7 @@ func TestAnimeGo_FullHTML(t *testing.T) {
 }
 
 func TestAnimeGo_PartialHTML(t *testing.T) {
-	html, err := os.Open("testdata/animego/partial.html")
+	html, err := os.Open(filepath.Join("..", "testdata", "animego", "partial.html"))
 	require.NoError(t, err)
 	defer func() {
 		require.NoError(t, html.Close())

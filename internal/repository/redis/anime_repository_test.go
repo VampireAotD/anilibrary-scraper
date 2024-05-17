@@ -20,9 +20,9 @@ const testURL string = "https://animego.org/anime/naruto-uragannye-hroniki-103"
 type AnimeRepositorySuite struct {
 	suite.Suite
 
-	redisServer     *miniredis.Miniredis
-	animeRepository AnimeRepository
-	expectedAnime   model.Anime
+	redisServer   *miniredis.Miniredis
+	repository    AnimeRepository
+	expectedAnime model.Anime
 }
 
 func TestAnimeRepositorySuite(t *testing.T) {
@@ -34,7 +34,7 @@ func (ars *AnimeRepositorySuite) SetupSuite() {
 	defer ctrl.Finish()
 
 	ars.redisServer = miniredis.RunT(ars.T())
-	ars.animeRepository = NewAnimeRepository(
+	ars.repository = NewAnimeRepository(
 		redis.NewClient(&redis.Options{
 			Addr: ars.redisServer.Addr(),
 		}),
@@ -65,16 +65,16 @@ func (ars *AnimeRepositorySuite) TestFindByURL() {
 	)
 
 	t.Run("Not found in cache", func(_ *testing.T) {
-		anime, err := ars.animeRepository.FindByURL(context.Background(), testURL)
+		anime, err := ars.repository.FindByURL(context.Background(), testURL)
 		require.Error(err)
 		require.Zero(anime)
 	})
 
 	t.Run("Found in cache", func(_ *testing.T) {
-		err := ars.animeRepository.Create(context.Background(), ars.expectedAnime)
+		err := ars.repository.Create(context.Background(), ars.expectedAnime)
 		require.NoError(err)
 
-		anime, err := ars.animeRepository.FindByURL(context.Background(), testURL)
+		anime, err := ars.repository.FindByURL(context.Background(), testURL)
 		require.NoError(err)
 		require.NotZero(anime)
 		require.Equal(ars.expectedAnime.MapToDomainEntity(), anime)
@@ -88,7 +88,7 @@ func (ars *AnimeRepositorySuite) TestCreate() {
 	)
 
 	t.Run("With required TTL", func(_ *testing.T) {
-		err := ars.animeRepository.Create(context.Background(), ars.expectedAnime)
+		err := ars.repository.Create(context.Background(), ars.expectedAnime)
 		require.NoError(err)
 
 		ttl := ars.redisServer.TTL(testURL)

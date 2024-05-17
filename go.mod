@@ -14,6 +14,7 @@ require (
 	github.com/gofiber/contrib/otelfiber/v2 v2.1.0
 	github.com/gofiber/fiber/v2 v2.52.4
 	github.com/ilyakaznacheev/cleanenv v1.5.0
+	github.com/phuslu/lru v1.0.15
 	github.com/prometheus/client_golang v1.19.1
 	github.com/redis/go-redis/extra/redisotel/v9 v9.0.5
 	github.com/redis/go-redis/v9 v9.5.1
