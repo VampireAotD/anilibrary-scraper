@@ -88,7 +88,7 @@ func (c TLSClient) Image(ctx context.Context, url string) (_ string, err error) 
 
 	contentType := response.Header.Get("Content-Type")
 	if !strings.HasPrefix(contentType, "image/") {
-		return "", fmt.Errorf("invalid content type: %s", contentType)
+		return "", fmt.Errorf("invalid content type: %s, expected 'image/*'", contentType)
 	}
 
 	buf, _ := c.pool.Get().(*bytes.Buffer)
@@ -134,7 +134,7 @@ func (c TLSClient) HTML(ctx context.Context, url string) (_ *goquery.Document, e
 
 	contentType := response.Header.Get("Content-Type")
 	if !strings.HasPrefix(contentType, "text/html") {
-		return nil, fmt.Errorf("invalid content1 type: %s, expected text/html", contentType)
+		return nil, fmt.Errorf("invalid content type: %s, expected 'text/html'", contentType)
 	}
 
 	return goquery.NewDocumentFromReader(response.Body)

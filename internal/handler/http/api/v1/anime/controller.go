@@ -41,12 +41,12 @@ func NewController(useCase ScraperUseCase, validate *validator.Validate) Control
 //	@Tags			anime
 //	@Accept			json
 //	@Produce		json
-//	@Param			Authorization	header		string					true	"Access token"	default(Bearer)
-//	@Param			url				body		request.ScrapeRequest	true	"Url to scrape from"
-//	@Success		200				{object}	response.ScrapeResponse
-//	@Failure		401				string		Unauthorized
-//	@Failure		422				{object}	response.ScrapeErrorResponse
+//	@Param			url	body		request.ScrapeRequest	true	"Url to scrape from"
+//	@Success		200	{object}	response.ScrapeResponse
+//	@Failure		401	string		Unauthorized
+//	@Failure		422	{object}	response.ScrapeErrorResponse
 //	@Router			/anime/scrape [post]
+//	@Security		Bearer
 func (c Controller) Scrape(ctx *fiber.Ctx) error {
 	logger := logging.FromContext(ctx.UserContext())
 	span := trace.SpanFromContext(ctx.UserContext())

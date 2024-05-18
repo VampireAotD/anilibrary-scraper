@@ -63,12 +63,6 @@ paths:
       - application/json
       description: Scrape anime data
       parameters:
-      - default: Bearer
-        description: Access token
-        in: header
-        name: Authorization
-        required: true
-        type: string
       - description: Url to scrape from
         in: body
         name: url
@@ -90,7 +84,15 @@ paths:
           description: Unprocessable Entity
           schema:
             $ref: '#/definitions/response.ScrapeErrorResponse'
+      security:
+      - Bearer: []
       summary: Scrape anime data
       tags:
       - anime
+securityDefinitions:
+  Bearer:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

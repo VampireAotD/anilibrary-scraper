@@ -22,7 +22,7 @@ import (
 
 const (
 	animego   string = "https://animego.org/anime/naruto-uragannye-hroniki-103"
-	animevost string = "https://animevost.org/anime/naruto-uragannye-hroniki-103"
+	animevost string = "https://animevost.org/tip/tv/5-naruto-shippuuden12.html"
 )
 
 type ScraperSuite struct {
@@ -148,6 +148,9 @@ func (s *ScraperSuite) TestScrapeAnime() {
 					anime, err := s.scraper.ScrapeAnime(context.Background(), testCases[i%2])
 					require.NoError(err)
 					require.NotEmpty(anime)
+
+					_, exists := s.scraper.cache.Get(testCases[i%2])
+					require.True(exists)
 				}()
 			}
 
@@ -166,7 +169,7 @@ func (s *ScraperSuite) TestScrape() {
 	})
 
 	s.Run("Supported site", func() {
-		s.Run("AnimeGO", func() {
+		s.Run("AnimeGo", func() {
 			s.clientMock.HTML(context.Background(), animego).Return(&goquery.Document{}, nil)
 
 			parser, err := s.scraper.scrape(context.Background(), animego)

@@ -22,6 +22,11 @@ const docTemplate = `{
     "paths": {
         "/anime/scrape": {
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Scrape anime data",
                 "consumes": [
                     "application/json"
@@ -34,14 +39,6 @@ const docTemplate = `{
                 ],
                 "summary": "Scrape anime data",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "default": "Bearer",
-                        "description": "Access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "Url to scrape from",
                         "name": "url",
@@ -146,6 +143,14 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "Bearer": {
+            "description": "Type \"Bearer\" followed by a space and JWT token.",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`

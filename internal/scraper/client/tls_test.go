@@ -51,26 +51,23 @@ func (s *TLSClientSuite) TearDownSuite() {
 }
 
 func (s *TLSClientSuite) TestFetch() {
-	var (
-		t       = s.T()
-		require = s.Require()
-	)
+	var require = s.Require()
 
-	t.Run("HTTP status", func(t *testing.T) {
-		t.Run("OK", func(_ *testing.T) {
+	s.Run("HTTP status", func() {
+		s.Run("OK", func() {
 			response, err := s.client.fetch(context.Background(), s.mockServer.URL)
 			require.NoError(err)
 			require.NotNil(response)
 		})
 
-		t.Run("404", func(_ *testing.T) {
+		s.Run("404", func() {
 			response, err := s.client.fetch(context.Background(), s.mockServer.URL+"/404")
 			require.Error(err)
 			require.Nil(response)
 		})
 	})
 
-	t.Run("Concurrency", func(_ *testing.T) {
+	s.Run("Concurrency", func() {
 		var wg sync.WaitGroup
 
 		wg.Add(2)
@@ -94,20 +91,15 @@ func (s *TLSClientSuite) TestFetch() {
 }
 
 func (s *TLSClientSuite) TestHTML() {
-	var (
-		t       = s.T()
-		require = s.Require()
-	)
-
-	t.Run("Parsed", func(_ *testing.T) {
+	s.Run("Parsed", func() {
 		doc, err := s.client.HTML(context.Background(), s.mockServer.URL+"/html")
-		require.NoError(err)
-		require.NotNil(doc)
+		s.Require().NoError(err)
+		s.Require().NotNil(doc)
 	})
 
-	t.Run("Wrong content type", func(_ *testing.T) {
+	s.Run("Wrong content type", func() {
 		doc, err := s.client.HTML(context.Background(), s.mockServer.URL+"/404")
-		require.Error(err)
-		require.Nil(doc)
+		s.Require().Error(err)
+		s.Require().Nil(doc)
 	})
 }
