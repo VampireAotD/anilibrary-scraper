@@ -92,7 +92,7 @@ func (s *ScraperServiceSuite) TestProcess() {
 					expected: entity.Anime{
 						Image:       base64.StdEncoding.EncodeToString([]byte("data:image/png;base64,image")),
 						Title:       "Наруто: Ураганные хроники",
-						Status:      "Вышел",
+						Status:      entity.Ready,
 						Episodes:    "500",
 						Genres:      []string{"Боевые искусства", "Комедия", "Сёнэн"},
 						VoiceActing: []string{"AniDUB", "AniLibria", "SHIZA Project", "2x2"},

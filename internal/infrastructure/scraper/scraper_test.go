@@ -51,8 +51,8 @@ func (s *ScraperSuite) SetupSuite() {
 	s.scraper = New(client, validator.New())
 
 	s.testData = map[string]*goquery.Document{
-		animego:   s.loadHTML(filepath.Join("testdata", "animego", "full.html")),
-		animevost: s.loadHTML(filepath.Join("testdata", "animevost", "full.html")),
+		animego:   s.loadHTML(filepath.Join("testdata", "animego", "show.html")),
+		animevost: s.loadHTML(filepath.Join("testdata", "animevost", "show.html")),
 	}
 }
 

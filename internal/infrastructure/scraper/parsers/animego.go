@@ -24,7 +24,7 @@ func NewAnimeGo(document *goquery.Document) AnimeGo {
 }
 
 func (a AnimeGo) ImageURL() string {
-	if attr, exists := a.document.Find(".anime-poster img").First().Attr("src"); exists {
+	if attr, exists := a.document.Find(".anime-poster img").Attr("src"); exists {
 		return strings.Replace(attr, "/media/cache/thumbs_250x350", "", 1)
 	}
 
@@ -101,7 +101,7 @@ func (a AnimeGo) Synonyms() []string {
 		synonyms := make([]string, 0, synonymsList.Length())
 
 		synonymsList.Each(func(_ int, selection *goquery.Selection) {
-			synonyms = append(synonyms, selection.First().Text())
+			synonyms = append(synonyms, selection.Text())
 		})
 
 		return synonyms
@@ -111,7 +111,7 @@ func (a AnimeGo) Synonyms() []string {
 }
 
 func (a AnimeGo) Year() int {
-	if yearText := a.document.Find(".anime-info .row dt:contains(Сезон) + dd").Text(); yearText != "" {
+	if yearText := a.document.Find(".anime-info .row dt:contains(Выпуск) + dd").Text(); yearText != "" {
 		year, err := strconv.Atoi(yearRegex.FindString(yearText))
 		if err != nil {
 			return 0

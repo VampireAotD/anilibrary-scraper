@@ -1,21 +1,14 @@
 package model
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
-	"sync"
+	"strings"
 
 	"anilibrary-scraper/internal/domain/entity"
 
 	"github.com/go-playground/validator/v10"
 )
-
-var validationPool = sync.Pool{
-	New: func() any {
-		return new(bytes.Buffer)
-	},
-}
 
 type Status = entity.Status
 type Type = entity.Type
@@ -41,25 +34,25 @@ type Anime struct {
 	Year        int      `validate:"required,gt=0"`
 }
 
-func (a Anime) Validate(validate *validator.Validate) error {
+func (a *Anime) Validate(validate *validator.Validate) error {
 	if err := validate.Struct(a); err != nil {
-		if errs, ok := err.(validator.ValidationErrors); ok {
-			buf, _ := validationPool.Get().(*bytes.Buffer)
-			defer func() {
-				buf.Reset()
-				validationPool.Put(buf)
-			}()
+		var errs validator.ValidationErrors
+		if errors.As(err, &errs) {
+			var builder strings.Builder
+
+			// Total length of validation message will be 87 if all validations fail
+			builder.Grow(87)
 
 			for i := range errs {
-				buf.WriteString(errs[i].Field())
-				buf.WriteString(" - ")
-				buf.WriteString(errs[i].Tag())
+				builder.WriteString(errs[i].Field())
+				builder.WriteString(" - ")
+				builder.WriteString(errs[i].Tag())
 				if i != len(errs)-1 {
-					buf.WriteString("; ")
+					builder.WriteString("; ")
 				}
 			}
 
-			return errors.New(buf.String())
+			return errors.New(builder.String())
 		}
 
 		return fmt.Errorf("validator: %w", err)
@@ -68,7 +61,7 @@ func (a Anime) Validate(validate *validator.Validate) error {
 	return nil
 }
 
-func (a Anime) MapToDomainEntity() entity.Anime {
+func (a *Anime) MapToDomainEntity() entity.Anime {
 	return entity.Anime{
 		Image:       a.Image,
 		Title:       a.Title,

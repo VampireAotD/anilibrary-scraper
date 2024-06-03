@@ -1,11 +1,11 @@
 package client
 
 import (
-	"bytes"
 	"context"
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"io"
 	"maps"
 	"strings"
 	"sync"
@@ -69,8 +69,9 @@ func NewTLSClient() (TLSClient, error) {
 		client: client,
 		pool: &sync.Pool{
 			New: func() any {
-				// Most of the anime covers are around 150-200KB
-				return bytes.NewBuffer(make([]byte, 0, 170<<10)) // 170KB
+				var builder strings.Builder
+				builder.Grow(1024)
+				return &builder
 			},
 		},
 	}, nil
@@ -83,7 +84,7 @@ func (c TLSClient) Image(ctx context.Context, url string) (_ string, err error) 
 	}
 
 	defer func() {
-		_ = response.Body.Close()
+		err = errors.Join(err, response.Body.Close())
 	}()
 
 	contentType := response.Header.Get("Content-Type")
@@ -91,33 +92,28 @@ func (c TLSClient) Image(ctx context.Context, url string) (_ string, err error) 
 		return "", fmt.Errorf("invalid content type: %s, expected 'image/*'", contentType)
 	}
 
-	buf, _ := c.pool.Get().(*bytes.Buffer)
+	builder, _ := c.pool.Get().(*strings.Builder)
 	defer func() {
-		buf.Reset()
-		c.pool.Put(buf)
+		builder.Reset()
+		c.pool.Put(builder)
 	}()
 
-	length := int(response.ContentLength)
-	if length > buf.Cap() {
-		buf.Grow(length)
-	}
-
-	_, err = buf.ReadFrom(response.Body)
-	if err != nil {
-		return "", err
-	}
-
-	image := base64.StdEncoding.EncodeToString(buf.Bytes())
-
-	var builder strings.Builder
-	defer builder.Reset()
-
-	builder.Grow(5 + len(contentType) + 8 + len(image)) // 5 - "data:", 8 - ";base64,"
+	encodedLen := base64.StdEncoding.EncodedLen(int(response.ContentLength))
+	builder.Grow(5 + len(contentType) + 8 + encodedLen) // 5 - "data:", 8 - ";base64,"
 
 	builder.WriteString("data:")
 	builder.WriteString(contentType)
 	builder.WriteString(";base64,")
-	builder.WriteString(image)
+
+	encoder := base64.NewEncoder(base64.StdEncoding, builder)
+	defer func() {
+		err = errors.Join(err, encoder.Close())
+	}()
+
+	_, err = io.Copy(encoder, response.Body)
+	if err != nil {
+		return "", fmt.Errorf("could not encode image: %w", err)
+	}
 
 	return builder.String(), nil
 }

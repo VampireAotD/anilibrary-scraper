@@ -21,7 +21,7 @@ type Anime struct {
 	Year        int      `json:"year"`
 }
 
-func (a Anime) MapToDomainEntity() entity.Anime {
+func (a *Anime) MapToDomainEntity() entity.Anime {
 	return entity.Anime{
 		Image:       a.Image,
 		Title:       a.Title,
