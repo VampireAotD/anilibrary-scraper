@@ -33,7 +33,7 @@ linters:
     - decorder
     - errname
     - goconst
-    - exportloopref
+    - copyloopvar
     - revive
     - varnamelen
     - bodyclose
