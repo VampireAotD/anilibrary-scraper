@@ -1,6 +1,7 @@
 # Anilibrary Scraper
 
-:warning: **Currently this project is under development and is not considered stable**
+> [!WARNING]
+> **Currently this project is under development and is not considered stable**
 
 Microservice for scraping anime data.
 
