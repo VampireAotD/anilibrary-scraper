@@ -104,7 +104,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "episodes": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "genres": {
                     "type": "array",

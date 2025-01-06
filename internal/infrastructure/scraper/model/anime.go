@@ -22,16 +22,16 @@ const (
 )
 
 type Anime struct {
-	Image       string   `validate:"required"`
-	Title       string   `validate:"required"`
-	Status      Status   `validate:"required,oneof=Анонс Онгоинг Вышел"`
-	Type        Type     `validate:"required,oneof='ТВ Сериал' Фильм"`
-	Episodes    string   // validation not required
-	Genres      []string // validation not required
-	VoiceActing []string // validation not required
-	Synonyms    []string // validation not required
-	Rating      float32  `validate:"omitempty,gte=0,lte=10"`
-	Year        int      `validate:"required,gt=0"`
+	Image       string `validate:"required"`
+	Title       string `validate:"required"`
+	Status      Status `validate:"required,oneof=Анонс Онгоинг Вышел"`
+	Type        Type   `validate:"required,oneof='ТВ Сериал' Фильм"`
+	Genres      []string
+	VoiceActing []string
+	Synonyms    []string
+	Episodes    int
+	Year        int     `validate:"required,gt=0"`
+	Rating      float32 `validate:"omitempty,gte=0,lte=10"`
 }
 
 func (a *Anime) Validate(validate *validator.Validate) error {

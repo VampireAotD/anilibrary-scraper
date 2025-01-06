@@ -13,12 +13,12 @@ type ScrapeResponse struct {
 	Title       string  `json:"title"`
 	Status      string  `json:"status"`
 	Type        string  `json:"type"`
-	Episodes    string  `json:"episodes"`
 	Genres      []Entry `json:"genres"`
 	VoiceActing []Entry `json:"voiceActing"`
 	Synonyms    []Entry `json:"synonyms"`
-	Rating      float32 `json:"rating"`
+	Episodes    int     `json:"episodes"`
 	Year        int     `json:"year"`
+	Rating      float32 `json:"rating"`
 }
 
 func NewScrapeResponse(anime entity.Anime) ScrapeResponse {

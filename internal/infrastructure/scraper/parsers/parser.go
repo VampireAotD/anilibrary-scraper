@@ -10,8 +10,8 @@ const (
 
 // Default values
 const (
-	MinimalAnimeRating   float32 = 0
-	MinimalAnimeEpisodes string  = "0 / ?"
+	MinimalAnimeEpisodes int     = 0
+	MinimalAnimeRating   float32 = 0.0
 )
 
 // Common regexes for parsers

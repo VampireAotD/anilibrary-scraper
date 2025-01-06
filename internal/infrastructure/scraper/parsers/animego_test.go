@@ -27,7 +27,7 @@ func TestAnimeGoShow(t *testing.T) {
 		Title:       "Наруто: Ураганные хроники",
 		Status:      model.Ready,
 		Type:        model.Show,
-		Episodes:    "500",
+		Episodes:    500,
 		Genres:      []string{"Боевые искусства", "Комедия", "Сёнэн", "Супер сила", "Экшен"},
 		VoiceActing: []string{"AniDUB", "AniLibria", "SHIZA Project", "2x2"},
 		Synonyms:    []string{"Naruto: Shippuuden", "Naruto: Shippuden", "ナルト- 疾風伝", "Naruto Hurricane Chronicles"},

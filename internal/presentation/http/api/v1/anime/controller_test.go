@@ -115,7 +115,7 @@ func (s *AnimeControllerSuite) TestParse() {
 			Image:       base64.StdEncoding.EncodeToString([]byte("data:image/jpeg;base64,image")),
 			Title:       "Наруто: Ураганные хроники",
 			Status:      entity.Ready,
-			Episodes:    "500",
+			Episodes:    500,
 			Genres:      []string{"Боевые искусства", "Комедия", "Сёнэн", "Супер сила", "Экшен"},
 			VoiceActing: []string{"AniDUB", "AniLibria", "SHIZA Project", "2x2"},
 			Synonyms:    []string{"Naruto: Shippuden", "ナルト- 疾風伝", "Naruto Hurricane Chronicles"},
@@ -128,7 +128,7 @@ func (s *AnimeControllerSuite) TestParse() {
 			Image:    base64.StdEncoding.EncodeToString([]byte("data:image/jpeg;base64,image")),
 			Title:    "Наруто: Ураганные хроники",
 			Status:   string(entity.Ready),
-			Episodes: "500",
+			Episodes: 500,
 			Genres: []response.Entry{
 				{Name: "Боевые искусства"},
 				{Name: "Комедия"},

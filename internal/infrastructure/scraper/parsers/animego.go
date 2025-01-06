@@ -60,9 +60,14 @@ func (a AnimeGo) Rating() float32 {
 	return MinimalAnimeRating
 }
 
-func (a AnimeGo) Episodes() string {
+func (a AnimeGo) Episodes() int {
 	if episodesText := a.document.Find(".anime-info .row dt:contains(Эпизоды) + dd").Text(); episodesText != "" {
-		return episodesText
+		episodes, err := strconv.Atoi(episodesText)
+		if err != nil {
+			return MinimalAnimeEpisodes
+		}
+
+		return episodes
 	}
 
 	return MinimalAnimeEpisodes

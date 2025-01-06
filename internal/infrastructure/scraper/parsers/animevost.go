@@ -77,9 +77,14 @@ func (a AnimeVost) Rating() float32 {
 	return MinimalAnimeRating
 }
 
-func (a AnimeVost) Episodes() string {
+func (a AnimeVost) Episodes() int {
 	if episodesText := a.document.Find("p:contains(Количество)").Text(); episodesText != "" {
-		return animeVostEpisodesRegex.FindString(episodesText)
+		episodes, err := strconv.Atoi(animeVostEpisodesRegex.FindString(episodesText))
+		if err != nil {
+			return MinimalAnimeEpisodes
+		}
+
+		return episodes
 	}
 
 	return MinimalAnimeEpisodes

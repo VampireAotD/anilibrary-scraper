@@ -20,7 +20,7 @@ definitions:
   response.ScrapeResponse:
     properties:
       episodes:
-        type: string
+        type: integer
       genres:
         items:
           $ref: '#/definitions/response.Entry'

@@ -13,12 +13,12 @@ type Anime struct {
 	Title       string   `json:"title"`
 	Status      Status   `json:"status"`
 	Type        Type     `json:"type"`
-	Episodes    string   `json:"episodes"`
 	Genres      []string `json:"genres"`
 	VoiceActing []string `json:"voiceActing"`
 	Synonyms    []string `json:"synonyms"`
-	Rating      float32  `json:"rating"`
+	Episodes    int      `json:"episodes"`
 	Year        int      `json:"year"`
+	Rating      float32  `json:"rating"`
 }
 
 func (a *Anime) MapToDomainEntity() entity.Anime {

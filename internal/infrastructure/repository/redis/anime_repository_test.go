@@ -45,7 +45,7 @@ func (ars *AnimeRepositorySuite) SetupSuite() {
 		Title:    "test",
 		Status:   entity.Ready,
 		Type:     entity.Show,
-		Episodes: "120",
+		Episodes: 120,
 		Year:     time.Now().Year(),
 	}
 }

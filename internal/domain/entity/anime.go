@@ -21,10 +21,10 @@ type Anime struct {
 	Title       string
 	Status      Status
 	Type        Type
-	Episodes    string
 	Genres      []string
 	VoiceActing []string
 	Synonyms    []string
-	Rating      float32
+	Episodes    int
 	Year        int
+	Rating      float32
 }

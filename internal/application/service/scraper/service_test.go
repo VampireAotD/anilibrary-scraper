@@ -67,7 +67,7 @@ func (s *ScraperServiceSuite) TestProcess() {
 				Image:    base64.StdEncoding.EncodeToString([]byte("image")),
 				Title:    "Блич: Тысячелетняя кровавая война",
 				Status:   entity.Ready,
-				Episodes: "13",
+				Episodes: 13,
 				Rating:   9.7,
 			}
 
@@ -93,7 +93,7 @@ func (s *ScraperServiceSuite) TestProcess() {
 						Image:       base64.StdEncoding.EncodeToString([]byte("data:image/png;base64,image")),
 						Title:       "Наруто: Ураганные хроники",
 						Status:      entity.Ready,
-						Episodes:    "500",
+						Episodes:    500,
 						Genres:      []string{"Боевые искусства", "Комедия", "Сёнэн"},
 						VoiceActing: []string{"AniDUB", "AniLibria", "SHIZA Project", "2x2"},
 						Synonyms:    []string{"Naruto: Shippuuden", "Naruto: Shippuden", "ナルト- 疾風伝"},
@@ -107,7 +107,7 @@ func (s *ScraperServiceSuite) TestProcess() {
 						Image:       base64.StdEncoding.EncodeToString([]byte("data:image/png;base64,image")),
 						Title:       "Убийца Акаме! / Akame ga Kill!",
 						Status:      entity.Ready,
-						Episodes:    "24",
+						Episodes:    24,
 						Genres:      []string{"приключения", "фэнтези"},
 						VoiceActing: []string{"AnimeVost"},
 						Synonyms:    []string{"Akame ga Kill!"},

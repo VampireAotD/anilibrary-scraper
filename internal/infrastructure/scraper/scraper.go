@@ -49,7 +49,7 @@ type (
 		Rating() float32
 
 		// Episodes scrapes and returns the total number of episodes for the anime.
-		Episodes() string
+		Episodes() int
 
 		// Genres scrapes and returns all genres associated with the anime.
 		Genres() []string
