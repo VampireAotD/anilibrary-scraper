@@ -31,7 +31,21 @@ func (a AnimeGo) ImageURL() string {
 	return ""
 }
 
-func (a AnimeGo) Title() string {
+func (a AnimeGo) Parse() model.Anime {
+	return model.Anime{
+		Title:       a.title(),
+		Status:      a.status(),
+		Type:        a.animeType(),
+		Episodes:    a.episodes(),
+		Genres:      a.genres(),
+		VoiceActing: a.voiceActing(),
+		Synonyms:    a.synonyms(),
+		Rating:      a.rating(),
+		Year:        a.year(),
+	}
+}
+
+func (a AnimeGo) title() string {
 	if title := a.document.Find(".anime-title div h1").Text(); title != "" {
 		return title
 	}
@@ -39,7 +53,7 @@ func (a AnimeGo) Title() string {
 	return ""
 }
 
-func (a AnimeGo) Status() model.Status {
+func (a AnimeGo) status() model.Status {
 	if status := a.document.Find(".anime-info .row dt:contains(Статус) + dd").Text(); status != "" {
 		return model.Status(status)
 	}
@@ -47,7 +61,7 @@ func (a AnimeGo) Status() model.Status {
 	return model.Ready
 }
 
-func (a AnimeGo) Rating() float32 {
+func (a AnimeGo) rating() float32 {
 	if rating := a.document.Find(".rating-value").Text(); rating != "" {
 		value, err := strconv.ParseFloat(strings.Replace(rating, ",", ".", 1), 64)
 		if err != nil {
@@ -60,7 +74,7 @@ func (a AnimeGo) Rating() float32 {
 	return MinimalAnimeRating
 }
 
-func (a AnimeGo) Episodes() int {
+func (a AnimeGo) episodes() int {
 	if episodesText := a.document.Find(".anime-info .row dt:contains(Эпизоды) + dd").Text(); episodesText != "" {
 		episodes, err := strconv.Atoi(episodesText)
 		if err != nil {
@@ -73,7 +87,7 @@ func (a AnimeGo) Episodes() int {
 	return MinimalAnimeEpisodes
 }
 
-func (a AnimeGo) Genres() []string {
+func (a AnimeGo) genres() []string {
 	if genresText := a.document.Find(".anime-info .row dt:contains(Жанр) + dd").Text(); genresText != "" {
 		genres := strings.Split(genresText, ",")
 
@@ -87,7 +101,7 @@ func (a AnimeGo) Genres() []string {
 	return nil
 }
 
-func (a AnimeGo) VoiceActing() []string {
+func (a AnimeGo) voiceActing() []string {
 	if voiceActingText := a.document.Find(".anime-info .row dt:contains(Озвучка) + dd").Text(); voiceActingText != "" {
 		voiceActing := strings.Split(voiceActingText, ",")
 
@@ -101,7 +115,7 @@ func (a AnimeGo) VoiceActing() []string {
 	return nil
 }
 
-func (a AnimeGo) Synonyms() []string {
+func (a AnimeGo) synonyms() []string {
 	if synonymsList := a.document.Find(".synonyms ul li"); synonymsList.Length() != 0 {
 		synonyms := make([]string, 0, synonymsList.Length())
 
@@ -115,7 +129,7 @@ func (a AnimeGo) Synonyms() []string {
 	return nil
 }
 
-func (a AnimeGo) Year() int {
+func (a AnimeGo) year() int {
 	if yearText := a.document.Find(".anime-info .row dt:contains(Выпуск) + dd").Text(); yearText != "" {
 		year, err := strconv.Atoi(yearRegex.FindString(yearText))
 		if err != nil {
@@ -128,7 +142,7 @@ func (a AnimeGo) Year() int {
 	return 0
 }
 
-func (a AnimeGo) Type() model.Type {
+func (a AnimeGo) animeType() model.Type {
 	if typeText := a.document.Find(".anime-info .row dt:contains(Тип) + dd").Text(); typeText != "" {
 		switch typeText {
 		case animeGoMovie:

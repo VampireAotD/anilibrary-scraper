@@ -89,34 +89,6 @@ func (m *MockParser) EXPECT() *MockParserMockRecorder {
 	return m.recorder
 }
 
-// Episodes mocks base method.
-func (m *MockParser) Episodes() string {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Episodes")
-	ret0, _ := ret[0].(string)
-	return ret0
-}
-
-// Episodes indicates an expected call of Episodes.
-func (mr *MockParserMockRecorder) Episodes() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Episodes", reflect.TypeOf((*MockParser)(nil).Episodes))
-}
-
-// Genres mocks base method.
-func (m *MockParser) Genres() []string {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Genres")
-	ret0, _ := ret[0].([]string)
-	return ret0
-}
-
-// Genres indicates an expected call of Genres.
-func (mr *MockParserMockRecorder) Genres() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Genres", reflect.TypeOf((*MockParser)(nil).Genres))
-}
-
 // ImageURL mocks base method.
 func (m *MockParser) ImageURL() string {
 	m.ctrl.T.Helper()
@@ -131,100 +103,16 @@ func (mr *MockParserMockRecorder) ImageURL() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ImageURL", reflect.TypeOf((*MockParser)(nil).ImageURL))
 }
 
-// Rating mocks base method.
-func (m *MockParser) Rating() float32 {
+// Parse mocks base method.
+func (m *MockParser) Parse() model.Anime {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Rating")
-	ret0, _ := ret[0].(float32)
+	ret := m.ctrl.Call(m, "Parse")
+	ret0, _ := ret[0].(model.Anime)
 	return ret0
 }
 
-// Rating indicates an expected call of Rating.
-func (mr *MockParserMockRecorder) Rating() *gomock.Call {
+// Parse indicates an expected call of Parse.
+func (mr *MockParserMockRecorder) Parse() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Rating", reflect.TypeOf((*MockParser)(nil).Rating))
-}
-
-// Status mocks base method.
-func (m *MockParser) Status() model.Status {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Status")
-	ret0, _ := ret[0].(model.Status)
-	return ret0
-}
-
-// Status indicates an expected call of Status.
-func (mr *MockParserMockRecorder) Status() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Status", reflect.TypeOf((*MockParser)(nil).Status))
-}
-
-// Synonyms mocks base method.
-func (m *MockParser) Synonyms() []string {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Synonyms")
-	ret0, _ := ret[0].([]string)
-	return ret0
-}
-
-// Synonyms indicates an expected call of Synonyms.
-func (mr *MockParserMockRecorder) Synonyms() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Synonyms", reflect.TypeOf((*MockParser)(nil).Synonyms))
-}
-
-// Title mocks base method.
-func (m *MockParser) Title() string {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Title")
-	ret0, _ := ret[0].(string)
-	return ret0
-}
-
-// Title indicates an expected call of Title.
-func (mr *MockParserMockRecorder) Title() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Title", reflect.TypeOf((*MockParser)(nil).Title))
-}
-
-// Type mocks base method.
-func (m *MockParser) Type() model.Type {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Type")
-	ret0, _ := ret[0].(model.Type)
-	return ret0
-}
-
-// Type indicates an expected call of Type.
-func (mr *MockParserMockRecorder) Type() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Type", reflect.TypeOf((*MockParser)(nil).Type))
-}
-
-// VoiceActing mocks base method.
-func (m *MockParser) VoiceActing() []string {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "VoiceActing")
-	ret0, _ := ret[0].([]string)
-	return ret0
-}
-
-// VoiceActing indicates an expected call of VoiceActing.
-func (mr *MockParserMockRecorder) VoiceActing() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VoiceActing", reflect.TypeOf((*MockParser)(nil).VoiceActing))
-}
-
-// Year mocks base method.
-func (m *MockParser) Year() int {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Year")
-	ret0, _ := ret[0].(int)
-	return ret0
-}
-
-// Year indicates an expected call of Year.
-func (mr *MockParserMockRecorder) Year() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Year", reflect.TypeOf((*MockParser)(nil).Year))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Parse", reflect.TypeOf((*MockParser)(nil).Parse))
 }

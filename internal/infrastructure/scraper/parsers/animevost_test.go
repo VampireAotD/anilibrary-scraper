@@ -23,7 +23,6 @@ func TestAnimeVostShow(t *testing.T) {
 	parser := NewAnimeVost(document)
 
 	expected := model.Anime{
-		Image:       "https://animevost.org/uploads/posts/2016-06/1464842897_1.jpg",
 		Title:       "Наруто Ураганные Хроники",
 		Status:      model.Ready,
 		Episodes:    500,
@@ -35,23 +34,9 @@ func TestAnimeVostShow(t *testing.T) {
 		Type:        model.Show,
 	}
 
-	actual := model.Anime{
-		Image:       parser.ImageURL(),
-		Title:       parser.Title(),
-		Status:      parser.Status(),
-		Type:        parser.Type(),
-		Episodes:    parser.Episodes(),
-		Genres:      parser.Genres(),
-		VoiceActing: parser.VoiceActing(),
-		Synonyms:    parser.Synonyms(),
-		Rating:      parser.Rating(),
-		Year:        parser.Year(),
-	}
-
-	require.Equal(t, expected, actual)
-
-	_, err = url.Parse(actual.Image)
+	_, err = url.Parse(parser.ImageURL())
 	require.NoError(t, err)
+	require.Equal(t, expected, parser.Parse())
 }
 
 // Sometimes animevost renders a mobile layout
@@ -66,7 +51,6 @@ func TestAnimeVostMobileGrid(t *testing.T) {
 	parser := NewAnimeVost(document)
 
 	expected := model.Anime{
-		Image:       "https://animevost.org/uploads/posts/2014-08/1409038345_1.jpg",
 		Title:       "Убийца Акаме!",
 		Status:      model.Ready,
 		Episodes:    24,
@@ -78,23 +62,9 @@ func TestAnimeVostMobileGrid(t *testing.T) {
 		Type:        model.Show,
 	}
 
-	actual := model.Anime{
-		Image:       parser.ImageURL(),
-		Title:       parser.Title(),
-		Status:      parser.Status(),
-		Type:        parser.Type(),
-		Episodes:    parser.Episodes(),
-		Genres:      parser.Genres(),
-		VoiceActing: parser.VoiceActing(),
-		Synonyms:    parser.Synonyms(),
-		Rating:      parser.Rating(),
-		Year:        parser.Year(),
-	}
-
-	require.Equal(t, expected, actual)
-
-	_, err = url.Parse(actual.Image)
+	_, err = url.Parse(parser.ImageURL())
 	require.NoError(t, err)
+	require.Equal(t, expected, parser.Parse())
 }
 
 func TestAnimeVostMovie(t *testing.T) {
@@ -108,7 +78,6 @@ func TestAnimeVostMovie(t *testing.T) {
 	parser := NewAnimeVost(document)
 
 	expected := model.Anime{
-		Image:       "https://animevost.org/uploads/posts/2020-02/1581173195_1.jpg",
 		Title:       "Ван Пис: Бегство",
 		Status:      model.Ready,
 		Type:        model.Movie,
@@ -120,21 +89,7 @@ func TestAnimeVostMovie(t *testing.T) {
 		Year:        2019,
 	}
 
-	actual := model.Anime{
-		Image:       parser.ImageURL(),
-		Title:       parser.Title(),
-		Status:      parser.Status(),
-		Type:        parser.Type(),
-		Episodes:    parser.Episodes(),
-		Genres:      parser.Genres(),
-		VoiceActing: parser.VoiceActing(),
-		Synonyms:    parser.Synonyms(),
-		Rating:      parser.Rating(),
-		Year:        parser.Year(),
-	}
-
-	require.Equal(t, expected, actual)
-
-	_, err = url.Parse(actual.Image)
+	_, err = url.Parse(parser.ImageURL())
 	require.NoError(t, err)
+	require.Equal(t, expected, parser.Parse())
 }

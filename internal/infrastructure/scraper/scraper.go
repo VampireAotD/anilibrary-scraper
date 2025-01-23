@@ -34,37 +34,13 @@ type (
 		HTML(ctx context.Context, url string) (*goquery.Document, error)
 	}
 
-	// Parser must be implemented by any parser that will be used for scraping particular site.
+	// Parser must be implemented by any parser that will be used for parsing.
 	Parser interface {
 		// ImageURL scrapes and returns the URL of an anime's promotional image or cover art.
 		ImageURL() string
 
-		// Title scrapes and returns the title of the anime.
-		Title() string
-
-		// Status scrapes and returns the current status of the anime (e.g., ongoing, completed).
-		Status() model.Status
-
-		// Rating scrapes and returns the current rating of the anime from a predetermined source.
-		Rating() float32
-
-		// Episodes scrapes and returns the total number of episodes for the anime.
-		Episodes() int
-
-		// Genres scrapes and returns all genres associated with the anime.
-		Genres() []string
-
-		// VoiceActing scrapes and returns the list of voice actors associated with the anime.
-		VoiceActing() []string
-
-		// Synonyms scrapes and returns alternative names or titles for the anime.
-		Synonyms() []string
-
-		// Year scrapes and returns the year the anime was released.
-		Year() int
-
-		// Type scrapes and returns the format type of the anime (e.g., TV series, movie).
-		Type() model.Type
+		// Parse scrapes response and returns its as model.Anime.
+		Parse() model.Anime
 	}
 )
 
@@ -193,22 +169,13 @@ func (s Scraper) scrape(ctx context.Context, url string) (Parser, error) {
 func (s Scraper) parse(ctx context.Context, parser Parser) (model.Anime, error) {
 	var anime model.Anime
 
-	imageCh := make(chan struct{})
-	parseHTML := func(extractor func()) {
-		defer func() {
-			if err := recover(); err != nil {
-				metrics.IncrPanicCounter()
-			}
-		}()
+	imageCh := make(chan string)
 
-		extractor()
-	}
-
-	go parseHTML(func() {
+	go func() {
 		defer close(imageCh)
 
 		if url := parser.ImageURL(); url != "" {
-			imageCtx, cancel := context.WithTimeout(ctx, 1*time.Second)
+			imageCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
 			defer cancel()
 
 			image, err := s.client.Image(imageCtx, url)
@@ -217,21 +184,15 @@ func (s Scraper) parse(ctx context.Context, parser Parser) (model.Anime, error) 
 				return
 			}
 
-			anime.Image = image
+			imageCh <- image
 		}
-	})
+	}()
 
-	parseHTML(func() { anime.Title = parser.Title() })
-	parseHTML(func() { anime.Status = parser.Status() })
-	parseHTML(func() { anime.Rating = parser.Rating() })
-	parseHTML(func() { anime.Episodes = parser.Episodes() })
-	parseHTML(func() { anime.Genres = parser.Genres() })
-	parseHTML(func() { anime.VoiceActing = parser.VoiceActing() })
-	parseHTML(func() { anime.Synonyms = parser.Synonyms() })
-	parseHTML(func() { anime.Year = parser.Year() })
-	parseHTML(func() { anime.Type = parser.Type() })
+	anime = parser.Parse()
 
-	<-imageCh
+	if image := <-imageCh; image != "" {
+		anime.Image = image
+	}
 
 	if err := anime.Validate(s.validator); err != nil {
 		return model.Anime{}, fmt.Errorf("validating response data: %w", err)

@@ -42,7 +42,21 @@ func (a AnimeVost) ImageURL() string {
 	return ""
 }
 
-func (a AnimeVost) Title() string {
+func (a AnimeVost) Parse() model.Anime {
+	return model.Anime{
+		Title:       a.title(),
+		Status:      a.status(),
+		Type:        a.animeType(),
+		Episodes:    a.episodes(),
+		Genres:      a.genres(),
+		VoiceActing: a.voiceActing(),
+		Synonyms:    a.synonyms(),
+		Rating:      a.rating(),
+		Year:        a.year(),
+	}
+}
+
+func (a AnimeVost) title() string {
 	if title := a.document.Find(".shortstoryHead h1, .infoTitle h1").Text(); title != "" {
 		title = strings.TrimSpace(title)
 		slashIndex := strings.Index(title, " /")
@@ -56,7 +70,7 @@ func (a AnimeVost) Title() string {
 	return ""
 }
 
-func (a AnimeVost) Status() model.Status {
+func (a AnimeVost) status() model.Status {
 	if a.document.Find("#nexttime").Length() > 0 {
 		return model.Ongoing
 	}
@@ -64,7 +78,7 @@ func (a AnimeVost) Status() model.Status {
 	return model.Ready
 }
 
-func (a AnimeVost) Rating() float32 {
+func (a AnimeVost) rating() float32 {
 	if ratingText := a.document.Find(".current-rating").Text(); ratingText != "" {
 		rating, err := strconv.Atoi(ratingText)
 		if err != nil {
@@ -77,7 +91,7 @@ func (a AnimeVost) Rating() float32 {
 	return MinimalAnimeRating
 }
 
-func (a AnimeVost) Episodes() int {
+func (a AnimeVost) episodes() int {
 	if episodesText := a.document.Find("p:contains(Количество)").Text(); episodesText != "" {
 		episodes, err := strconv.Atoi(animeVostEpisodesRegex.FindString(episodesText))
 		if err != nil {
@@ -90,7 +104,7 @@ func (a AnimeVost) Episodes() int {
 	return MinimalAnimeEpisodes
 }
 
-func (a AnimeVost) Genres() []string {
+func (a AnimeVost) genres() []string {
 	if genresText := a.document.Find("p:contains(Жанр)").Text(); genresText != "" {
 		raw := strings.TrimPrefix(genresText, "Жанр: ")
 
@@ -109,11 +123,11 @@ func (a AnimeVost) Genres() []string {
 	return nil
 }
 
-func (a AnimeVost) VoiceActing() []string {
+func (a AnimeVost) voiceActing() []string {
 	return []string{"AnimeVost"}
 }
 
-func (a AnimeVost) Synonyms() []string {
+func (a AnimeVost) synonyms() []string {
 	if title := a.document.Find(".shortstoryHead h1, .infoTitle h1").Text(); title != "" {
 		// If there is a synonym, then the correct one without any symbols will be at index 1
 		if entries := animeVostSynonymsRegex.FindStringSubmatch(title); len(entries) > 1 {
@@ -126,7 +140,7 @@ func (a AnimeVost) Synonyms() []string {
 	return nil
 }
 
-func (a AnimeVost) Year() int {
+func (a AnimeVost) year() int {
 	if yearText := a.document.Find("p:contains(Год)").Text(); yearText != "" {
 		year, err := strconv.Atoi(yearRegex.FindString(yearText))
 		if err != nil {
@@ -139,7 +153,7 @@ func (a AnimeVost) Year() int {
 	return 0
 }
 
-func (a AnimeVost) Type() model.Type {
+func (a AnimeVost) animeType() model.Type {
 	if typeText := a.document.Find("p:contains(Тип)").Text(); typeText != "" {
 		animeType := strings.TrimPrefix(typeText, "Тип: ")
 

@@ -23,7 +23,6 @@ func TestAnimeGoShow(t *testing.T) {
 	parser := NewAnimeGo(document)
 
 	expected := model.Anime{
-		Image:       "https://animego.org/upload/anime/images/5a3ff73e8bd5b.jpg",
 		Title:       "Наруто: Ураганные хроники",
 		Status:      model.Ready,
 		Type:        model.Show,
@@ -35,18 +34,7 @@ func TestAnimeGoShow(t *testing.T) {
 		Rating:      9.5,
 	}
 
-	actual := model.Anime{
-		Image:       parser.ImageURL(),
-		Title:       parser.Title(),
-		Status:      parser.Status(),
-		Type:        parser.Type(),
-		Episodes:    parser.Episodes(),
-		Genres:      parser.Genres(),
-		VoiceActing: parser.VoiceActing(),
-		Synonyms:    parser.Synonyms(),
-		Rating:      parser.Rating(),
-		Year:        parser.Year(),
-	}
+	actual := parser.Parse()
 
 	require.Equal(t, expected, actual)
 
@@ -65,7 +53,6 @@ func TestAnimeGoMovie(t *testing.T) {
 	parser := NewAnimeGo(document)
 
 	expected := model.Anime{
-		Image:       "https://animego.org/upload/anime/images/5a3d312d9404a.jpg",
 		Title:       "Ван-Пис: Золото",
 		Status:      model.Ready,
 		Type:        model.Movie,
@@ -77,21 +64,7 @@ func TestAnimeGoMovie(t *testing.T) {
 		Year:        2016,
 	}
 
-	actual := model.Anime{
-		Image:       parser.ImageURL(),
-		Title:       parser.Title(),
-		Status:      parser.Status(),
-		Type:        parser.Type(),
-		Episodes:    parser.Episodes(),
-		Genres:      parser.Genres(),
-		VoiceActing: parser.VoiceActing(),
-		Synonyms:    parser.Synonyms(),
-		Rating:      parser.Rating(),
-		Year:        parser.Year(),
-	}
-
-	require.Equal(t, expected, actual)
-
-	_, err = url.Parse(actual.Image)
+	_, err = url.Parse(parser.ImageURL())
 	require.NoError(t, err)
+	require.Equal(t, expected, parser.Parse())
 }
