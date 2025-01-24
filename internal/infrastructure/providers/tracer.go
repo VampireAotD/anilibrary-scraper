@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"anilibrary-scraper/internal/infrastructure/config"
-	"anilibrary-scraper/pkg/logging"
+	"github.com/VampireAotD/anilibrary-scraper/internal/infrastructure/config"
+	"github.com/VampireAotD/anilibrary-scraper/pkg/logging"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"

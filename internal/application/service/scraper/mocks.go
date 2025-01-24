@@ -5,8 +5,8 @@
 package scraper
 
 import (
-	entity "anilibrary-scraper/internal/domain/entity"
-	model "anilibrary-scraper/internal/infrastructure/repository/model"
+	entity "github.com/VampireAotD/anilibrary-scraper/internal/domain/entity"
+	model "github.com/VampireAotD/anilibrary-scraper/internal/infrastructure/repository/model"
 	context "context"
 	reflect "reflect"
 

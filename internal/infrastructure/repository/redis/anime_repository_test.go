@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"anilibrary-scraper/internal/domain/entity"
-	"anilibrary-scraper/internal/infrastructure/repository/model"
+	"github.com/VampireAotD/anilibrary-scraper/internal/domain/entity"
+	"github.com/VampireAotD/anilibrary-scraper/internal/infrastructure/repository/model"
 
 	"github.com/alicebob/miniredis/v2"
 	"github.com/redis/go-redis/v9"

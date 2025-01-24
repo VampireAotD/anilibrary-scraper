@@ -1,7 +1,7 @@
 package model
 
 import (
-	"anilibrary-scraper/internal/domain/entity"
+	"github.com/VampireAotD/anilibrary-scraper/internal/domain/entity"
 )
 
 type Status = entity.Status

@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"anilibrary-scraper/internal/infrastructure/config"
+	"github.com/VampireAotD/anilibrary-scraper/internal/infrastructure/config"
 
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"

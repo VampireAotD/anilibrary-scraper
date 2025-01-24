@@ -5,7 +5,7 @@
 package scraper
 
 import (
-	model "anilibrary-scraper/internal/infrastructure/scraper/model"
+	model "github.com/VampireAotD/anilibrary-scraper/internal/infrastructure/scraper/model"
 	context "context"
 	reflect "reflect"
 

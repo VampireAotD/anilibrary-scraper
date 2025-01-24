@@ -5,8 +5,8 @@ import (
 	"encoding/base64"
 	"testing"
 
-	"anilibrary-scraper/internal/domain/entity"
-	"anilibrary-scraper/internal/infrastructure/scraper"
+	"github.com/VampireAotD/anilibrary-scraper/internal/domain/entity"
+	"github.com/VampireAotD/anilibrary-scraper/internal/infrastructure/scraper"
 
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/mock/gomock"

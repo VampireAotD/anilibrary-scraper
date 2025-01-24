@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"anilibrary-scraper/internal/domain/entity"
+	"github.com/VampireAotD/anilibrary-scraper/internal/domain/entity"
 
 	"github.com/go-playground/validator/v10"
 )

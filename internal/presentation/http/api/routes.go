@@ -1,10 +1,10 @@
 package api
 
 import (
-	_ "anilibrary-scraper/docs" // generated swagger docs
-	"anilibrary-scraper/internal/infrastructure/config"
-	"anilibrary-scraper/internal/presentation/http/api/v1/anime"
-	"anilibrary-scraper/internal/presentation/http/middleware"
+	_ "github.com/VampireAotD/anilibrary-scraper/docs" // generated swagger docs
+	"github.com/VampireAotD/anilibrary-scraper/internal/infrastructure/config"
+	"github.com/VampireAotD/anilibrary-scraper/internal/presentation/http/api/v1/anime"
+	"github.com/VampireAotD/anilibrary-scraper/internal/presentation/http/middleware"
 
 	"github.com/ansrivas/fiberprometheus/v2"
 	"github.com/gofiber/contrib/otelfiber/v2"

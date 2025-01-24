@@ -5,7 +5,7 @@
 package event
 
 import (
-	model "anilibrary-scraper/internal/infrastructure/repository/model"
+	model "github.com/VampireAotD/anilibrary-scraper/internal/infrastructure/repository/model"
 	context "context"
 	reflect "reflect"
 

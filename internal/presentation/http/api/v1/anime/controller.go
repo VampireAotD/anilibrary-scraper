@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 
-	"anilibrary-scraper/internal/application/usecase/scraper"
-	"anilibrary-scraper/internal/domain/entity"
-	"anilibrary-scraper/internal/infrastructure/metrics"
-	"anilibrary-scraper/internal/presentation/http/api/v1/anime/request"
-	"anilibrary-scraper/internal/presentation/http/api/v1/anime/response"
-	"anilibrary-scraper/pkg/logging"
+	"github.com/VampireAotD/anilibrary-scraper/internal/application/usecase/scraper"
+	"github.com/VampireAotD/anilibrary-scraper/internal/domain/entity"
+	"github.com/VampireAotD/anilibrary-scraper/internal/infrastructure/metrics"
+	"github.com/VampireAotD/anilibrary-scraper/internal/presentation/http/api/v1/anime/request"
+	"github.com/VampireAotD/anilibrary-scraper/internal/presentation/http/api/v1/anime/response"
+	"github.com/VampireAotD/anilibrary-scraper/pkg/logging"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"

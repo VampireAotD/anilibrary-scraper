@@ -5,8 +5,8 @@ import (
 	"net"
 	"strconv"
 
-	"anilibrary-scraper/internal/infrastructure/config"
-	"anilibrary-scraper/pkg/logging"
+	"github.com/VampireAotD/anilibrary-scraper/internal/infrastructure/config"
+	"github.com/VampireAotD/anilibrary-scraper/pkg/logging"
 
 	"github.com/gofiber/contrib/fiberzap/v2"
 	"github.com/gofiber/fiber/v2"

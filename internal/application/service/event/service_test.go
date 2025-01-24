@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"anilibrary-scraper/internal/infrastructure/repository/model"
+	"github.com/VampireAotD/anilibrary-scraper/internal/infrastructure/repository/model"
 
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/mock/gomock"

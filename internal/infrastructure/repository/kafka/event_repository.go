@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"anilibrary-scraper/internal/infrastructure/repository/model"
+	"github.com/VampireAotD/anilibrary-scraper/internal/infrastructure/repository/model"
 
 	"github.com/segmentio/kafka-go"
 )

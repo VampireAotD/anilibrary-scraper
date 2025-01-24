@@ -7,7 +7,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"anilibrary-scraper/internal/infrastructure/scraper/model"
+	"github.com/VampireAotD/anilibrary-scraper/internal/infrastructure/scraper/model"
 
 	"github.com/PuerkitoBio/goquery"
 )

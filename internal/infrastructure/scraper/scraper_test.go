@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"anilibrary-scraper/internal/domain/entity"
-	"anilibrary-scraper/internal/infrastructure/scraper/model"
-	"anilibrary-scraper/internal/infrastructure/scraper/parsers"
+	"github.com/VampireAotD/anilibrary-scraper/internal/domain/entity"
+	"github.com/VampireAotD/anilibrary-scraper/internal/infrastructure/scraper/model"
+	"github.com/VampireAotD/anilibrary-scraper/internal/infrastructure/scraper/parsers"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/go-playground/validator/v10"

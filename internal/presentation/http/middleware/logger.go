@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"anilibrary-scraper/pkg/logging"
+	"github.com/VampireAotD/anilibrary-scraper/pkg/logging"
 
 	"github.com/gofiber/fiber/v2"
 )

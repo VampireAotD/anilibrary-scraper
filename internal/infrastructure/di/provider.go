@@ -1,7 +1,7 @@
 package di
 
 import (
-	"anilibrary-scraper/internal/infrastructure/providers"
+	"github.com/VampireAotD/anilibrary-scraper/internal/infrastructure/providers"
 
 	"go.uber.org/fx"
 )

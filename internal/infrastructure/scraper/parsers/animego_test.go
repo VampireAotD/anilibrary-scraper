@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"anilibrary-scraper/internal/infrastructure/scraper/model"
+	"github.com/VampireAotD/anilibrary-scraper/internal/infrastructure/scraper/model"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/require"

@@ -1,4 +1,4 @@
-module anilibrary-scraper
+module github.com/VampireAotD/anilibrary-scraper
 
 go 1.23
 

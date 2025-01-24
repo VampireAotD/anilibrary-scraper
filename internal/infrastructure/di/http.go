@@ -1,11 +1,11 @@
 package di
 
 import (
-	"anilibrary-scraper/internal/application/usecase/scraper"
-	"anilibrary-scraper/internal/presentation/http/api"
-	"anilibrary-scraper/internal/presentation/http/api/v1/anime"
-	"anilibrary-scraper/internal/presentation/http/monitoring"
-	"anilibrary-scraper/internal/presentation/http/monitoring/healthcheck"
+	"github.com/VampireAotD/anilibrary-scraper/internal/application/usecase/scraper"
+	"github.com/VampireAotD/anilibrary-scraper/internal/presentation/http/api"
+	"github.com/VampireAotD/anilibrary-scraper/internal/presentation/http/api/v1/anime"
+	"github.com/VampireAotD/anilibrary-scraper/internal/presentation/http/monitoring"
+	"github.com/VampireAotD/anilibrary-scraper/internal/presentation/http/monitoring/healthcheck"
 
 	"github.com/ansrivas/fiberprometheus/v2"
 	"go.uber.org/fx"

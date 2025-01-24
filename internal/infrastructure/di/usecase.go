@@ -1,9 +1,9 @@
 package di
 
 import (
-	"anilibrary-scraper/internal/application/service/event"
-	scraperService "anilibrary-scraper/internal/application/service/scraper"
-	"anilibrary-scraper/internal/application/usecase/scraper"
+	"github.com/VampireAotD/anilibrary-scraper/internal/application/service/event"
+	scraperService "github.com/VampireAotD/anilibrary-scraper/internal/application/service/scraper"
+	"github.com/VampireAotD/anilibrary-scraper/internal/application/usecase/scraper"
 
 	"go.uber.org/fx"
 )

@@ -1,12 +1,12 @@
 package di
 
 import (
-	"anilibrary-scraper/internal/application/service/event"
-	scraperService "anilibrary-scraper/internal/application/service/scraper"
-	"anilibrary-scraper/internal/infrastructure/repository/kafka"
-	"anilibrary-scraper/internal/infrastructure/repository/redis"
-	"anilibrary-scraper/internal/infrastructure/scraper"
-	"anilibrary-scraper/internal/infrastructure/scraper/client"
+	"github.com/VampireAotD/anilibrary-scraper/internal/application/service/event"
+	scraperService "github.com/VampireAotD/anilibrary-scraper/internal/application/service/scraper"
+	"github.com/VampireAotD/anilibrary-scraper/internal/infrastructure/repository/kafka"
+	"github.com/VampireAotD/anilibrary-scraper/internal/infrastructure/repository/redis"
+	"github.com/VampireAotD/anilibrary-scraper/internal/infrastructure/scraper"
+	"github.com/VampireAotD/anilibrary-scraper/internal/infrastructure/scraper/client"
 
 	"go.uber.org/fx"
 )

@@ -1,7 +1,7 @@
 package response
 
 import (
-	"anilibrary-scraper/internal/domain/entity"
+	"github.com/VampireAotD/anilibrary-scraper/internal/domain/entity"
 )
 
 type Entry struct {

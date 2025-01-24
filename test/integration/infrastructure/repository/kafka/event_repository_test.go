@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	kafkaRepository "anilibrary-scraper/internal/infrastructure/repository/kafka"
-	"anilibrary-scraper/internal/infrastructure/repository/model"
+	kafkaRepository "github.com/VampireAotD/anilibrary-scraper/internal/infrastructure/repository/kafka"
+	"github.com/VampireAotD/anilibrary-scraper/internal/infrastructure/repository/model"
 
 	"github.com/segmentio/kafka-go"
 	"github.com/stretchr/testify/suite"

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"anilibrary-scraper/internal/application/service/event"
-	"anilibrary-scraper/internal/domain/entity"
+	"github.com/VampireAotD/anilibrary-scraper/internal/application/service/event"
+	"github.com/VampireAotD/anilibrary-scraper/internal/domain/entity"
 )
 
 type (

@@ -5,8 +5,8 @@
 package anime
 
 import (
-	scraper "anilibrary-scraper/internal/application/usecase/scraper"
-	entity "anilibrary-scraper/internal/domain/entity"
+	scraper "github.com/VampireAotD/anilibrary-scraper/internal/application/usecase/scraper"
+	entity "github.com/VampireAotD/anilibrary-scraper/internal/domain/entity"
 	context "context"
 	reflect "reflect"
 

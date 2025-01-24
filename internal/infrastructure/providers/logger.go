@@ -3,7 +3,7 @@ package providers
 import (
 	"context"
 
-	"anilibrary-scraper/pkg/logging"
+	"github.com/VampireAotD/anilibrary-scraper/pkg/logging"
 
 	"go.uber.org/fx"
 )

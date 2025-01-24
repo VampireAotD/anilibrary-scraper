@@ -9,10 +9,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	scraperUseCase "anilibrary-scraper/internal/application/usecase/scraper"
-	"anilibrary-scraper/internal/domain/entity"
-	"anilibrary-scraper/internal/infrastructure/scraper"
-	"anilibrary-scraper/internal/presentation/http/api/v1/anime/response"
+	scraperUseCase "github.com/VampireAotD/anilibrary-scraper/internal/application/usecase/scraper"
+	"github.com/VampireAotD/anilibrary-scraper/internal/domain/entity"
+	"github.com/VampireAotD/anilibrary-scraper/internal/infrastructure/scraper"
+	"github.com/VampireAotD/anilibrary-scraper/internal/presentation/http/api/v1/anime/response"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"

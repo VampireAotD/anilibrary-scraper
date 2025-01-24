@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"time"
 
-	"anilibrary-scraper/internal/infrastructure/config"
-	"anilibrary-scraper/internal/presentation/http/middleware"
-	"anilibrary-scraper/pkg/logging"
+	"github.com/VampireAotD/anilibrary-scraper/internal/infrastructure/config"
+	"github.com/VampireAotD/anilibrary-scraper/internal/presentation/http/middleware"
+	"github.com/VampireAotD/anilibrary-scraper/pkg/logging"
 
 	"github.com/gofiber/contrib/fiberzap/v2"
 	"github.com/gofiber/fiber/v2"

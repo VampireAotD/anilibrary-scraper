@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"anilibrary-scraper/internal/presentation/http/monitoring/healthcheck"
+	"github.com/VampireAotD/anilibrary-scraper/internal/presentation/http/monitoring/healthcheck"
 
 	"github.com/alicebob/miniredis/v2"
 	"github.com/gofiber/fiber/v2"

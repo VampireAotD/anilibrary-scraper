@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"anilibrary-scraper/internal/infrastructure/repository/model"
+	"github.com/VampireAotD/anilibrary-scraper/internal/infrastructure/repository/model"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
