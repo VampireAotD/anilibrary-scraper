@@ -6,13 +6,13 @@ jobs:
   test:
     strategy:
       matrix:
-        go-version: ['1.22']
+        go-version: ['1.23']
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - name: Install Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go-version }}
 

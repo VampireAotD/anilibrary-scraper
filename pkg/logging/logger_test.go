@@ -43,6 +43,15 @@ func TestLogger(t *testing.T) {
 		require.Equal(t, testMessage, testLog.Message)
 	})
 
+	t.Run("Logging level", func(t *testing.T) {
+		defer buff.Reset()
+
+		logger := New(WithOutput(&buff), WithLevel("info"))
+		logger.Debug(testMessage)
+
+		require.NotContains(t, buff.String(), testMessage, "Must log starting with INFO level")
+	})
+
 	t.Run("ECS support", func(t *testing.T) {
 		defer buff.Reset()
 

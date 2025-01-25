@@ -20,8 +20,13 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/anime/parse": {
+        "/anime/scrape": {
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Scrape anime data",
                 "consumes": [
                     "application/json"
@@ -34,14 +39,6 @@ const docTemplate = `{
                 ],
                 "summary": "Scrape anime data",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "default": "Bearer",
-                        "description": "Access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "Url to scrape from",
                         "name": "url",
@@ -68,7 +65,7 @@ const docTemplate = `{
                     "422": {
                         "description": "Unprocessable Entity",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/response.ScrapeErrorResponse"
                         }
                     }
                 }
@@ -95,7 +92,7 @@ const docTemplate = `{
                 }
             }
         },
-        "response.ErrorResponse": {
+        "response.ScrapeErrorResponse": {
             "type": "object",
             "properties": {
                 "message": {
@@ -107,7 +104,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "episodes": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "genres": {
                     "type": "array",
@@ -133,13 +130,27 @@ const docTemplate = `{
                 "title": {
                     "type": "string"
                 },
+                "type": {
+                    "type": "string"
+                },
                 "voiceActing": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/response.Entry"
                     }
+                },
+                "year": {
+                    "type": "integer"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "Bearer": {
+            "description": "Type \"Bearer\" followed by a space and JWT token.",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`

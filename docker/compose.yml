@@ -3,8 +3,6 @@ services:
     image: redis:${REDIS_VERSION}
     container_name: anilibrary-scraper-redis
     command: redis-server --requirepass ${REDIS_PASSWORD}
-    ports:
-      - ${REDIS_PORT:-6380}:6379
     environment:
       REDIS_REPLICATION_MODE: master
       REDIS_PASSWORD: ${REDIS_PASSWORD}
@@ -13,6 +11,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    ports:
+      - ${REDIS_PORT}:6379
     volumes:
       - redis-data:/data
     networks:
@@ -20,10 +20,10 @@ services:
 
   filebeat:
     image: elastic/filebeat:${FILEBEAT_VERSION}
-    container_name: anilibrary-scraper-filebeat
-    user: root
     profiles:
       - filebeat
+    user: root
+    container_name: anilibrary-scraper-filebeat
     command:
       - -e
       - --strict.perms=false
@@ -41,14 +41,14 @@ services:
     container_name: anilibrary-scraper-clickhouse
     env_file:
       - ../.env
-    ports:
-      - "8123:8123"
-      - "9005:9000"
     healthcheck:
       test: wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1
       interval: 5s
       timeout: 5s
       retries: 5
+    ports:
+      - ${CLICKHOUSE_HTTP_PORT}:8123
+      - ${CLICKHOUSE_TCP_PORT}:9000
     volumes:
       - clickhouse-data:/var/lib/clickhouse
       - ./clickhouse/config.xml:/etc/clickhouse-server/config.d/config.xml
@@ -86,7 +86,7 @@ services:
       timeout: 5s
       retries: 5
     ports:
-      - "9092:9092"
+      - ${KAFKA_PORT}:9092
     networks:
       - local
 
@@ -98,6 +98,12 @@ services:
         condition: service_healthy
       kafka:
         condition: service_healthy
+    build:
+      context: ..
+      args:
+        TIMEZONE: ${TIMEZONE:-Europe/Kiev}
+      dockerfile: docker/Dockerfile
+      target: final
     container_name: anilibrary-scraper
     labels:
       co.elastic.logs/enabled: true
@@ -105,11 +111,6 @@ services:
       co.elastic.logs/json.overwrite_keys: true
       co.elastic.logs/json.add_error_key: true
       co.elastic.logs/json.expand_keys: true
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-      args:
-        TIMEZONE: ${TIMEZONE:-Europe/Kiev}
     env_file:
       - ../.env
     ports:
@@ -129,4 +130,6 @@ networks:
 
 volumes:
   redis-data:
+    name: anilibrary-scraper-redis-data
   clickhouse-data:
+    name: anilibrary-scraper-clickhouse-data

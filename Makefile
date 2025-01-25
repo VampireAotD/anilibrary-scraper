@@ -13,6 +13,7 @@ install-dependencies: ## Install dependencies to create mocks, OpenAPI specs, ma
 	go install github.com/pressly/goose/v3/cmd/goose@latest;
 	go install go.uber.org/mock/mockgen@latest;
 	go install github.com/swaggo/swag/cmd/swag@latest;
+	go install github.com/evilmartians/lefthook@latest;
 
 .PHONY: install
 install: ## Install dependencies and build application.

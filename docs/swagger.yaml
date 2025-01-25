@@ -12,7 +12,7 @@ definitions:
       name:
         type: string
     type: object
-  response.ErrorResponse:
+  response.ScrapeErrorResponse:
     properties:
       message:
         type: string
@@ -20,7 +20,7 @@ definitions:
   response.ScrapeResponse:
     properties:
       episodes:
-        type: string
+        type: integer
       genres:
         items:
           $ref: '#/definitions/response.Entry'
@@ -37,10 +37,14 @@ definitions:
         type: array
       title:
         type: string
+      type:
+        type: string
       voiceActing:
         items:
           $ref: '#/definitions/response.Entry'
         type: array
+      year:
+        type: integer
     type: object
 host: localhost:8080
 info:
@@ -53,18 +57,12 @@ info:
   title: Anilibrary Scraper
   version: "1.0"
 paths:
-  /anime/parse:
+  /anime/scrape:
     post:
       consumes:
       - application/json
       description: Scrape anime data
       parameters:
-      - default: Bearer
-        description: Access token
-        in: header
-        name: Authorization
-        required: true
-        type: string
       - description: Url to scrape from
         in: body
         name: url
@@ -85,8 +83,16 @@ paths:
         "422":
           description: Unprocessable Entity
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/response.ScrapeErrorResponse'
+      security:
+      - Bearer: []
       summary: Scrape anime data
       tags:
       - anime
+securityDefinitions:
+  Bearer:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
