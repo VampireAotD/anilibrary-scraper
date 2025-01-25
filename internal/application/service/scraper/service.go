@@ -55,6 +55,7 @@ func (s Service) Process(ctx context.Context, url string) (entity.Anime, error) 
 	} else {
 		metrics.IncrCacheHitCounter()
 		span.SetStatus(codes.Ok, "anime has been fetched from cache")
+
 		return anime, nil
 	}
 
@@ -64,6 +65,7 @@ func (s Service) Process(ctx context.Context, url string) (entity.Anime, error) 
 	if err != nil {
 		span.SetStatus(codes.Error, "failed to scrape anime")
 		span.RecordError(err)
+
 		return entity.Anime{}, fmt.Errorf("scraping anime: %w", err)
 	}
 
@@ -86,6 +88,8 @@ func (s Service) Process(ctx context.Context, url string) (entity.Anime, error) 
 		span.SetStatus(codes.Error, "failed to create anime record in cache")
 		span.RecordError(err)
 	}
+
+	span.SetStatus(codes.Ok, "anime has been saved in cache")
 
 	return anime, nil
 }

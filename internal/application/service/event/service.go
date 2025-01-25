@@ -42,8 +42,11 @@ func (s Service) Send(ctx context.Context, dto DTO) error {
 	if err != nil {
 		span.SetStatus(codes.Error, "failed to send event")
 		span.RecordError(err)
+
 		return fmt.Errorf("sending event: %w", err)
 	}
+
+	span.SetStatus(codes.Ok, "event has been sent")
 
 	return nil
 }

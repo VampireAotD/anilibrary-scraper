@@ -88,8 +88,9 @@ func (c Controller) Scrape(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusUnprocessableEntity).JSON(response.NewScrapeError(err.Error()))
 	}
 
-	span.AddEvent("Finished scraping")
-
 	metrics.IncrHTTPSuccessCounter()
+	span.AddEvent("Finished scraping")
+	span.SetStatus(codes.Ok, "anime has been successfully scraped")
+
 	return ctx.JSON(response.NewScrapeResponse(anime))
 }
