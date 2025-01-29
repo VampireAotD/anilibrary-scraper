@@ -1,0 +1,37 @@
+# Define a namespace that will be used for all resources.
+namespace: ""
+
+# Define a secret store providers.
+secretStore:
+  provider:
+    pulumi:
+      organization: anilibrary
+      project: anilibrary-scraper
+      environment: production
+      accessToken:
+        secretRef:
+          name: anilibrary-scraper-access-token
+          key: ANILIBRARY_SCRAPER_ACCESS_TOKEN
+
+# Define the application settings.
+app:
+  name: ""
+  environment: production
+  deployment:
+    replicaCount: 1
+    imagePullPolicy: Always
+    image: anilibrary-scraper
+    version: latest
+    ports:
+      http: 8080
+      monitoring: 8081
+  service:
+    ports:
+      http: 80
+      monitoring: 81
+  ingress:
+    enabled: true
+    className: nginx
+    host: anilibrary-scraper.local
+    tls:
+      enabled: false

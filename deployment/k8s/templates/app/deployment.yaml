@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "app.fullname" . }}-deployment
+  namespace: {{ include "namespace" . }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.app.deployment.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "app.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "app.labels" . | nindent 8 }}
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: {{ include "app.name" . }}
+          {{- with .Values.app.deployment }}
+          image: '{{ .image }}:{{ .version }}'
+          imagePullPolicy: {{ .imagePullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "app.fullname" $ }}-config
+            - secretRef:
+                name: {{ include "app.fullname" $ }}-external-secret
+          readinessProbe:
+            httpGet:
+              path: /healthcheck
+              port: {{ .ports.monitoring }}
+            initialDelaySeconds: 5
+            periodSeconds: 30
+          livenessProbe:
+            httpGet:
+              path: /healthcheck
+              port: {{ .ports.monitoring }}
+            periodSeconds: 30
+          ports:
+            - containerPort: {{ .ports.http }}
+              protocol: TCP
+            - containerPort: {{ .ports.monitoring }}
+              protocol: TCP
+          {{- end }}

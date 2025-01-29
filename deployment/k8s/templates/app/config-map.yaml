@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "app.fullname" . }}-config
+  namespace: {{ include "namespace" . }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+data:
+  APP_ENV: "{{ .Values.app.environment }}"
+  APP_NAME: "{{ include "app.name" . }}"
+
+  HTTP_ADDR: "0.0.0.0"
+  HTTP_MAIN_PORT: "{{ .Values.app.deployment.ports.http }}"
+  HTTP_MONITORING_PORT: "{{ .Values.app.deployment.ports.monitoring }}"
+
+  TIMEZONE: "Europe/Kiev"

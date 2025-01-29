@@ -1,0 +1,26 @@
+Thank you for using {{ include "app.name" . }}.
+
+Release is named {{ .Release.Name }} and namespace is {{ include "namespace" . }}.
+
+To verify the deployment status, run:
+  kubectl get deployment {{ include "app.fullname" . }}-deployment -n {{ include "namespace" . }}
+
+To check the application logs:
+  kubectl logs -f deployment/{{ include "app.fullname" . }}-deployment -n {{ include "namespace" . }}
+
+Application endpoints:
+{{- if .Values.app.ingress.enabled }}
+  The application can be accessed via Ingress: http{{ if .Values.app.ingress.tls.enabled }}s{{ end }}://{{ .Values.app.ingress.host }}/
+{{- else }}
+  The application is accessible within the cluster at: http://{{ include "app.fullname" . }}-service.{{ include "namespace" . }}.svc.cluster.local:{{ .Values.app.service.ports.http }}
+{{- end }}
+
+For more information about the deployment, see:
+  kubectl describe deployment {{ include "app.fullname" . }}-deployment -n {{ include "namespace" . }}
+
+To uninstall the chart:
+  helm uninstall {{ .Release.Name }} -n {{ include "namespace" . }}
+
+{{- if eq .Values.app.environment "production" }}
+NOTE: This is a PRODUCTION deployment. Please ensure all security measures are in place.
+{{- end }}
