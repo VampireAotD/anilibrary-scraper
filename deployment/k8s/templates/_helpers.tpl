@@ -55,3 +55,11 @@ Selector labels
 app.kubernetes.io/name: {{ include "app.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
+
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "app.serviceAccountName" -}}
+{{- $name := printf "%s-sa" (include "app.fullname" .) }}
+{{- $name }}
+{{- end }}

@@ -6,7 +6,9 @@ metadata:
   labels:
     {{- include "app.labels" . | nindent 4 }}
 spec:
+  {{- if not .Values.app.scaledObject.enabled }}
   replicas: {{ .Values.app.deployment.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "app.selectorLabels" . | nindent 6 }}
@@ -15,6 +17,7 @@ spec:
       labels:
         {{- include "app.labels" . | nindent 8 }}
     spec:
+      serviceAccountName: {{ include "app.serviceAccountName" . }}
       restartPolicy: Always
       containers:
         - name: {{ include "app.name" . }}
@@ -26,6 +29,8 @@ spec:
                 name: {{ include "app.fullname" $ }}-config
             - secretRef:
                 name: {{ include "app.fullname" $ }}-external-secret
+          resources:
+            {{- .resources | toYaml | nindent 12 }}
           readinessProbe:
             httpGet:
               path: /healthcheck

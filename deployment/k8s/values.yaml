@@ -19,12 +19,19 @@ app:
   environment: production
   deployment:
     replicaCount: 1
-    imagePullPolicy: Always
+    imagePullPolicy: IfNotPresent
     image: anilibrary-scraper
     version: latest
     ports:
       http: 8080
       monitoring: 8081
+    resources:
+      requests:
+        cpu: 500m
+        memory: 256Mi
+      limits:
+        cpu: 2000m
+        memory: 2Gi
   service:
     ports:
       http: 80
@@ -35,3 +42,16 @@ app:
     host: anilibrary-scraper.local
     tls:
       enabled: false
+  scaledObject:
+    enabled: true
+    minReplicaCount: 1
+    maxReplicaCount: 5
+    triggers:
+      - type: cpu
+        metricType: Utilization
+        metadata:
+          value: "80"
+      - type: memory
+        metricType: Utilization
+        metadata:
+          value: "80"

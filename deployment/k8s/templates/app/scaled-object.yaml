@@ -1,0 +1,16 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ include "app.fullname" . }}-scaled-object
+  namespace: {{ include "namespace" . }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "app.fullname" . }}-deployment
+  minReplicaCount: {{ .Values.app.scaledObject.minReplicaCount }}
+  maxReplicaCount: {{ .Values.app.scaledObject.maxReplicaCount }}
+  triggers:
+    {{- .Values.app.scaledObject.triggers | toYaml | nindent 4 }}
