@@ -55,3 +55,21 @@ app:
         metricType: Utilization
         metadata:
           value: "80"
+
+# Define Bitnami Redis settings.
+redis:
+  architecture: standalone
+  auth:
+    enabled: true
+    existingSecret: "redis-password"
+  master:
+    persistence:
+      enabled: true
+      size: "5Gi"
+    resources:
+      requests:
+        cpu: 100m
+        memory: 512Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi
