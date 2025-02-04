@@ -19,8 +19,12 @@ spec:
     spec:
       serviceAccountName: {{ include "app.serviceAccountName" . }}
       restartPolicy: Always
+      securityContext:
+        {{- .Values.app.deployment.podSecurityContext | toYaml | nindent 8 }}
       containers:
         - name: {{ include "app.name" . }}
+          securityContext:
+            {{- .Values.app.deployment.securityContext | toYaml | nindent 12 }}
           {{- with .Values.app.deployment }}
           image: '{{ .image }}:{{ .version }}'
           imagePullPolicy: {{ .imagePullPolicy }}

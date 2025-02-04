@@ -1,157 +1,313 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Values",
-  "type": "object",
-  "properties": {
-    "namespace": {
-      "type": "string",
-      "description": "Namespace for all resources"
-    },
-    "secretStore": {
-      "type": "object",
-      "properties": {
-        "provider": {
-          "type": "object",
-          "properties": {
-            "pulumi": {
-              "type": "object",
-              "properties": {
-                "organization": { "type": "string" },
-                "project": { "type": "string" },
-                "environment": { "type": "string" },
-                "accessToken": {
-                  "type": "object",
-                  "properties": {
-                    "secretRef": {
-                      "type": "object",
-                      "properties": {
-                        "name": { "type": "string" },
-                        "key": { "type": "string" }
-                      },
-                      "required": ["name", "key"]
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "app": {
-      "type": "object",
-      "properties": {
-        "name": { "type": "string" },
-        "environment": {
-          "type": "string",
-          "enum": ["production", "staging", "development"]
-        },
-        "deployment": {
-          "type": "object",
-          "properties": {
-            "replicaCount": {
-              "type": "integer",
-              "minimum": 1
-            },
-            "imagePullPolicy": {
-              "type": "string",
-              "enum": ["Always", "IfNotPresent", "Never"]
-            },
-            "image": { "type": "string" },
-            "version": { "type": "string" },
-            "ports": {
-              "type": "object",
-              "properties": {
-                "http": {
-                  "type": "integer",
-                  "minimum": 1,
-                  "maximum": 65535
-                },
-                "monitoring": {
-                  "type": "integer",
-                  "minimum": 1,
-                  "maximum": 65535
-                }
-              }
-            },
-            "resources": {
-              "type": "object",
-              "properties": {
-                "requests": {
-                  "type": "object",
-                  "properties": {
-                    "cpu": { "type": "string" },
-                    "memory": { "type": "string" }
-                  }
-                },
-                "limits": {
-                  "type": "object",
-                  "properties": {
-                    "cpu": { "type": "string" },
-                    "memory": { "type": "string" }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "service": {
-          "type": "object",
-          "properties": {
-            "ports": {
-              "type": "object",
-              "properties": {
-                "http": { "type": "integer" },
-                "monitoring": { "type": "integer" }
-              }
-            }
-          }
-        },
-        "ingress": {
-          "type": "object",
-          "properties": {
-            "enabled": { "type": "boolean" },
-            "className": { "type": "string" },
-            "host": { "type": "string" },
-            "tls": {
-              "type": "object",
-              "properties": {
-                "enabled": { "type": "boolean" }
-              }
-            }
-          }
-        },
-        "scaledObject": {
-          "type": "object",
-          "properties": {
-            "enabled": { "type": "boolean" },
-            "minReplicaCount": { "type": "integer" },
-            "maxReplicaCount": { "type": "integer" },
-            "triggers": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "enum": ["cpu", "memory"]
-                  },
-                  "metricType": {
-                    "type": "string",
-                    "enum": ["Utilization"]
-                  },
-                  "metadata": {
-                    "type": "object",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "properties": {
+        "app": {
+            "properties": {
+                "deployment": {
                     "properties": {
-                      "value": { "type": "string" }
-                    }
-                  }
+                        "image": {
+                            "type": "string"
+                        },
+                        "imagePullPolicy": {
+                            "type": "string"
+                        },
+                        "podSecurityContext": {
+                            "properties": {
+                                "fsGroup": {
+                                    "type": "integer"
+                                },
+                                "fsGroupChangePolicy": {
+                                    "type": "string"
+                                },
+                                "runAsGroup": {
+                                    "type": "integer"
+                                },
+                                "runAsUser": {
+                                    "type": "integer"
+                                },
+                                "seccompProfile": {
+                                    "properties": {
+                                        "type": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "ports": {
+                            "properties": {
+                                "http": {
+                                    "type": "integer"
+                                },
+                                "monitoring": {
+                                    "type": "integer"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "replicaCount": {
+                            "type": "integer"
+                        },
+                        "resources": {
+                            "properties": {
+                                "limits": {
+                                    "properties": {
+                                        "cpu": {
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "requests": {
+                                    "properties": {
+                                        "cpu": {
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "securityContext": {
+                            "properties": {
+                                "allowPrivilegeEscalation": {
+                                    "type": "boolean"
+                                },
+                                "capabilities": {
+                                    "properties": {
+                                        "drop": {
+                                            "items": {
+                                                "type": "string"
+                                            },
+                                            "type": "array"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "privileged": {
+                                    "type": "boolean"
+                                },
+                                "readOnlyRootFilesystem": {
+                                    "type": "boolean"
+                                },
+                                "runAsNonRoot": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "version": {
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                "environment": {
+                    "type": "string"
+                },
+                "ingress": {
+                    "properties": {
+                        "className": {
+                            "type": "string"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "host": {
+                            "type": "string"
+                        },
+                        "tls": {
+                            "properties": {
+                                "enabled": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "type": "object"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "podDisruptionBudget": {
+                    "properties": {
+                        "minAvailable": {
+                            "type": "integer"
+                        }
+                    },
+                    "type": "object"
+                },
+                "scaledObject": {
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "maxReplicaCount": {
+                            "type": "integer"
+                        },
+                        "minReplicaCount": {
+                            "type": "integer"
+                        },
+                        "triggers": {
+                            "items": {
+                                "properties": {
+                                    "metadata": {
+                                        "properties": {
+                                            "value": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    "metricType": {
+                                        "type": "string"
+                                    },
+                                    "type": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            },
+                            "type": "array"
+                        }
+                    },
+                    "type": "object"
+                },
+                "service": {
+                    "properties": {
+                        "ports": {
+                            "properties": {
+                                "http": {
+                                    "type": "integer"
+                                },
+                                "monitoring": {
+                                    "type": "integer"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "type": "object"
                 }
-              }
-            }
-          }
+            },
+            "type": "object"
+        },
+        "namespace": {
+            "type": "string"
+        },
+        "redis": {
+            "properties": {
+                "architecture": {
+                    "type": "string"
+                },
+                "auth": {
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "existingSecret": {
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                "master": {
+                    "properties": {
+                        "persistence": {
+                            "properties": {
+                                "enabled": {
+                                    "type": "boolean"
+                                },
+                                "size": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "resources": {
+                            "properties": {
+                                "limits": {
+                                    "properties": {
+                                        "cpu": {
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "requests": {
+                                    "properties": {
+                                        "cpu": {
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "type": "object"
+                }
+            },
+            "type": "object"
+        },
+        "secretStore": {
+            "properties": {
+                "provider": {
+                    "properties": {
+                        "pulumi": {
+                            "properties": {
+                                "accessToken": {
+                                    "properties": {
+                                        "secretRef": {
+                                            "properties": {
+                                                "key": {
+                                                    "type": "string"
+                                                },
+                                                "name": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "environment": {
+                                    "type": "string"
+                                },
+                                "organization": {
+                                    "type": "string"
+                                },
+                                "project": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "type": "object"
+                }
+            },
+            "type": "object"
         }
-      }
-    }
-  }
+    },
+    "title": "Values",
+    "type": "object"
 }
