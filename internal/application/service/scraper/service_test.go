@@ -1,7 +1,6 @@
 package scraper
 
 import (
-	"context"
 	"encoding/base64"
 	"testing"
 
@@ -39,12 +38,9 @@ func (s *ScraperServiceSuite) SetupSuite() {
 }
 
 func (s *ScraperServiceSuite) TestProcess() {
-	var (
-		t       = s.T()
-		require = s.Require()
-	)
+	var require = s.Require()
 
-	t.Run("Unsupported sites", func(_ *testing.T) {
+	s.T().Run("Unsupported sites", func(t *testing.T) {
 		testCases := []string{
 			"",
 			"https://google.com",
@@ -54,14 +50,14 @@ func (s *ScraperServiceSuite) TestProcess() {
 			s.repositoryMock.FindByURL(gomock.Any(), testCase).Return(entity.Anime{}, entity.ErrAnimeNotFound)
 			s.scraperMock.ScrapeAnime(gomock.Any(), testCase).Return(entity.Anime{}, scraper.ErrSiteNotSupported)
 
-			anime, err := s.service.Process(context.Background(), testCase)
+			anime, err := s.service.Process(t.Context(), testCase)
 			require.Empty(anime)
 			require.ErrorIs(err, scraper.ErrSiteNotSupported)
 		}
 	})
 
-	t.Run("Supported sites", func(t *testing.T) {
-		t.Run("Cache hit", func(_ *testing.T) {
+	s.T().Run("Supported sites", func(t *testing.T) {
+		t.Run("Cache hit", func(t *testing.T) {
 			const url string = "https://animego.org/anime/blich-tysyacheletnyaya-krovavaya-voyna-2129"
 			anime := entity.Anime{
 				Image:    base64.StdEncoding.EncodeToString([]byte("image")),
@@ -73,7 +69,7 @@ func (s *ScraperServiceSuite) TestProcess() {
 
 			s.repositoryMock.FindByURL(gomock.Any(), url).Return(anime, nil)
 
-			result, err := s.service.Process(context.Background(), url)
+			result, err := s.service.Process(t.Context(), url)
 
 			require.NoError(err)
 			require.NotEmpty(result)
@@ -124,7 +120,7 @@ func (s *ScraperServiceSuite) TestProcess() {
 					s.scraperMock.ScrapeAnime(gomock.Any(), testCases[i].url).Return(testCases[i].expected, nil)
 					s.repositoryMock.Create(gomock.Any(), gomock.Any()).Return(nil)
 
-					anime, err := s.service.Process(context.Background(), testCases[i].url)
+					anime, err := s.service.Process(t.Context(), testCases[i].url)
 
 					require.NoError(err)
 					require.NotEmpty(anime)

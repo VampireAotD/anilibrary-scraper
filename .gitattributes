@@ -1,0 +1,7 @@
+* text=auto eol=lf
+
+*.go      diff=go
+*.html    diff=html
+*.md      diff=markdown
+
+.github   export-ignore

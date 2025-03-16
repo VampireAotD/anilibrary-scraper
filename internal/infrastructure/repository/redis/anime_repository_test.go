@@ -1,7 +1,6 @@
 package redis
 
 import (
-	"context"
 	"encoding/base64"
 	"testing"
 	"time"
@@ -29,17 +28,17 @@ func TestAnimeRepositorySuite(t *testing.T) {
 	suite.Run(t, new(AnimeRepositorySuite))
 }
 
-func (ars *AnimeRepositorySuite) SetupSuite() {
-	ctrl := gomock.NewController(ars.T())
+func (s *AnimeRepositorySuite) SetupSuite() {
+	ctrl := gomock.NewController(s.T())
 	defer ctrl.Finish()
 
-	ars.redisServer = miniredis.RunT(ars.T())
-	ars.repository = NewAnimeRepository(
+	s.redisServer = miniredis.RunT(s.T())
+	s.repository = NewAnimeRepository(
 		redis.NewClient(&redis.Options{
-			Addr: ars.redisServer.Addr(),
+			Addr: s.redisServer.Addr(),
 		}),
 	)
-	ars.expectedAnime = model.Anime{
+	s.expectedAnime = model.Anime{
 		URL:      testURL,
 		Image:    base64.StdEncoding.EncodeToString([]byte("data:image/png;base64,image")),
 		Title:    "test",
@@ -50,48 +49,42 @@ func (ars *AnimeRepositorySuite) SetupSuite() {
 	}
 }
 
-func (ars *AnimeRepositorySuite) TearDownTest() {
-	ars.redisServer.Del(testURL)
+func (s *AnimeRepositorySuite) TearDownTest() {
+	s.redisServer.Del(testURL)
 }
 
-func (ars *AnimeRepositorySuite) TearDownSuite() {
-	ars.redisServer.Close()
+func (s *AnimeRepositorySuite) TearDownSuite() {
+	s.redisServer.Close()
 }
 
-func (ars *AnimeRepositorySuite) TestFindByURL() {
-	var (
-		t       = ars.T()
-		require = ars.Require()
-	)
+func (s *AnimeRepositorySuite) TestFindByURL() {
+	var require = s.Require()
 
-	t.Run("Not found in cache", func(_ *testing.T) {
-		anime, err := ars.repository.FindByURL(context.Background(), testURL)
+	s.T().Run("Not found in cache", func(t *testing.T) {
+		anime, err := s.repository.FindByURL(t.Context(), testURL)
 		require.Error(err)
 		require.Zero(anime)
 	})
 
-	t.Run("Found in cache", func(_ *testing.T) {
-		err := ars.repository.Create(context.Background(), ars.expectedAnime)
+	s.T().Run("Found in cache", func(t *testing.T) {
+		err := s.repository.Create(t.Context(), s.expectedAnime)
 		require.NoError(err)
 
-		anime, err := ars.repository.FindByURL(context.Background(), testURL)
+		anime, err := s.repository.FindByURL(t.Context(), testURL)
 		require.NoError(err)
 		require.NotZero(anime)
-		require.Equal(ars.expectedAnime.MapToDomainEntity(), anime)
+		require.Equal(s.expectedAnime.MapToDomainEntity(), anime)
 	})
 }
 
-func (ars *AnimeRepositorySuite) TestCreate() {
-	var (
-		t       = ars.T()
-		require = ars.Require()
-	)
+func (s *AnimeRepositorySuite) TestCreate() {
+	var require = s.Require()
 
-	t.Run("With required TTL", func(_ *testing.T) {
-		err := ars.repository.Create(context.Background(), ars.expectedAnime)
+	s.T().Run("With required TTL", func(t *testing.T) {
+		err := s.repository.Create(t.Context(), s.expectedAnime)
 		require.NoError(err)
 
-		ttl := ars.redisServer.TTL(testURL)
+		ttl := s.redisServer.TTL(testURL)
 		expectedTTL, err := time.ParseDuration(sevenDaysInHours)
 		require.NoError(err)
 		require.Equal(expectedTTL, ttl)

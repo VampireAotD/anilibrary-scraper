@@ -50,7 +50,7 @@ linters:
     - unparam
     - wastedassign
     - nolintlint
-    - tenv
+    - usetesting
     - tparallel
     - usestdlibvars
 
