@@ -16,8 +16,8 @@ require (
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/phuslu/lru v1.0.18
 	github.com/prometheus/client_golang v1.21.1
-	github.com/redis/go-redis/extra/redisotel/v9 v9.7.1
-	github.com/redis/go-redis/v9 v9.7.1
+	github.com/redis/go-redis/extra/redisotel/v9 v9.7.3
+	github.com/redis/go-redis/v9 v9.7.3
 	github.com/segmentio/kafka-go v0.4.47
 	github.com/stretchr/testify v1.10.0
 	github.com/swaggo/fiber-swagger v1.3.0
@@ -101,7 +101,7 @@ require (
 	github.com/prometheus/common v0.62.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/quic-go/quic-go v0.48.1 // indirect
-	github.com/redis/go-redis/extra/rediscmd/v9 v9.7.1 // indirect
+	github.com/redis/go-redis/extra/rediscmd/v9 v9.7.3 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/shirou/gopsutil/v3 v3.23.12 // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect

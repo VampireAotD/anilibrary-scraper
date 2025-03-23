@@ -11,22 +11,22 @@ import (
 )
 
 type EventRepository struct {
-	connection *kafka.Conn
+	writer *kafka.Writer
 }
 
-func NewEventRepository(connection *kafka.Conn) EventRepository {
+func NewEventRepository(writer *kafka.Writer) EventRepository {
 	return EventRepository{
-		connection: connection,
+		writer: writer,
 	}
 }
 
-func (r EventRepository) Send(_ context.Context, event model.Event) error {
+func (r EventRepository) Send(ctx context.Context, event model.Event) error {
 	bytes, err := json.Marshal(event)
 	if err != nil {
 		return fmt.Errorf("marshal 'event' model for Kafka: %w", err)
 	}
 
-	_, err = r.connection.WriteMessages(kafka.Message{
+	err = r.writer.WriteMessages(ctx, kafka.Message{
 		Value: bytes,
 	})
 	if err != nil {

@@ -1,4 +1,4 @@
-ARG KAFKA_VERSION=latest
+ARG KAFKA_VERSION=3.9.0
 
 FROM bitnami/kafka:$KAFKA_VERSION
 

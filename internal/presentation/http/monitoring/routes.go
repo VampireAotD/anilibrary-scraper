@@ -10,10 +10,9 @@ import (
 
 type Params struct {
 	fx.In
-
+	HealthcheckHandler healthcheck.Controller
 	Router             fiber.Router `name:"monitoring-server"`
 	Metrics            *fiberprometheus.FiberPrometheus
-	HealthcheckHandler healthcheck.Controller
 }
 
 func RegisterMetricsRoutes(params Params) {

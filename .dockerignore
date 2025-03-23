@@ -5,11 +5,13 @@
 **/.vs
 **/.vscode
 **/docker
+**/.dockerignore
 **/.env
 **/.env.example
-**/.dockerignore
+**/.gitattributes
 **/.gitignore
 **/.golangci.yml
+**/lefthook.yml
 **/LICENSE
 **/Makefile
 **/README.md

@@ -3,7 +3,6 @@
 package kafka
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -28,16 +27,13 @@ func TestEventRepositorySuite(t *testing.T) {
 	suite.Run(t, new(EventRepositorySuite))
 }
 
-func (ers *EventRepositorySuite) SetupSuite() {
-	ctrl := gomock.NewController(ers.T())
+func (s *EventRepositorySuite) SetupSuite() {
+	ctrl := gomock.NewController(s.T())
 	defer ctrl.Finish()
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*2)
-	defer cancel()
-
-	kafkaContainer, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
+	kafkaContainer, err := testcontainers.GenericContainer(s.T().Context(), testcontainers.GenericContainerRequest{
 		ContainerRequest: testcontainers.ContainerRequest{
-			Image: "bitnami/kafka",
+			Image: "bitnami/kafka:3.9.0",
 			ExposedPorts: []string{
 				"9092:9092/tcp",
 			},
@@ -50,38 +46,63 @@ func (ers *EventRepositorySuite) SetupSuite() {
 				"KAFKA_CFG_CONTROLLER_QUORUM_VOTERS":       "1@localhost:9093",
 				"KAFKA_CFG_LISTENERS":                      "PLAINTEXT://:9092,CONTROLLER://:9093",
 				"KAFKA_CFG_ADVERTISED_LISTENERS":           "PLAINTEXT://localhost:9092",
+				"KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE":      "true",
 			},
 			WaitingFor: wait.ForListeningPort("9092/tcp").
-				WithPollInterval(time.Millisecond * 100).
+				WithPollInterval(250 * time.Millisecond).
 				WithStartupTimeout(time.Minute),
 		},
 		Started: true,
 	})
-	ers.Require().NoError(err)
+	s.Require().NoError(err)
 
-	ip, err := kafkaContainer.ContainerIP(ctx)
-	ers.Require().NoError(err)
+	ip, err := kafkaContainer.ContainerIP(s.T().Context())
+	s.Require().NoError(err)
 
-	conn, err := kafka.DialLeader(ctx, "tcp", ip+":9092", "test_topic", 0)
-	ers.Require().NoError(err)
+	topicName := "test_topic"
 
-	ers.kafkaContainer = kafkaContainer
-	ers.eventRepository = kafkaRepository.NewEventRepository(conn)
+	// To fix https://github.com/segmentio/kafka-go/issues/683
+	conn, err := kafka.Dial("tcp", ip+":9092")
+	s.Require().NoError(err)
+	defer func() {
+		s.Require().NoError(conn.Close())
+	}()
+
+	topicConfigs := []kafka.TopicConfig{
+		{
+			Topic:             topicName,
+			NumPartitions:     1,
+			ReplicationFactor: 1,
+		},
+	}
+
+	err = conn.CreateTopics(topicConfigs...)
+	s.Require().NoError(err)
+
+	writer := &kafka.Writer{
+		Addr:                   kafka.TCP(ip + ":9092"),
+		Topic:                  topicName,
+		Balancer:               &kafka.LeastBytes{},
+		AllowAutoTopicCreation: true,
+	}
+
+	s.kafkaContainer = kafkaContainer
+	s.eventRepository = kafkaRepository.NewEventRepository(writer)
 }
 
-func (ers *EventRepositorySuite) TearDownSuite() {
-	ers.Require().NoError(ers.kafkaContainer.Stop(context.Background(), nil))
-	ers.Require().NoError(ers.kafkaContainer.Terminate(context.Background()))
+func (s *EventRepositorySuite) TearDownSuite() {
+	s.Require().NoError(s.kafkaContainer.Stop(s.T().Context(), nil))
+	s.Require().NoError(s.kafkaContainer.Terminate(s.T().Context()))
 }
 
-func (ers *EventRepositorySuite) TestSend() {
+func (s *EventRepositorySuite) TestSend() {
 	const testURL string = "https://google.com/"
 
-	err := ers.eventRepository.Send(context.Background(), model.Event{
+	err := s.eventRepository.Send(s.T().Context(), model.Event{
 		URL:       testURL,
 		Timestamp: time.Now().Unix(),
 		IP:        "0.0.0.0",
 		UserAgent: "Mozilla/5.0",
 	})
-	ers.Require().NoError(err)
+	s.Require().NoError(err)
 }

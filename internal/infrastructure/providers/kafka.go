@@ -12,19 +12,23 @@ import (
 	"go.uber.org/fx"
 )
 
-func NewKafkaProvider(lifecycle fx.Lifecycle, cfg config.Kafka) (*kafka.Conn, error) {
+func NewKafkaProvider(lifecycle fx.Lifecycle, cfg config.Kafka) (*kafka.Writer, error) {
 	mechanism, err := scram.Mechanism(scram.SHA512, cfg.Username, cfg.Password)
 	if err != nil {
 		return nil, fmt.Errorf("creating scram mechanism: %w", err)
 	}
 
-	dialer := &kafka.Dialer{
-		SASLMechanism: mechanism,
+	transport := &kafka.Transport{
+		SASL: mechanism,
 	}
 
-	conn, err := dialer.DialLeader(context.Background(), "tcp", cfg.Address, cfg.Topic, cfg.Partition)
-	if err != nil {
-		return nil, fmt.Errorf("connecting to kafka: %w", err)
+	writer := &kafka.Writer{
+		Addr:                   kafka.TCP(cfg.Address),
+		Topic:                  cfg.Topic,
+		Balancer:               &kafka.LeastBytes{},
+		Transport:              transport,
+		AllowAutoTopicCreation: true,
+		BatchTimeout:           cfg.BatchTimeout,
 	}
 
 	logging.Get().Info("Connected to Kafka")
@@ -32,10 +36,9 @@ func NewKafkaProvider(lifecycle fx.Lifecycle, cfg config.Kafka) (*kafka.Conn, er
 	lifecycle.Append(fx.Hook{
 		OnStop: func(_ context.Context) error {
 			logging.Get().Info("Closing Kafka connection")
-
-			return conn.Close()
+			return writer.Close()
 		},
 	})
 
-	return conn, nil
+	return writer, nil
 }

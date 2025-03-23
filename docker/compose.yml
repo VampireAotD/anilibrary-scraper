@@ -122,7 +122,7 @@ services:
 
 networks:
   local:
-    name: local
+    name: anilibrary-scraper-local
     driver: bridge
   shared:
     name: anilibrary
