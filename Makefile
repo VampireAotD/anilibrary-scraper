@@ -27,7 +27,10 @@ filebeat: ## Start application with Filebeat.
 	$(compose) -f docker/compose.yml --profile filebeat up --build
 
 down: ## Stop application.
-	$(compose) -f docker/compose.yml down
+	$(compose) -f docker/compose.yml down --remove-orphans
+
+generate: ## Generate mocks.
+	go generate ./...
 
 test: ## Run unit tests.
 	go test -v ./... -race -cover -count=1

@@ -6,29 +6,26 @@ import (
 
 	"github.com/VampireAotD/anilibrary-scraper/internal/infrastructure/config"
 	"github.com/VampireAotD/anilibrary-scraper/pkg/logging"
-
-	"github.com/segmentio/kafka-go"
-	"github.com/segmentio/kafka-go/sasl/scram"
+	"github.com/twmb/franz-go/pkg/kgo"
+	"github.com/twmb/franz-go/pkg/sasl/scram"
 	"go.uber.org/fx"
 )
 
-func NewKafkaProvider(lifecycle fx.Lifecycle, cfg config.Kafka) (*kafka.Writer, error) {
-	mechanism, err := scram.Mechanism(scram.SHA512, cfg.Username, cfg.Password)
+func NewKafkaProvider(lifecycle fx.Lifecycle, cfg config.Kafka) (*kgo.Client, error) {
+	auth := scram.Auth{
+		User: cfg.Username,
+		Pass: cfg.Password,
+	}
+
+	client, err := kgo.NewClient(
+		kgo.SeedBrokers(cfg.Address),
+		kgo.SASL(auth.AsSha512Mechanism()),
+		kgo.DefaultProduceTopic(cfg.Topic),
+		kgo.ProducerBatchMaxBytes(1024*1024),
+		kgo.AllowAutoTopicCreation(),
+	)
 	if err != nil {
-		return nil, fmt.Errorf("creating scram mechanism: %w", err)
-	}
-
-	transport := &kafka.Transport{
-		SASL: mechanism,
-	}
-
-	writer := &kafka.Writer{
-		Addr:                   kafka.TCP(cfg.Address),
-		Topic:                  cfg.Topic,
-		Balancer:               &kafka.LeastBytes{},
-		Transport:              transport,
-		AllowAutoTopicCreation: true,
-		BatchTimeout:           cfg.BatchTimeout,
+		return nil, fmt.Errorf("creating Kafka client: %w", err)
 	}
 
 	logging.Get().Info("Connected to Kafka")
@@ -36,9 +33,10 @@ func NewKafkaProvider(lifecycle fx.Lifecycle, cfg config.Kafka) (*kafka.Writer, 
 	lifecycle.Append(fx.Hook{
 		OnStop: func(_ context.Context) error {
 			logging.Get().Info("Closing Kafka connection")
-			return writer.Close()
+			client.Close()
+			return nil
 		},
 	})
 
-	return writer, nil
+	return client, nil
 }

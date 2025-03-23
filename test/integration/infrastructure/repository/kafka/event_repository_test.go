@@ -8,8 +8,8 @@ import (
 
 	kafkaRepository "github.com/VampireAotD/anilibrary-scraper/internal/infrastructure/repository/kafka"
 	"github.com/VampireAotD/anilibrary-scraper/internal/infrastructure/repository/model"
+	"github.com/twmb/franz-go/pkg/kgo"
 
-	"github.com/segmentio/kafka-go"
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
@@ -20,6 +20,7 @@ type EventRepositorySuite struct {
 	suite.Suite
 
 	kafkaContainer  testcontainers.Container
+	client          *kgo.Client
 	eventRepository kafkaRepository.EventRepository
 }
 
@@ -59,38 +60,21 @@ func (s *EventRepositorySuite) SetupSuite() {
 	ip, err := kafkaContainer.ContainerIP(s.T().Context())
 	s.Require().NoError(err)
 
-	topicName := "test_topic"
-
-	// To fix https://github.com/segmentio/kafka-go/issues/683
-	conn, err := kafka.Dial("tcp", ip+":9092")
+	client, err := kgo.NewClient(
+		kgo.SeedBrokers(ip+":9092"),
+		kgo.DefaultProduceTopic("test_topic"),
+		kgo.ProducerBatchMaxBytes(1024*1024),
+		kgo.AllowAutoTopicCreation(),
+	)
 	s.Require().NoError(err)
-	defer func() {
-		s.Require().NoError(conn.Close())
-	}()
-
-	topicConfigs := []kafka.TopicConfig{
-		{
-			Topic:             topicName,
-			NumPartitions:     1,
-			ReplicationFactor: 1,
-		},
-	}
-
-	err = conn.CreateTopics(topicConfigs...)
-	s.Require().NoError(err)
-
-	writer := &kafka.Writer{
-		Addr:                   kafka.TCP(ip + ":9092"),
-		Topic:                  topicName,
-		Balancer:               &kafka.LeastBytes{},
-		AllowAutoTopicCreation: true,
-	}
 
 	s.kafkaContainer = kafkaContainer
-	s.eventRepository = kafkaRepository.NewEventRepository(writer)
+	s.client = client
+	s.eventRepository = kafkaRepository.NewEventRepository(s.client)
 }
 
 func (s *EventRepositorySuite) TearDownSuite() {
+	s.client.Close()
 	s.Require().NoError(s.kafkaContainer.Stop(s.T().Context(), nil))
 	s.Require().NoError(s.kafkaContainer.Terminate(s.T().Context()))
 }

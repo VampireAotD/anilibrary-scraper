@@ -6,17 +6,16 @@ import (
 	"fmt"
 
 	"github.com/VampireAotD/anilibrary-scraper/internal/infrastructure/repository/model"
-
-	"github.com/segmentio/kafka-go"
+	"github.com/twmb/franz-go/pkg/kgo"
 )
 
 type EventRepository struct {
-	writer *kafka.Writer
+	client *kgo.Client
 }
 
-func NewEventRepository(writer *kafka.Writer) EventRepository {
+func NewEventRepository(client *kgo.Client) EventRepository {
 	return EventRepository{
-		writer: writer,
+		client: client,
 	}
 }
 
@@ -26,9 +25,11 @@ func (r EventRepository) Send(ctx context.Context, event model.Event) error {
 		return fmt.Errorf("marshal 'event' model for Kafka: %w", err)
 	}
 
-	err = r.writer.WriteMessages(ctx, kafka.Message{
+	record := &kgo.Record{
 		Value: bytes,
-	})
+	}
+
+	err = r.client.ProduceSync(ctx, record).FirstErr()
 	if err != nil {
 		return fmt.Errorf("send event to Kafka: %w", err)
 	}
