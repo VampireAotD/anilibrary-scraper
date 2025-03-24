@@ -13,14 +13,13 @@ import (
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
-	"go.uber.org/mock/gomock"
 )
 
 type EventRepositorySuite struct {
 	suite.Suite
 
-	kafkaContainer  testcontainers.Container
 	client          *kgo.Client
+	container       testcontainers.Container
 	eventRepository kafkaRepository.EventRepository
 }
 
@@ -29,9 +28,6 @@ func TestEventRepositorySuite(t *testing.T) {
 }
 
 func (s *EventRepositorySuite) SetupSuite() {
-	ctrl := gomock.NewController(s.T())
-	defer ctrl.Finish()
-
 	kafkaContainer, err := testcontainers.GenericContainer(s.T().Context(), testcontainers.GenericContainerRequest{
 		ContainerRequest: testcontainers.ContainerRequest{
 			Image: "bitnami/kafka:3.9.0",
@@ -68,15 +64,14 @@ func (s *EventRepositorySuite) SetupSuite() {
 	)
 	s.Require().NoError(err)
 
-	s.kafkaContainer = kafkaContainer
 	s.client = client
+	s.container = kafkaContainer
 	s.eventRepository = kafkaRepository.NewEventRepository(s.client)
 }
 
 func (s *EventRepositorySuite) TearDownSuite() {
 	s.client.Close()
-	s.Require().NoError(s.kafkaContainer.Stop(s.T().Context(), nil))
-	s.Require().NoError(s.kafkaContainer.Terminate(s.T().Context()))
+	s.Require().NoError(s.container.Terminate(s.T().Context()))
 }
 
 func (s *EventRepositorySuite) TestSend() {

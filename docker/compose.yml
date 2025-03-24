@@ -18,47 +18,6 @@ services:
     networks:
       - local
 
-  filebeat:
-    image: elastic/filebeat:${FILEBEAT_VERSION}
-    profiles:
-      - filebeat
-    user: root
-    container_name: anilibrary-scraper-filebeat
-    command:
-      - -e
-      - --strict.perms=false
-    env_file:
-      - ../.env
-    volumes:
-      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /var/lib/docker/containers/:/var/lib/docker/containers:ro
-    networks:
-      - shared
-
-  clickhouse:
-    image: clickhouse/clickhouse-server:${CLICKHOUSE_VERSION}
-    container_name: anilibrary-scraper-clickhouse
-    env_file:
-      - ../.env
-    healthcheck:
-      test: wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    ports:
-      - ${CLICKHOUSE_HTTP_PORT}:8123
-      - ${CLICKHOUSE_TCP_PORT}:9000
-    volumes:
-      - clickhouse-data:/var/lib/clickhouse
-      - ./clickhouse/config.xml:/etc/clickhouse-server/config.d/config.xml
-    ulimits:
-      nofile:
-        soft: 262144
-        hard: 262144
-    networks:
-      - local
-
   kafka:
     build:
       context: kafka
@@ -89,6 +48,53 @@ services:
       - ${KAFKA_PORT}:9092
     networks:
       - local
+
+  clickhouse:
+    depends_on:
+      kafka:
+        condition: service_healthy
+    image: clickhouse/clickhouse-server:${CLICKHOUSE_VERSION}
+    container_name: anilibrary-scraper-clickhouse
+    env_file:
+      - ../.env
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - ${CLICKHOUSE_HTTP_PORT}:8123
+      - ${CLICKHOUSE_TCP_PORT}:9000
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+      - ./clickhouse/config.xml:/etc/clickhouse-server/config.d/config.xml
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    networks:
+      - local
+
+  filebeat:
+    depends_on:
+      app:
+        condition: service_healthy
+    image: elastic/filebeat:${FILEBEAT_VERSION}
+    profiles:
+      - filebeat
+    user: root
+    container_name: anilibrary-scraper-filebeat
+    command:
+      - -e
+      - --strict.perms=false
+    env_file:
+      - ../.env
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers/:/var/lib/docker/containers:ro
+    networks:
+      - shared
 
   app:
     depends_on:
