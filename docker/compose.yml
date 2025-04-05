@@ -2,7 +2,7 @@ services:
   redis:
     image: redis:${REDIS_VERSION}
     container_name: anilibrary-scraper-redis
-    command: redis-server --requirepass ${REDIS_PASSWORD}
+    command: redis-server --requirepass "${REDIS_PASSWORD"
     environment:
       REDIS_REPLICATION_MODE: master
       REDIS_PASSWORD: ${REDIS_PASSWORD}
@@ -24,19 +24,21 @@ services:
       args:
         KAFKA_VERSION: ${KAFKA_VERSION}
     container_name: anilibrary-scraper-kafka
+    hostname: anilibrary-scraper-kafka
     env_file:
       - ../.env
     environment:
       # KRaft configuration
       - KAFKA_CFG_NODE_ID=0
-      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_KRAFT_CLUSTER_ID=anilibrary-scraper
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
       - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
       # Broker configuration
+      - KAFKA_CFG_LISTENERS=SCRAPER_CLIENT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=SCRAPER_CLIENT://kafka:9092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=SCRAPER_CLIENT:SASL_PLAINTEXT,CONTROLLER:PLAINTEXT
       - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=SCRAPER_CLIENT
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
-      - KAFKA_CFG_ADVERTISED_LISTENERS=SCRAPER_CLIENT://kafka:9092
-      - KAFKA_CFG_LISTENERS=SCRAPER_CLIENT://:9092,CONTROLLER://:9093
-      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=SCRAPER_CLIENT:SASL_PLAINTEXT,CONTROLLER:PLAINTEXT
       - KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL=SCRAM-SHA-512
       - KAFKA_NUM_PARTITIONS=2
     healthcheck:

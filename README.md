@@ -50,7 +50,7 @@ List of all variables and their description:
 | **KAFKA_INTER_BROKER_USER**     | kafka                        | Specify Kafka inter broker username for broker communication.                                                                                      |
 | **KAFKA_INTER_BROKER_PASSWORD** |                              | Specify Kafka inter broker password for broker communication.                                                                                      |
 | **KAFKA_TOPIC**                 |                              | Specify Kafka topic.                                                                                                                               |
-| **KAFKA_BATCH_TIMEOUT**         | 1s                           | Specify Kafka batch timeout.                                                                                                                       |
+| **KAFKA_CLIENT_ID**             | scraper-client               | Specify Kafka client id.                                                                                                                           |
 | **CLICKHOUSE_VERSION**          | 25.2.2.39                    | Specify desired ClickHouse version.                                                                                                                |
 | **CLICKHOUSE_HTTP_PORT**        | 8123                         | Specify ClickHouse HTTP interface port.                                                                                                            |
 | **CLICKHOUSE_TCP_PORT**         | 9005                         | Specifies the port for the ClickHouse TCP interface, used for cluster communications and client connections over TCP.                              |

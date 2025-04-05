@@ -19,9 +19,11 @@ func NewKafkaProvider(lifecycle fx.Lifecycle, cfg config.Kafka) (*kgo.Client, er
 
 	client, err := kgo.NewClient(
 		kgo.SeedBrokers(cfg.Address),
+		kgo.ClientID(cfg.ClientID),
 		kgo.SASL(auth.AsSha512Mechanism()),
 		kgo.DefaultProduceTopic(cfg.Topic),
 		kgo.ProducerBatchMaxBytes(1024*1024),
+		kgo.ProducerBatchCompression(kgo.ZstdCompression()),
 		kgo.AllowAutoTopicCreation(),
 	)
 	if err != nil {

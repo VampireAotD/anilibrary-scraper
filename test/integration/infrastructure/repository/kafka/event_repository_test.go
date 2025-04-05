@@ -35,14 +35,16 @@ func (s *EventRepositorySuite) SetupSuite() {
 				"9092:9092/tcp",
 			},
 			Env: map[string]string{
-				"KAFKA_CFG_NODE_ID":                        "1",
-				"KAFKA_CFG_PROCESS_ROLES":                  "controller,broker",
+				"KAFKA_CFG_NODE_ID":                        "0",
+				"KAFKA_KRAFT_CLUSTER_ID":                   "anilibrary-scraper-test",
+				"KAFKA_CFG_PROCESS_ROLES":                  "broker,controller",
+				"KAFKA_CFG_CONTROLLER_QUORUM_VOTERS":       "0@localhost:9093",
 				"ALLOW_PLAINTEXT_LISTENER":                 "yes",
+				"KAFKA_CFG_LISTENERS":                      "INTERNAL://:9092,CONTROLLER://:9093",
+				"KAFKA_CFG_ADVERTISED_LISTENERS":           "INTERNAL://localhost:9092",
+				"KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP": "INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT",
+				"KAFKA_CFG_INTER_BROKER_LISTENER_NAME":     "INTERNAL",
 				"KAFKA_CFG_CONTROLLER_LISTENER_NAMES":      "CONTROLLER",
-				"KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP": "PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT",
-				"KAFKA_CFG_CONTROLLER_QUORUM_VOTERS":       "1@localhost:9093",
-				"KAFKA_CFG_LISTENERS":                      "PLAINTEXT://:9092,CONTROLLER://:9093",
-				"KAFKA_CFG_ADVERTISED_LISTENERS":           "PLAINTEXT://localhost:9092",
 				"KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE":      "true",
 			},
 			WaitingFor: wait.ForListeningPort("9092/tcp").
@@ -58,8 +60,10 @@ func (s *EventRepositorySuite) SetupSuite() {
 
 	client, err := kgo.NewClient(
 		kgo.SeedBrokers(ip+":9092"),
+		kgo.ClientID("test"),
 		kgo.DefaultProduceTopic("test_topic"),
 		kgo.ProducerBatchMaxBytes(1024*1024),
+		kgo.ProducerBatchCompression(kgo.ZstdCompression()),
 		kgo.AllowAutoTopicCreation(),
 	)
 	s.Require().NoError(err)
