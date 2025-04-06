@@ -2,7 +2,7 @@ services:
   redis:
     image: redis:${REDIS_VERSION}
     container_name: anilibrary-scraper-redis
-    command: redis-server --requirepass "${REDIS_PASSWORD"
+    command: redis-server --requirepass "${REDIS_PASSWORD}"
     environment:
       REDIS_REPLICATION_MODE: master
       REDIS_PASSWORD: ${REDIS_PASSWORD}
