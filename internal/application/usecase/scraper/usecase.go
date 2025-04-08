@@ -34,7 +34,7 @@ func NewUseCase(scraperService Service, eventService EventService) UseCase {
 func (u UseCase) Scrape(ctx context.Context, dto DTO) (entity.Anime, error) {
 	if err := u.eventService.Send(ctx, event.DTO{
 		URL:       dto.URL,
-		Time:      time.Now(),
+		CreatedAt: time.Now(),
 		IP:        dto.IP,
 		UserAgent: dto.UserAgent,
 	}); err != nil {

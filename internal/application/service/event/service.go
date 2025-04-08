@@ -3,7 +3,6 @@ package event
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/VampireAotD/anilibrary-scraper/internal/infrastructure/repository/model"
 
@@ -37,7 +36,7 @@ func (s Service) Send(ctx context.Context, dto DTO) error {
 		URL:       dto.URL,
 		IP:        dto.IP,
 		UserAgent: dto.UserAgent,
-		Timestamp: time.Now().Unix(),
+		Timestamp: dto.CreatedAt.Unix(),
 	})
 	if err != nil {
 		span.SetStatus(codes.Error, "failed to send event")

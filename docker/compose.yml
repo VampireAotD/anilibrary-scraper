@@ -2,7 +2,7 @@ services:
   redis:
     image: redis:${REDIS_VERSION}
     container_name: anilibrary-scraper-redis
-    command: redis-server --requirepass ${REDIS_PASSWORD}
+    command: redis-server --requirepass "${REDIS_PASSWORD}"
     environment:
       REDIS_REPLICATION_MODE: master
       REDIS_PASSWORD: ${REDIS_PASSWORD}
@@ -18,25 +18,44 @@ services:
     networks:
       - local
 
-  filebeat:
-    image: elastic/filebeat:${FILEBEAT_VERSION}
-    profiles:
-      - filebeat
-    user: root
-    container_name: anilibrary-scraper-filebeat
-    command:
-      - -e
-      - --strict.perms=false
+  kafka:
+    build:
+      context: kafka
+      args:
+        KAFKA_VERSION: ${KAFKA_VERSION}
+    container_name: anilibrary-scraper-kafka
+    hostname: anilibrary-scraper-kafka
     env_file:
       - ../.env
-    volumes:
-      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /var/lib/docker/containers/:/var/lib/docker/containers:ro
+    environment:
+      # KRaft configuration
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_KRAFT_CLUSTER_ID=anilibrary-scraper
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+      # Broker configuration
+      - KAFKA_CFG_LISTENERS=SCRAPER_CLIENT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=SCRAPER_CLIENT://kafka:9092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=SCRAPER_CLIENT:SASL_PLAINTEXT,CONTROLLER:PLAINTEXT
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=SCRAPER_CLIENT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL=SCRAM-SHA-512
+      - KAFKA_NUM_PARTITIONS=2
+      - KAFKA_CFG_REPLICA_LAG_TIME_MAX_MS=10000
+    healthcheck:
+      test: [ "CMD-SHELL", "kafka-broker-api-versions.sh --bootstrap-server localhost:9092 --command-config=/opt/bitnami/kafka/config/client.properties" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - ${KAFKA_PORT}:9092
     networks:
-      - shared
+      - local
 
   clickhouse:
+    depends_on:
+      kafka:
+        condition: service_healthy
     image: clickhouse/clickhouse-server:${CLICKHOUSE_VERSION}
     container_name: anilibrary-scraper-clickhouse
     env_file:
@@ -59,36 +78,26 @@ services:
     networks:
       - local
 
-  kafka:
-    build:
-      context: kafka
-      args:
-        KAFKA_VERSION: ${KAFKA_VERSION}
-    container_name: anilibrary-scraper-kafka
+  filebeat:
+    depends_on:
+      app:
+        condition: service_healthy
+    image: elastic/filebeat:${FILEBEAT_VERSION}
+    profiles:
+      - filebeat
+    user: root
+    container_name: anilibrary-scraper-filebeat
+    command:
+      - -e
+      - --strict.perms=false
     env_file:
       - ../.env
-    environment:
-      # KRaft configuration
-      - KAFKA_CFG_NODE_ID=0
-      - KAFKA_CFG_PROCESS_ROLES=controller,broker
-      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
-      # Broker configuration
-      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=SCRAPER_CLIENT
-      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
-      - KAFKA_CFG_ADVERTISED_LISTENERS=SCRAPER_CLIENT://kafka:9092
-      - KAFKA_CFG_LISTENERS=SCRAPER_CLIENT://:9092,CONTROLLER://:9093
-      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=SCRAPER_CLIENT:SASL_PLAINTEXT,CONTROLLER:PLAINTEXT
-      - KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL=SCRAM-SHA-512
-      - KAFKA_NUM_PARTITIONS=2
-    healthcheck:
-      test: [ "CMD-SHELL", "kafka-broker-api-versions.sh --bootstrap-server localhost:9092 --command-config=/opt/bitnami/kafka/config/client.properties" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    ports:
-      - ${KAFKA_PORT}:9092
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers/:/var/lib/docker/containers:ro
     networks:
-      - local
+      - shared
 
   app:
     depends_on:
@@ -122,7 +131,7 @@ services:
 
 networks:
   local:
-    name: local
+    name: anilibrary-scraper-local
     driver: bridge
   shared:
     name: anilibrary

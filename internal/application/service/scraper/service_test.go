@@ -116,7 +116,8 @@ func (s *ScraperServiceSuite) TestProcess() {
 				t.Run(testCases[i].name, func(t *testing.T) {
 					t.Parallel()
 
-					s.repositoryMock.FindByURL(gomock.Any(), testCases[i].url).Return(entity.Anime{}, entity.ErrAnimeNotFound)
+					s.repositoryMock.FindByURL(gomock.Any(), testCases[i].url).
+						Return(entity.Anime{}, entity.ErrAnimeNotFound)
 					s.scraperMock.ScrapeAnime(gomock.Any(), testCases[i].url).Return(testCases[i].expected, nil)
 					s.repositoryMock.Create(gomock.Any(), gomock.Any()).Return(nil)
 

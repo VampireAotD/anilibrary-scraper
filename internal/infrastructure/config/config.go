@@ -52,11 +52,11 @@ type Redis struct {
 }
 
 type Kafka struct {
-	Address   string `env:"KAFKA_ADDRESS" env-required:""`
-	Username  string `env:"KAFKA_CLIENT_USERS" env-required:""`
-	Password  string `env:"KAFKA_CLIENT_PASSWORDS" env-required:""`
-	Topic     string `env:"KAFKA_TOPIC" env-default:"scraper_topic"`
-	Partition int    `env:"KAFKA_PARTITION" env-default:"0"`
+	Address  string `env:"KAFKA_ADDRESS" env-required:""`
+	Username string `env:"KAFKA_CLIENT_USERS" env-required:""`
+	Password string `env:"KAFKA_CLIENT_PASSWORDS" env-required:""`
+	Topic    string `env:"KAFKA_TOPIC" env-default:"scraper_topic"`
+	ClientID string `env:"KAFKA_CLIENT_ID" env-default:"scraper_client"`
 }
 
 type JWT struct {

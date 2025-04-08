@@ -4,4 +4,4 @@
 *.html    diff=html
 *.md      diff=markdown
 
-.github   export-ignore
+/.github   export-ignore
