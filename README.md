@@ -42,7 +42,7 @@ List of all variables and their description:
 | **FILEBEAT_OUTPUT**             |                              | Specify url on where to send logs to. Logs can be visualized by Kibana in [ELK service](https://github.com/VampireAotD/anilibrary-elk).            |
 | **FILEBEAT_USER**               |                              | Specify login for Filebeat user.                                                                                                                   |
 | **FILEBEAT_PASSWORD**           |                              | Specify password for Filebeat user.                                                                                                                |
-| **KAFKA_VERSION**               | 3.9.0                        | Specify desired Kafka image version.                                                                                                               |
+| **KAFKA_VERSION**               | 4.0.0                        | Specify desired Kafka image version.                                                                                                               |
 | **KAFKA_PORT**                  | 9092                         | Specify Kafka port.                                                                                                                                |
 | **KAFKA_ADDRESS**               | kafka:${KAFKA_PORT}          | Specify Kafka connection address.                                                                                                                  |
 | **KAFKA_CLIENT_USERS**          | example                      | Specify Kafka username for client connection.                                                                                                      |
