@@ -1,58 +1,76 @@
-run:
-  build-tags:
-    - integration
-
-output:
-  sort-results: true
-
-linters-settings:
-  gocritic:
-    enabled-tags:
-      - diagnostic
-      - experimental
-      - opinionated
-      - performance
-      - style
-    disabled-checks:
-      - hugeParam # disabled until another architecture refactoring
-  errcheck:
-    check-type-assertions: true
-  govet:
-    enable:
-      - fieldalignment
-      - shadow
-  varnamelen:
-    min-name-length: 2
-    ignore-decls:
-      - w http.ResponseWriter
-      - r *http.Request
-      - i int
-
+version: "2"
 linters:
   enable:
+    - bodyclose
+    - copyloopvar
     - decorder
     - errname
-    - goconst
-    - copyloopvar
-    - revive
-    - varnamelen
-    - bodyclose
     - exhaustive
+    - goconst
     - gocritic
+    - gosec
     - importas
     - nakedret
     - noctx
+    - nolintlint
     - prealloc
     - predeclared
-    - gosec
-    - stylecheck
+    - revive
+    - staticcheck
+    - tparallel
     - unconvert
     - unparam
-    - wastedassign
-    - nolintlint
-    - usetesting
-    - tparallel
     - usestdlibvars
-
+    - usetesting
+    - varnamelen
+    - wastedassign
+  settings:
+    errcheck:
+      check-type-assertions: true
+    gocritic:
+      disabled-checks:
+        - hugeParam # disabled until another architecture refactoring
+      enabled-tags:
+        - diagnostic
+        - experimental
+        - opinionated
+        - performance
+        - style
+    govet:
+      enable:
+        - fieldalignment
+        - shadow
+    varnamelen:
+      min-name-length: 2
+      ignore-decls:
+        - w http.ResponseWriter
+        - r *http.Request
+        - i int
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
 issues:
   fix: true
+output:
+  sort-order:
+    - linter
+    - severity
+    - file
+run:
+  build-tags:
+    - integration

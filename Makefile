@@ -12,7 +12,7 @@ help:
 
 install-dependencies: ## Install dependencies to create mocks, OpenAPI specs, manage database migrations, etc.
 	go install github.com/pressly/goose/v3/cmd/goose@v3.24.1;
-	go install go.uber.org/mock/mockgen@v0.5.0;
+	go install go.uber.org/mock/mockgen@v0.5.1;
 	go install github.com/swaggo/swag/cmd/swag@v1.16.4;
 	go install github.com/evilmartians/lefthook@v1.11.3;
 
