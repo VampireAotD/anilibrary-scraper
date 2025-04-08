@@ -58,12 +58,23 @@ linters:
       - builtin$
       - examples$
 formatters:
+  enable:
+    - gofmt
+    - golines
+  settings:
+    gofmt:
+      rewrite-rules:
+        - pattern: 'interface{}'
+          replacement: 'any'
+    golines:
+      max-len: 120
   exclusions:
     generated: lax
     paths:
       - third_party$
       - builtin$
       - examples$
+      - config/config.go
 issues:
   fix: true
 output:
