@@ -20,13 +20,13 @@ services:
 
   kafka:
     build:
-      context: kafka
+      context: build/kafka
       args:
         KAFKA_VERSION: ${KAFKA_VERSION}
     container_name: anilibrary-scraper-kafka
     hostname: anilibrary-scraper-kafka
     env_file:
-      - ../.env
+      - .env
     environment:
       # KRaft configuration
       - KAFKA_CFG_NODE_ID=0
@@ -59,7 +59,7 @@ services:
     image: clickhouse/clickhouse-server:${CLICKHOUSE_VERSION}
     container_name: anilibrary-scraper-clickhouse
     env_file:
-      - ../.env
+      - .env
     healthcheck:
       test: wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1
       interval: 5s
@@ -69,8 +69,8 @@ services:
       - ${CLICKHOUSE_HTTP_PORT}:8123
       - ${CLICKHOUSE_TCP_PORT}:9000
     volumes:
+      - ./build/clickhouse/config.xml:/etc/clickhouse-server/config.d/config.xml
       - clickhouse-data:/var/lib/clickhouse
-      - ./clickhouse/config.xml:/etc/clickhouse-server/config.d/config.xml
     ulimits:
       nofile:
         soft: 262144
@@ -91,9 +91,9 @@ services:
       - -e
       - --strict.perms=false
     env_file:
-      - ../.env
+      - .env
     volumes:
-      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - ./build/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /var/lib/docker/containers/:/var/lib/docker/containers:ro
     networks:
@@ -108,20 +108,19 @@ services:
       kafka:
         condition: service_healthy
     build:
-      context: ..
       args:
         TIMEZONE: ${TIMEZONE:-Europe/Kiev}
-      dockerfile: docker/Dockerfile
+      dockerfile: build/app/Dockerfile
       target: final
-    container_name: anilibrary-scraper
     labels:
       co.elastic.logs/enabled: true
       co.elastic.logs/json.keys_under_root: true
       co.elastic.logs/json.overwrite_keys: true
       co.elastic.logs/json.add_error_key: true
       co.elastic.logs/json.expand_keys: true
+    container_name: anilibrary-scraper
     env_file:
-      - ../.env
+      - .env
     ports:
       - ${HTTP_MAIN_PORT}:${HTTP_MAIN_PORT}
       - ${HTTP_MONITORING_PORT}:${HTTP_MONITORING_PORT}
