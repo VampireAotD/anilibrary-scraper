@@ -4,7 +4,7 @@
 **/.idea
 **/.vs
 **/.vscode
-**/docker
+**/build
 **/.dockerignore
 **/.env
 **/.env.example

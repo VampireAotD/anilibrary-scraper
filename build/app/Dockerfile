@@ -17,7 +17,7 @@ RUN --mount=type=cache,target=/go/pkg/mod/ \
     --mount=type=bind,target=. \
     CGO_ENABLED=0 GOARCH=$TARGETARCH go build -ldflags '-w -s -extldflags "-static"' -o /bin/scraper ./cmd/app
 
-FROM alpine:latest as final
+FROM alpine:latest AS final
 
 RUN --mount=type=cache,target=/var/cache/apk \
     apk --update add tzdata

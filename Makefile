@@ -1,10 +1,11 @@
 include .env
 export
 
-compose := $(shell command -v docker-compose || echo docker compose)
+COMPOSE := $(shell command -v docker-compose || echo docker compose)
+COMPOSE_FILE := compose.yml
 
-.PHONY: help install-dependencies install up filebeat down test integration-test lint swag \
-        swag-fmt clickhouse-migrate clickhouse-migrate-rollback
+.PHONY: help install-dependencies install up filebeat down test integration-test lint bake \
+        swag swag-fmt clickhouse-migrate clickhouse-migrate-rollback
 
 help:
 	@printf "Usage: make <command>\n"
@@ -20,14 +21,17 @@ install: ## Install dependencies and build application.
 	@make install-dependencies
 	@make up
 
+bake: ## Build images.
+	docker buildx bake -f ./build/docker-bake.hcl
+
 up: ## Start application.
-	$(compose) -f docker/compose.yml up --build
+	$(COMPOSE) -f $(COMPOSE_FILE) up --build
 
 filebeat: ## Start application with Filebeat.
-	$(compose) -f docker/compose.yml --profile filebeat up --build
+	$(COMPOSE) -f $(COMPOSE_FILE) --profile filebeat up --build
 
 down: ## Stop application.
-	$(compose) -f docker/compose.yml down --remove-orphans
+	$(COMPOSE) -f $(COMPOSE_FILE) down --remove-orphans
 
 generate: ## Generate mocks.
 	go generate ./...
