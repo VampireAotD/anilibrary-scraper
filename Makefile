@@ -4,8 +4,8 @@ export
 COMPOSE := $(shell command -v docker-compose || echo docker compose)
 COMPOSE_FILE := compose.yml
 
-.PHONY: help install-dependencies install up filebeat down test integration-test lint swag \
-        swag-fmt clickhouse-migrate clickhouse-migrate-rollback
+.PHONY: help install-dependencies install up filebeat down test integration-test lint bake \
+        swag swag-fmt clickhouse-migrate clickhouse-migrate-rollback
 
 help:
 	@printf "Usage: make <command>\n"
@@ -20,6 +20,9 @@ install-dependencies: ## Install dependencies to create mocks, OpenAPI specs, ma
 install: ## Install dependencies and build application.
 	@make install-dependencies
 	@make up
+
+bake: ## Build images.
+	docker buildx bake -f ./build/docker-bake.hcl
 
 up: ## Start application.
 	$(COMPOSE) -f $(COMPOSE_FILE) up --build
